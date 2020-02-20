@@ -5,14 +5,21 @@
 # но будет лучше если мы как можно скорее сможем разработать модульную конструкцию (события хранятся в отдельном файле и импортируются сюда), чтобы было проще 
 # 1) разделить код по авторам 2) понимать, где что находится и удобно редактировать функции 3) не использовать один файл бесконечной длины.
 
-import platform
-from discord.ext import commands
-from authvar import token
+import platform # необходимо для считывания версии системы 
+import discord # здесь нам пригодятся вообще в принципе функции api дискорда (для статуса бота например)
+from discord.ext import commands # импортируем саму библиотеку api *бота* для дискорда
+from authvar import token # токен из нашего второго файла берём
 
-bot = commands.Bot(command_prefix='b/')
+game = discord.Game("v0") # типо пишем боту в активити че он делает))0
+bot = commands.Bot(command_prefix='b/') # чтобы не писать везде что это commands.Bot и префикс, мы просто делаем переменную и рубим profit
 
-@bot.event
+def bonzo(): # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
+    print('/', 'initialization file has been successfully read. starting up bonzo...', '/', sep='\n')
+    bot.run(token)
+
+@bot.event # on_ready выполняется при полной готовности бота к действиям
 async def on_ready():
+    await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команды (и "играет" в "игру" которую мы задали в строке 13)
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), '/', sep='\n')
 
-bot.run(token)
+bonzo() # запускаем !
