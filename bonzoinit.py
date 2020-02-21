@@ -1,5 +1,5 @@
 # Created by ムAloneStranger (c) 2020.
-# ver 0.0.(0).1 propheader
+# ver 0.0.(0).2 propheader
 
 # ! ПРОШУ НЕ ВНОСИТЬ НИКАКИХ ИЗМЕНЕНИЙ В ЭТОТ ФАЙЛ !
 
@@ -10,7 +10,7 @@ import discord # здесь нам пригодятся вообще в прин
 from discord.ext import commands # импортируем саму библиотеку api *бота* для дискорда
 from authvar import token # токен из нашего второго файла берём
 
-game = discord.Game("v0.0.(0).1 propheader") # типо пишем боту в активити че он делает))0
+game = discord.Game("v0.0.(0).2 propheader") # типо пишем боту в активити че он делает))0
 bot = commands.Bot(command_prefix='b/') # чтобы не писать везде что это commands.Bot и префикс, мы просто делаем переменную и рубим profit
 
 def bonzo(): # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
