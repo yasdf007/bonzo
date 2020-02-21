@@ -9,6 +9,7 @@ import platform # необходимо для считывания версии 
 import discord # здесь нам пригодятся вообще в принципе функции api дискорда (для статуса бота например)
 from discord.ext import commands # импортируем саму библиотеку api *бота* для дискорда
 from authvar import token # токен из нашего второго файла берём
+from function import *
 
 game = discord.Game("v0") # типо пишем боту в активити че он делает))0
 bot = commands.Bot(command_prefix='b/') # чтобы не писать везде что это commands.Bot и префикс, мы просто делаем переменную и рубим profit
@@ -23,3 +24,4 @@ async def on_ready():
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), '/', sep='\n')
 
 bonzo() # запускаем !
+
