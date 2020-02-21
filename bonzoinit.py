@@ -17,10 +17,14 @@ def bonzo(): # функция запуска (можно узнать разни
     print('/', 'initialization file has been successfully read. starting up bonzo...', '/', sep='\n')
     bot.run(token)
 
+# импорт файла-фикса для импорта наших функций
+from botlib.func_blankfix import * 
+
 # импорт наших собственных функций в файл инстанции.
+from botlib.func_nohame import *
 from botlib.func_alone import *
 from botlib.func_vlaner import *
-from botlib.func_nohame import *
+
 
 @bot.event # on_ready выполняется при полной готовности бота к действиям
 async def on_ready():
