@@ -1,6 +1,6 @@
 # bonzo v0.0.(0).2 propheader
 
-## made by yasdf007, vlaner & nohame.
+## made by yasdf007, vlaner & nohame
 
 ### / использование этого бота является пустой и бессмысленной тратой времени. /
 
