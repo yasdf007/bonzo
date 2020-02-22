@@ -2,7 +2,7 @@
 # вносить дальнейшие изменения в этот файл следует только автору файла.
 
 # необходимое каждому модулю команд начало
-from bonzoinit import bot
+from bonzoboot import bot
 from random import randint
 
 # функция говорит сама за себя
