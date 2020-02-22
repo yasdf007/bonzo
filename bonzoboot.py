@@ -18,7 +18,7 @@ bot = commands.Bot(command_prefix='b/') # чтобы не писать везд�
 
 def bonzo(): # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
     global ctimest # таймштамп, код успешно прочитан
-    ctimest = int(time())
+    ctimest = time()
     print('/', 'initialization file has been successfully read. starting up bonzo...', '/', sep='\n')
     bot.run(token)
 
@@ -35,7 +35,7 @@ from botlib.func_vlaner import *
 async def on_ready():
     global ctimest
     await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команды (и "играет" в "игру" которую мы задали в строке 13)
-    ctimest = int(time()) - ctimest # таймштамп, бот готов к работе
-    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(ctimest), '/', sep='\n')
+    ctimest = time() - ctimest # таймштамп, бот готов к работе
+    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', '/', sep='\n')
 
 bonzo() # запускаем !
