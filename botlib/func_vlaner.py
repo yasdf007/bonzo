@@ -29,3 +29,7 @@ async def pict(ctx):
     url += symbolsStr # соединяем строку выше с ссылкой url
     await ctx.send(url)
 
+@bot.command()
+async def ping(ctx):    
+    await ctx.send('Pong! ' + str(round(bot.latency, 3)) + 'ms ' + '(задержка)')
+
