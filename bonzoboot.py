@@ -13,12 +13,12 @@ from discord.ext import commands # импортируем саму библио�
 
 from authtoken import token # импортируем токен
 
-ctimest = 0 # переменная для таймштампа
 game = discord.Game("v0.1.0-alpha1 chostape") # типо пишем боту в активити че он делает))0
 bot = commands.Bot(command_prefix='b/') # чтобы не писать везде что это commands.Bot и префикс, мы просто делаем переменную и рубим profit
 
 def bonzo(): # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
-    ctimest = int(time()) # таймштамп, код успешно прочитан
+    global ctimest # таймштамп, код успешно прочитан
+    ctimest = int(time())
     print('/', 'initialization file has been successfully read. starting up bonzo...', '/', sep='\n')
     bot.run(token)
 
@@ -33,8 +33,9 @@ from botlib.func_vlaner import *
 
 @bot.event # on_ready выполняется при полной готовности бота к действиям
 async def on_ready():
+    global ctimest
     await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команды (и "играет" в "игру" которую мы задали в строке 13)
     ctimest = int(time()) - ctimest # таймштамп, бот готов к работе
-    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + ctimest, '/', sep='\n')
+    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(ctimest), '/', sep='\n')
 
 bonzo() # запускаем !
