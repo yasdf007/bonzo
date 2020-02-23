@@ -5,7 +5,7 @@ from bonzoboot import bot
 import discord
 
 @bot.command()
-async def welp(ctx):
+async def help(ctx):
    embed=discord.Embed(
    title='**Команды бота:**', # title - головная часть, colour - hex-код цвета полоски
    colour=0xffff00)
