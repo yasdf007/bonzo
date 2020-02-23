@@ -5,17 +5,16 @@ from bonzoboot import bot
 import discord
 
 @bot.command()
-async def jf(ctx):
+async def welp(ctx):
    embed=discord.Embed(
-   title="Команды бота ахахахахахахаха",
+   title='**Команды бота:**', # title - головная часть, colour - hex-код цвета полоски
    colour=0xffff00)
-   #головная часть. Последняя штука для цвета полоски
-   embed.add_field(name="b/da", value="ладно", inline=False) 
-   #первый шрифт жирный, второй тонкий внизу 
-   embed.add_field(name="b/randomcat", value="котик", inline=False) 
-   #смещение влево (False) 
-   embed.add_field(name="b/ping", value="пинг!", inline=False)
-   #маленькая подпись в самом низу
-   embed.set_footer(text="вставить текст")
-   #сброс бомбы на пiндосов 
+#  embed.set_thumbnail(url=discord.AppInfo.icon)
+   embed.add_field(name='da', value='Отправит в ответ ПИЗДУ)', inline=False) # inline отвечает за смещение вправо (репрезентация в одной строке)
+   embed.add_field(name='ping', value='Понг!', inline=False)
+   embed.add_field(name='roll', value='Ролит как в доте или между двумя числами', inline=False)
+   embed.add_field(name='randomcat', value='Отправляет случайного котика :3', inline=False)
+   embed.add_field(name='pict', value='Отправляет случайное изображение из prnt.sc :o', inline=False) 
+#  embed.add_field(name='', value='', inline=)
+   embed.set_footer(text="-------") # подпись внизу
    await ctx.send(embed=embed)

@@ -15,9 +15,11 @@ async def da(ctx):
 async def roll(ctx, a=None, b=None):
     if a is None and b is None:
         await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, 100)))
-    else:
+    elif b is None:
         a = int(a)
-        b = int(b)
+        await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, a)))
+    else:
+        a, b = int(a), int(b)
         await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(a, b)))
 
 @bot.command()
