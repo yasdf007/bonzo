@@ -1,4 +1,4 @@
-    # created by ムAloneStranger (c) 2020. 
+# created by ムAloneStranger (c) 2020. 
 
 # необходимое каждому модулю команд начало
 from bonzoboot import bot
@@ -21,18 +21,18 @@ async def serverinfo(ctx):
         title = '**Информация о сервере:**',
         colour = 0x7D07DE
     )
-#   embed.set_footer(text='', icon_url=server.icon_url) # не даёт необходимый результат
+    #embed.set_footer(text='', icon_url=server.icon_url_as(format='png', static_format='png', size=64)) # не даёт необходимый результат
     embed.add_field(name='Название:', value=str(server.name), inline=False)
     embed.add_field(name='Количество участников:', value=str(server.member_count), inline=False)
     await ctx.send(embed=embed)
 
 @bot.command()
 async def clear(ctx, count: int):
-#    if '.' in ctx.message.author.permissions_in(ctx.message.channel):
+    abc = [y.name.lower() for y in ctx.author.roles]
+    if 'bonzodev' in abc:
         await discord.TextChannel.purge(ctx.message.channel, limit=count + 1)
         await ctx.send("очистил %s сообщений!" % count)
         await sleep(2)
         await discord.TextChannel.purge(ctx.message.channel, limit=1)
-#     else:
-#         print(ctx.message.author.permissions_in(ctx.message.channel))
-#         await ctx.send('{0.author.mention}'.format(ctx)+ ' **слыш,** тебе нельзя такое исполнять')
+    else:
+        await ctx.send('{0.author.mention}'.format(ctx)+ ' **слыш,** тебе нельзя такое исполнять')
