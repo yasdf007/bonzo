@@ -2,6 +2,8 @@
 
 # необходимое каждому модулю команд начало
 from bonzoboot import bot
+
+# импорт дополнительных модулей (индивидуальных)
 import discord
 
 @bot.command()

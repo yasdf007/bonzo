@@ -2,11 +2,11 @@
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
 
+import discord # наша основная рабочая библиотека.
+from discord.ext import commands
+
 import platform # необходимо для считывания версии системы 
 from time import time # необходимо для таймштампа
-
-import discord # здесь нам пригодятся вообще в принципе функции api дискорда (для статуса бота например)
-from discord.ext import commands # импортируем саму библиотеку api *бота* для дискорда
 
 from authtoken import token # импортируем токен
 
