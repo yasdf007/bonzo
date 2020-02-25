@@ -39,4 +39,5 @@ async def on_ready():
     ctimest = time() - ctimest # дельта времени: бот готов к работе
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', '/', sep='\n')
 
+# запускаем инстанцию бота
 bonzo()
