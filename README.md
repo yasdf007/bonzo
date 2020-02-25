@@ -1,4 +1,4 @@
-# bonzo v0.2 shart
+# bonzo v0.2.1 shart
 
 ## made by yasdf007, vlaner & nohame
 

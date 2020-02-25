@@ -27,10 +27,11 @@ async def serverinfo(ctx):
     embed.set_footer(text='/by bonzo/ for @' + ctx.message.author.name)
     await ctx.send(embed=embed)
 
+# функция, удаляющая X сообщений из чата
 @bot.command()
 async def clear(ctx, count: int):
-    abc = [y.name.lower() for y in ctx.author.roles]
-    if 'bonzodev' in abc:
+    authorroles = [y.name.lower() for y in ctx.author.roles] # создание читаемого списка ролей запрашивающего выполнения команды
+    if 'bonzodev' in authorroles:
         await discord.TextChannel.purge(ctx.message.channel, limit=count + 1)
         await ctx.send("очистил %s сообщений!" % count)
         await sleep(2)

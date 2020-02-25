@@ -24,6 +24,7 @@ async def roll(ctx, a=None, b=None):
         a, b = int(a), int(b)
         await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(a, b)))
 
+# отправляет случайный скриншот из базы prnt sc
 @bot.command()
 async def pict(ctx):
     symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
@@ -32,7 +33,7 @@ async def pict(ctx):
     url += symbolsStr # соединяем строку выше с ссылкой url
     await ctx.send(url)
 
+# отправляет пинг
 @bot.command()
 async def ping(ctx):    
     await ctx.send('Pong! ' + str(round(bot.latency, 3)) + 'ms ' + '(задержка)')
-
