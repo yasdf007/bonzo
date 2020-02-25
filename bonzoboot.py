@@ -8,9 +8,12 @@ from discord.ext import commands
 import platform # необходимо для считывания версии системы 
 from time import time # необходимо для таймштампа
 
-from authtoken import token # импортируем токен
+# для безопасного импорта токена
+import os 
+from dotenv import load_dotenv 
+load_dotenv() 
 
-game = discord.Game("v0.1.3-alpha1 chostape") # типо пишем боту в активити че он делает))0
+game = discord.Game("v0.2 shart") # типо пишем боту в активити че он делает))0
 bot = commands.Bot(command_prefix='b/', help_command=None) # чтобы не писать везде что это commands.Bot и префикс, мы просто делаем переменную и рубим profit
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
@@ -18,7 +21,7 @@ def bonzo():
     global ctimest # таймштамп: код успешно прочитан
     ctimest = time()
     print('/', 'initialization file has been successfully read. starting up bonzo...', '/', sep='\n')
-    bot.run(token)
+    bot.run(os.getenv('TOKEN'))
 
 # импорт файла-фикса для импорта наших функций
 from botlib.func_blankfix import * 
