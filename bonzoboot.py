@@ -10,7 +10,7 @@ from time import time # необходимо для таймштампа
 
 from authtoken import token # импортируем токен
 
-game = discord.Game("v0.1.2-alpha1 chostape") # типо пишем боту в активити че он делает))0
+game = discord.Game("v0.1.3-alpha1 chostape") # типо пишем боту в активити че он делает))0
 bot = commands.Bot(command_prefix='b/', help_command=None) # чтобы не писать везде что это commands.Bot и префикс, мы просто делаем переменную и рубим profit
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)

@@ -21,9 +21,10 @@ async def serverinfo(ctx):
         title = '**Информация о сервере:**',
         colour = 0x7D07DE
     )
-    #embed.set_footer(text='', icon_url=server.icon_url_as(format='png', static_format='png', size=64)) # не даёт необходимый результат
-    embed.add_field(name='Название:', value=str(server.name), inline=False)
-    embed.add_field(name='Количество участников:', value=str(server.member_count), inline=False)
+    embed.set_thumbnail(url=server.icon_url)
+    embed.add_field(name='**Название:**', value=str(server.name), inline=False)
+    embed.add_field(name='**Количество участников:**', value=str(server.member_count), inline=False)
+    embed.set_footer(text='/by bonzo/ for @' + ctx.message.author.name)
     await ctx.send(embed=embed)
 
 @bot.command()
