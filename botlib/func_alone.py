@@ -38,3 +38,14 @@ async def clear(ctx, count: int):
         await discord.TextChannel.purge(ctx.message.channel, limit=1)
     else:
         await ctx.send('{0.author.mention}'.format(ctx)+ ' **слыш,** тебе нельзя такое исполнять')
+
+# eval - запуск кода от лица бота овнером через discord.
+@bot.command() 
+async def eval(ctx, evcode):
+    ownerids = [221246477630963722, 196314341572608000, 393807398047055883]
+    if evcode==None:
+        await ctx.send("укажите код для экзекьюции.")
+    if ctx.author.id in ownerids:
+        await ctx.send(eval(evcode))
+
+""" ^^ нужен фикс ^^ """
