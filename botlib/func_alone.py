@@ -51,6 +51,3 @@ async def evala(ctx, evcode=None):
             await execute
         else: 
             await ctx.send("ты безправное чмо " + '{0.author.mention}'.format(ctx))
-
-
-""" ^^ нужен фикс ^^ """
