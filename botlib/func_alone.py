@@ -41,11 +41,15 @@ async def clear(ctx, count: int):
 
 # eval - запуск кода от лица бота овнером через discord.
 @bot.command() 
-async def eval(ctx, evcode):
+async def eval(ctx, evcode=None):
     ownerids = [221246477630963722, 196314341572608000, 393807398047055883]
     if evcode==None:
         await ctx.send("укажите код для экзекьюции.")
-    if ctx.author.id in ownerids:
-        await ctx.send(eval(evcode))
+    else:
+        if ctx.author.id in ownerids:
+            ctx.send(eval(evcode))
+        else: 
+            await ctx.send("ты безправное чмо " + '{0.author.mention}'.format(ctx))
+
 
 """ ^^ нужен фикс ^^ """
