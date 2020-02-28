@@ -23,6 +23,19 @@ def bonzo():
     print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
     bot.run(os.getenv('TOKEN'))
 
+# eval - запуск кода от лица бота овнером через discord.
+@bot.command() 
+async def evala(ctx, evcode=None):
+    ownerids = [221246477630963722, 196314341572608000, 393807398047055883]
+    if evcode == None:
+        await ctx.send("укажите код для экзекьюции.")
+    else:
+        if ctx.author.id in ownerids:
+            execute = eval(str(evcode))
+            await execute
+        else: 
+            await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
+
 # импорт файла-фикса для импорта наших функций
 from botlib.func_blankfix import * 
 
