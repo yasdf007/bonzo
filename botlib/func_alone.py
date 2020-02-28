@@ -47,7 +47,7 @@ async def eval(ctx, evcode=None):
         await ctx.send("укажите код для экзекьюции.")
     else:
         if ctx.author.id in ownerids:
-            ctx.send(eval(evcode))
+            await eval(evcode)
         else: 
             await ctx.send("ты безправное чмо " + '{0.author.mention}'.format(ctx))
 
