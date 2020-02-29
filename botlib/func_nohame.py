@@ -23,3 +23,12 @@ async def help(ctx):
 #  embed.add_field(name='', value='', inline=)
    embed.set_footer(text="/by bonzo/ for @" + ctx.message.author.name) # подпись внизу
    await ctx.send(embed=embed)
+
+@bot.command() 
+async def jn(ctx):
+ author = ctx.message.author #выбрать вождь
+ channel = ctx.author.voice.channel #понять куда вождь вести племя
+ await channel.connect() #следовать за вождь
+@bot.command() 
+ async def lv(ctx):
+ await ctx.voice_client.disconnect() #вождь выгонять умпалумпа из племя
