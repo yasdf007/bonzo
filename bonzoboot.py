@@ -13,8 +13,8 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() 
 
-game = discord.Game("v0.3 rocescrite") # пишем боту в активити
-bot = commands.Bot(command_prefix='b/', help_command=None)
+game = discord.Game("v0.3.1a rocescrite") # пишем боту в активити
+bot = commands.Bot(command_prefix='bd/', help_command=None)
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
 def bonzo():
