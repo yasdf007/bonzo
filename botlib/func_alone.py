@@ -31,14 +31,15 @@ async def serverinfo(ctx):
 @bot.command()
 async def clear(ctx, count: int):
     authorroles = [y.name.lower() for y in ctx.author.roles] # создание читаемого списка ролей запрашивающего выполнения команды
-    if 'bonzodev' in authorroles:
-        await discord.TextChannel.purge(ctx.message.channel, limit=count + 1)
-        await ctx.send("очистил %s сообщений!" % count)
-        await sleep(2)
-        await discord.TextChannel.purge(ctx.message.channel, limit=1)
+    if 'bonzodev' in authorroles: # проверяем, есть ли в ролях пользователя роль bonzodev
+        await discord.TextChannel.purge(ctx.message.channel, limit=count + 1) # удаляем запрошенное кол-во сообщений!
+        await ctx.send("очистил %s сообщений!" % count) # отправляем отчёт
+        await sleep(2) # ждём 2 секунды
+        await discord.TextChannel.purge(ctx.message.channel, limit=1) # удаляем отчёт
     else:
         await ctx.send('{0.author.mention}'.format(ctx)+ ' **слыш,** тебе нельзя такое исполнять')
 
+# функция, отправляющая инвайт-ссылку бота в чат
 @bot.command()
 async def invite(ctx):
     embedd = discord.Embed(title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)
