@@ -32,6 +32,7 @@ async def evala(ctx, evcode=None):
     else:
         if ctx.author.id in ownerids: # проверяем, овнер ли запросил команду?
             execute = eval(str(evcode))
+            await discord.TextChannel.purge(ctx.message.channel, limit=1) # удаляем команду
             await execute
         else: 
             await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
