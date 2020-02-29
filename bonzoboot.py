@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() 
 
-game = discord.Game("v0.2.1 shart") # пишем боту в активити
+game = discord.Game("v0.3 rocescrite") # пишем боту в активити
 bot = commands.Bot(command_prefix='b/', help_command=None)
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
@@ -22,6 +22,19 @@ def bonzo():
     ctimest = time() # таймштамп: код успешно прочитан
     print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
     bot.run(os.getenv('TOKEN'))
+
+# eval - запуск кода от лица бота овнером через discord.
+@bot.command() 
+async def evala(ctx, evcode=None):
+    ownerids = [221246477630963722, 196314341572608000, 393807398047055883] # определяем овнеров
+    if evcode == None: # проверяем, указан ли код
+        await ctx.send("укажите код для экзекьюции.")
+    else:
+        if ctx.author.id in ownerids: # проверяем, овнер ли запросил команду?
+            execute = eval(str(evcode))
+            await execute
+        else: 
+            await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
 
 # импорт файла-фикса для импорта наших функций
 from botlib.func_blankfix import * 
@@ -39,4 +52,5 @@ async def on_ready():
     ctimest = time() - ctimest # дельта времени: бот готов к работе
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', '/', sep='\n')
 
+# запускаем инстанцию бота
 bonzo()
