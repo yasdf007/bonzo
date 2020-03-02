@@ -42,5 +42,5 @@ async def leavevc(ctx):
    if voice_client:
       await ctx.voice_client.disconnect()
    else:
-      await ctx.send('даун, %s не в войсе' %"{0.author.mention}".format(ctx))
+      await ctx.send('даун, %s, я не в войсе' %"{0.author.mention}".format(ctx))
 
