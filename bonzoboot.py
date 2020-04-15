@@ -51,7 +51,7 @@ async def on_ready():
     global ctimest
     await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру" которую мы задали в строке 13)
     ctimest = time() - ctimest # дельта времени: бот готов к работе
-    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', '/', sep='\n')
+    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', 'discord latency is: ' + str(round(bot.latency, 3)) + 's', '/', sep='\n')
 
 # запускаем инстанцию бота
 bonzo()
