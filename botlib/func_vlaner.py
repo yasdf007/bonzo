@@ -42,8 +42,7 @@ async def pict(ctx):
 async def ping(ctx):    
     await ctx.send('Pong! ' + str(round(bot.latency, 3)) + 'ms ' + '(задержка)')
 
-
-
+# рандом пичка с имгура
 @bot.command()
 async def randImg(ctx):
     url = 'https://i.imgur.com/'
@@ -51,7 +50,6 @@ async def randImg(ctx):
 
     randSymbols = ''.join(sample(symbols, 5))
     iImgurUrl = url + randSymbols + '.png'
-    print(iImgurUrl)
     req = requests.get(iImgurUrl, headers={'User-Agent': 'Mozilla/5.0'})
 
     img = Image.open(BytesIO(req.content))
