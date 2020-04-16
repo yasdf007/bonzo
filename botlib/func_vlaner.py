@@ -6,6 +6,10 @@ from bonzoboot import bot
 # импорт дополнительных модулей (индивидуальных)
 from random import randint
 from random import sample
+from bs4 import BeautifulSoup
+import requests
+from PIL import Image
+from io import BytesIO
 
 # функция говорит сама за себя
 @bot.command()
@@ -37,3 +41,21 @@ async def pict(ctx):
 @bot.command()
 async def ping(ctx):    
     await ctx.send('Pong! ' + str(round(bot.latency, 3)) + 'ms ' + '(задержка)')
+
+
+
+@bot.command()
+async def randImg(ctx):
+    url = 'https://i.imgur.com/'
+    symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+
+    randSymbols = ''.join(sample(symbols, 5))
+    iImgurUrl = url + randSymbols + '.png'
+    print(iImgurUrl)
+    req = requests.get(iImgurUrl, headers={'User-Agent': 'Mozilla/5.0'})
+
+    img = Image.open(BytesIO(req.content))
+    if img.size[0] == 161 and img.size[1] == 81:
+        await randImg(ctx)
+    else:
+        await ctx.send(iImgurUrl)
