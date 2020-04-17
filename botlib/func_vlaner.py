@@ -15,7 +15,7 @@ from discord.utils import get
 import os
 import discord
 # функция говорит сама за себя
-@bot.command()
+@bot.command(pass_context=True)
 async def da(ctx): 
     await ctx.send('{0.author.mention}'.format(ctx) + ' ' + "ПИЗДА АХАХАХХАХАХАХАХААХАХААХА")
 
@@ -32,7 +32,7 @@ async def roll(ctx, a=None, b=None):
         await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(a, b)))
 
 # отправляет случайный скриншот из базы prnt sc
-@bot.command()
+@bot.command(pass_context=True)
 async def pict(ctx):
     symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
     url = 'https://prnt.sc/'
@@ -41,12 +41,12 @@ async def pict(ctx):
     await ctx.send(url)
 
 # отправляет пинг
-@bot.command()
+@bot.command(pass_context=True)
 async def ping(ctx):    
     await ctx.send('Pong! ' + str(round(bot.latency, 3)) + 'ms ' + '(задержка)')
 
 # рандом пичка с имгура
-@bot.command()
+@bot.command(pass_context=True)
 async def randImg(ctx):
     url = 'https://i.imgur.com/'
     symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
@@ -61,18 +61,8 @@ async def randImg(ctx):
     else:
         await ctx.send(iImgurUrl)
 
-# присоединение к голосовому каналу
-@bot.command()
-async def join(ctx):
-    channel = ctx.message.author.voice.channel
-    voice = get (bot.voice_clients, guild = ctx.guild)
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-    else:
-        await channel.connect()
-
 # выход из голосового канала
-@bot.command()
+@bot.command(pass_context=True)
 async def leave(ctx):
     channel = ctx.message.author.voice.channel
     voice = get (bot.voice_clients, guild = ctx.guild)
@@ -87,7 +77,16 @@ async def play(ctx, url: str):
         os.remove('song.mp3') # удаление файла, если он есть
     
     voice = get (bot.voice_clients, guild = ctx.guild) # получает список голосовых соединений бота
+    channel = ctx.message.author.voice.channel
 
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+        del(voice)
+    else:
+        await channel.connect()
+        del(voice)
+
+    voice = get (bot.voice_clients, guild = ctx.guild) # получает ВТОРОЙ (почему-то с одним ниче не работает) список голосовых соединений бота
 # настройки загрузчика аудио
     ytdl_options = { 
         'format' : 'bestaudio/best',
@@ -112,3 +111,9 @@ async def play(ctx, url: str):
     song_name = name.rsplit('-', 2)
     await ctx.send(f'Играет : {song_name[0]}')
 
+
+@bot.command(pass_context=True)
+async def stop(ctx):
+    voice = get (bot.voice_clients, guild = ctx.guild)
+    voice.stop()
+    await leave(ctx)
