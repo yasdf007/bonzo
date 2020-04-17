@@ -21,27 +21,8 @@ async def help(ctx):
    embed.add_field(name='serverinfo', value='Показывает информацию о сервере', inline=False)
    embed.add_field(name='clear', value='Очищает последние x сообщений (только для разработчиков)', inline=False)
    embed.add_field(name='evala', value='Исполняет код. (только для создателей бота)', inline=False)
-   embed.add_field(name='join', value='Присоединяется к войсу! Будет молчать как влаdick после месячных!', inline=True)
-   embed.add_field(name='leave', value='Покидает войс! Как влаdick после катки в доту!', inline=True)
+   embed.add_field(name='play', value='Присоединяется к войсу! Проигрывает трек по ссылке, затем будет молчать как влаdick после месячных!', inline=True)
+   embed.add_field(name='leave', value='Останавливает воспроизведение и покидает войс! Как влаdick после катки в доту!', inline=True)
 #  embed.add_field(name='', value='', inline=)
    embed.set_footer(text="/by bonzo/ for @" + ctx.message.author.name) # подпись внизу
    await ctx.send(embed=embed)
-
-# команда присоединения к vc
-# @bot.command() 
-# async def joinvc(ctx):
-#    if ctx.author.voice and ctx.author.voice.channel:
-#       channel = ctx.author.voice.channel
-#       await channel.connect() #следовать за вождь
-#    else:
-#       await ctx.send("{0.author.mention}".format(ctx) + " ты че долбоёб зайди в войс")
-
-# команда отсоединения от vc
-# @bot.command() 
-# async def leavevc(ctx):
-#    voice_client = ctx.bot.voice_clients
-#    if voice_client:
-#       await ctx.voice_client.disconnect()
-#    else:
-#       await ctx.send('даун, %s, я не в войсе' %"{0.author.mention}".format(ctx))
-
