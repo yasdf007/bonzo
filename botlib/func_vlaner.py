@@ -10,7 +10,10 @@ from bs4 import BeautifulSoup
 import requests
 from PIL import Image
 from io import BytesIO
-
+import youtube_dl
+from discord.utils import get
+import os
+import discord
 # функция говорит сама за себя
 @bot.command()
 async def da(ctx): 
@@ -57,3 +60,57 @@ async def randImg(ctx):
         await randImg(ctx)
     else:
         await ctx.send(iImgurUrl)
+
+@bot.command()
+async def join(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get (bot.voice_clients, guild = ctx.guild)
+    if voice and voice.is_connected():
+        await voice.move_to(channel)
+    else:
+        await channel.connect()
+
+@bot.command()
+async def leave(ctx):
+    channel = ctx.message.author.voice.channel
+    voice = get (bot.voice_clients, guild = ctx.guild)
+    if voice and voice.is_connected():
+        await voice.disconnect()
+
+
+@bot.command()
+async def play(ctx, url: str):
+    isSongInDir = os.path.isfile("song.mp3") 
+    try:
+        if isSongInDir:
+            os.remove('song.mp3') # удаление файла, если он есть
+            print('EBNYL')
+    except PermissionError:
+        print('Файла нет') # если нет то погнали
+    
+    voice = get (bot.voice_clients, guild = ctx.guild)
+
+
+    ytdl_options = {
+        'format' : 'bestaudio/best',
+        'postprocessors' : [{
+            'key' : 'FFmpegExtractAudio',
+            'preferredcodec' : 'mp3',
+            'preferredquality' : '192' # битрейт
+        }],
+    }
+
+    with youtube_dl.YoutubeDL(ytdl_options) as ydl:
+        ydl.download([url]) 
+
+    for file in os.listdir('./'):
+        if file.endswith('mp3'):
+            name = file
+            os.rename(file, 'song.mp3')
+    voice.play(discord.FFmpegPCMAudio('song.mp3'))
+    voice.source = discord.PCMVolumeTransformer(voice.source)
+    voice.source.volume = 0.07 # == 100% громкости
+
+    song_name = name.rsplit('-', 2)
+    await ctx.send(f'Играет : {song_name[0]}')
+    
