@@ -1,4 +1,4 @@
-# bonzo v0.3.2a rocescrite
+# bonzo v0.4a wenowspeak
 
 ## made by yasdf007, vlaner & nohame
 

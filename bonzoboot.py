@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() # загружает файл env
 
-game = discord.Game("v0.3.2a rocescrite") # пишем боту в активити
+game = discord.Game("v0.4a wenowspeak") # пишем боту в активити
 bot = commands.Bot(command_prefix='bd/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
