@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() 
 
-game = discord.Game("v0.3 rocescrite") # пишем боту в активити
+game = discord.Game("v0.3.2 rocescrite") # пишем боту в активити
 bot = commands.Bot(command_prefix='b/', help_command=None)
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
@@ -50,7 +50,7 @@ async def on_ready():
     global ctimest
     await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру" которую мы задали в строке 13)
     ctimest = time() - ctimest # дельта времени: бот готов к работе
-    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', '/', sep='\n')
+    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', 'discord latency is: ' + str(round(bot.latency, 3)) + 's', '/', sep='\n')
 
 # запускаем инстанцию бота
 bonzo()
