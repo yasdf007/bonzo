@@ -29,14 +29,18 @@ async def help(ctx):
 # команда присоединения к vc
 @bot.command() 
 async def joinvc(ctx):
-   author = ctx.message.author #выбрать вождь
-   channel = ctx.author.voice.channel #понять куда вождь вести племя
-   if channel == None:
-      ctx.send("{0.author.mention}".format(ctx) + " ты че долбоёб зайди в войс")
-   else:
+   if ctx.author.voice and ctx.author.voice.channel:
+      channel = ctx.author.voice.channel
       await channel.connect() #следовать за вождь
+   else:
+      await ctx.send("{0.author.mention}".format(ctx) + " ты че долбоёб зайди в войс")
 
 # команда отсоединения от vc
 @bot.command() 
 async def leavevc(ctx):
-   await ctx.voice_client.disconnect() #вождь выгонять умпалумпа из племя
+   voice_client = ctx.bot.voice_clients
+   if voice_client:
+      await ctx.voice_client.disconnect()
+   else:
+      await ctx.send('даун, %s, я не в войсе' %"{0.author.mention}".format(ctx))
+
