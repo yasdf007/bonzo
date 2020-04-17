@@ -61,14 +61,6 @@ async def randImg(ctx):
     else:
         await ctx.send(iImgurUrl)
 
-# выход из голосового канала
-@bot.command(pass_context=True)
-async def leave(ctx):
-    channel = ctx.message.author.voice.channel
-    voice = get (bot.voice_clients, guild = ctx.guild)
-    if voice and voice.is_connected():
-        await voice.disconnect()
-
 # команда проигрывания музыки
 @bot.command()
 async def play(ctx, url: str):
@@ -86,8 +78,7 @@ async def play(ctx, url: str):
         await channel.connect()
         del(voice)
 
-    voice = get (bot.voice_clients, guild = ctx.guild) # получает ВТОРОЙ (почему-то с одним ниче не работает) список голосовых соединений бота
-# настройки загрузчика аудио
+    voice = get (bot.voice_clients, guild = ctx.guild) # обновляет список голосовых соединений бота
     ytdl_options = { 
         'format' : 'bestaudio/best',
         'postprocessors' : [{
@@ -109,11 +100,12 @@ async def play(ctx, url: str):
     voice.source.volume = 0.07 # == 100% громкости
 
     song_name = name.rsplit('-', 2)
-    await ctx.send(f'Играет : {song_name[0]}')
+    await ctx.send(f'Сейчас играет: {song_name[0]}')
 
-
+# команда остановки воспроизведения и выхода из канала
 @bot.command(pass_context=True)
 async def stop(ctx):
     voice = get (bot.voice_clients, guild = ctx.guild)
     voice.stop()
-    await leave(ctx)
+    if voice and voice.is_connected():
+        await voice.disconnect()
