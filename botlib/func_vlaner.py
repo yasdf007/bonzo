@@ -61,6 +61,7 @@ async def randImg(ctx):
     else:
         await ctx.send(iImgurUrl)
 
+# присоединение к голосовому каналу
 @bot.command()
 async def join(ctx):
     channel = ctx.message.author.voice.channel
@@ -70,6 +71,7 @@ async def join(ctx):
     else:
         await channel.connect()
 
+# выход из голосового канала
 @bot.command()
 async def leave(ctx):
     channel = ctx.message.author.voice.channel
@@ -77,25 +79,21 @@ async def leave(ctx):
     if voice and voice.is_connected():
         await voice.disconnect()
 
-
+# команда проигрывания музыки
 @bot.command()
 async def play(ctx, url: str):
-    isSongInDir = os.path.isfile("song.mp3") 
-    try:
-        if isSongInDir:
-            os.remove('song.mp3') # удаление файла, если он есть
-            print('EBNYL')
-    except PermissionError:
-        print('Файла нет') # если нет то погнали
+    isSongInDir = os.path.isfile("song.mp3") # есть ли файл song.mp3 в директории бота?
+    if isSongInDir: # выполняется, если файл существует
+        os.remove('song.mp3') # удаление файла, если он есть
     
-    voice = get (bot.voice_clients, guild = ctx.guild)
+    voice = get (bot.voice_clients, guild = ctx.guild) # получает список голосовых соединений бота
 
-
-    ytdl_options = {
+# настройки загрузчика аудио
+    ytdl_options = { 
         'format' : 'bestaudio/best',
         'postprocessors' : [{
             'key' : 'FFmpegExtractAudio',
-            'preferredcodec' : 'mp3',
+            'preferredcodec' : 'mp3', # кодек
             'preferredquality' : '192' # битрейт
         }],
     }
@@ -103,14 +101,14 @@ async def play(ctx, url: str):
     with youtube_dl.YoutubeDL(ytdl_options) as ydl:
         ydl.download([url]) 
 
-    for file in os.listdir('./'):
-        if file.endswith('mp3'):
-            name = file
-            os.rename(file, 'song.mp3')
-    voice.play(discord.FFmpegPCMAudio('song.mp3'))
+    for file in os.listdir('./'): # проверяет файлы в корне директории бота
+        if file.endswith('mp3'): # если файл заканчивается на mp3
+            name = file 
+            os.rename(file, 'song.mp3') # заменяет название файла на song.mp3
+    voice.play(discord.FFmpegPCMAudio('song.mp3')) # запускает проигрывание song.mp3 через ffmpeg
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.07 # == 100% громкости
 
     song_name = name.rsplit('-', 2)
     await ctx.send(f'Играет : {song_name[0]}')
-    
+
