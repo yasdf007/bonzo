@@ -109,3 +109,22 @@ async def stop(ctx):
     voice.stop()
     if voice and voice.is_connected():
         await voice.disconnect()
+
+
+@bot.command()
+async def choice(ctx, *args):  #*args значит несколько слов))))
+    pomoika = []
+    urlYT = 'https://www.youtube.com/results?search_query='
+    for i in args:
+        urlYT = urlYT + i + '+' # соединяем ссылку со словами, получается норм ссылка
+
+    req = requests.get(urlYT, headers={'User-Agent': 'Mozilla/5.0'})
+    soup = BeautifulSoup(req.text, "html.parser")
+
+
+    for item in soup.select("html body div h3"): # поиск по CSS селекторам, на ютубе под 3 заголовком норм инфа (название + href)
+        if item.find('a') == None:               #деюил находит три None а(англ) тэга
+            continue
+        pomoika.append(item.find('a').get('href') + '  ' + item.find('a').get('title')) # в кучу фигачим название + href, получается в 1 штуке сразу и название, и ссылка
+        # [/watch?v=Fwxpmsr8PRA  ЛУЧШИЕ ПРИКОЛЫ 2020 Апрель #112 ржака угар ПРИКОЛЮХА, '/watch?v=n1NBTA6t0D0  ЛУЧШИЕ ПРИКОЛЫ 2020 Январь #75 ржака угар ПРИКОХА' и т.д
+        # если сделать pomoika[0], то получим /watch?v=Fwxpmsr8PRA  ЛУЧШИЕ ПРИКОЛЫ 2020 Апрель #112 ржака угар ПРИКОЛЮХА сразу вмести, поэтому я хотел в словарь
