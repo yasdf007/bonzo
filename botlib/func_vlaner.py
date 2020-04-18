@@ -128,3 +128,9 @@ async def choice(ctx, *args):  #*args значит несколько слов))
         pomoika.append(item.find('a').get('href') + '  ' + item.find('a').get('title')) # в кучу фигачим название + href, получается в 1 штуке сразу и название, и ссылка
         # [/watch?v=Fwxpmsr8PRA  ЛУЧШИЕ ПРИКОЛЫ 2020 Апрель #112 ржака угар ПРИКОЛЮХА, '/watch?v=n1NBTA6t0D0  ЛУЧШИЕ ПРИКОЛЫ 2020 Январь #75 ржака угар ПРИКОХА' и т.д
         # если сделать pomoika[0], то получим /watch?v=Fwxpmsr8PRA  ЛУЧШИЕ ПРИКОЛЫ 2020 Апрель #112 ржака угар ПРИКОЛЮХА сразу вмести, поэтому я хотел в словарь
+
+
+
+@bot.command()
+async def obser(ctx):
+    await ctx.send("https://sun1-16.userapi.com/NjDsxJrEr31xWKtAVMQiKZ5CzDH6cGS9XhaB-g/ZBfUwNHhdzw.jpg")
