@@ -37,7 +37,7 @@ async def evala(ctx, evcode=None):
             await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
 
 # импорт файла-фикса для импорта наших функций
-from botlib.func_blankfix import * 
+from botlib.blankfix import * 
 
 # импорт наших собственных функций в файл инстанции.
 from botlib.func_nohame import *
