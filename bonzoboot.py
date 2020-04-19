@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() 
 
-game = discord.Game("v0.3.2 rocescrite") # пишем боту в активити
+game = discord.Game("v0.3.3 rocescrite") # пишем боту в активити
 bot = commands.Bot(command_prefix='b/', help_command=None)
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
