@@ -21,7 +21,8 @@ async def help(ctx):
    embed.add_field(name='serverinfo', value='Показывает информацию о сервере', inline=False)
    embed.add_field(name='clear', value='Очищает последние x сообщений (только для разработчиков)', inline=False)
    embed.add_field(name='evala', value='Исполняет код. (только для создателей бота)', inline=False)
-   embed.add_field(name='play', value='Присоединяется к войсу! Проигрывает трек по ссылке, затем будет молчать как влаdick после месячных!', inline=True)
+   embed.add_field(name='obser', value='Виды обсёров блять.......', inline=False)
+   embed.add_field(name='play', value='Присоединяется к войсу! Проигрывает трек по ссылке или по выбору (!), затем будет молчать как влаdick после месячных!', inline=True)
    embed.add_field(name='leave', value='Останавливает воспроизведение и покидает войс! Как влаdick после катки в доту!', inline=True)
 #  embed.add_field(name='', value='', inline=)
    embed.set_footer(text="/by bonzo/ for @" + ctx.message.author.name) # подпись внизу
