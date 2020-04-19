@@ -113,7 +113,8 @@ async def stop(ctx):
 
 @bot.command()
 async def choice(ctx, *args):  #*args значит несколько слов))))
-    pomoika = []
+    url_title_DICT = {}
+    max_URL = 0
     urlYT = 'https://www.youtube.com/results?search_query='
     for i in args:
         urlYT = urlYT + i + '+' # соединяем ссылку со словами, получается норм ссылка
@@ -121,15 +122,56 @@ async def choice(ctx, *args):  #*args значит несколько слов))
     req = requests.get(urlYT, headers={'User-Agent': 'Mozilla/5.0'})
     soup = BeautifulSoup(req.text, "html.parser")
 
-
+    await ctx.send('Жди...')
     for item in soup.select("html body div h3"): # поиск по CSS селекторам, на ютубе под 3 заголовком норм инфа (название + href)
         if item.find('a') == None:               #деюил находит три None а(англ) тэга
             continue
-        pomoika.append(item.find('a').get('href') + '  ' + item.find('a').get('title')) # в кучу фигачим название + href, получается в 1 штуке сразу и название, и ссылка
-        # [/watch?v=Fwxpmsr8PRA  ЛУЧШИЕ ПРИКОЛЫ 2020 Апрель #112 ржака угар ПРИКОЛЮХА, '/watch?v=n1NBTA6t0D0  ЛУЧШИЕ ПРИКОЛЫ 2020 Январь #75 ржака угар ПРИКОХА' и т.д
-        # если сделать pomoika[0], то получим /watch?v=Fwxpmsr8PRA  ЛУЧШИЕ ПРИКОЛЫ 2020 Апрель #112 ржака угар ПРИКОЛЮХА сразу вмести, поэтому я хотел в словарь
+
+        url_title_DICT[(item.find('a').get('title'))] = (item.find('a').get('href'))
+        max_URL +=1
+        if max_URL > 5:
+            break
+
+    await ctx.send('Жди...')
+    values = list(url_title_DICT.values())
+    keys = list(url_title_DICT.keys())
+
+    number = 1
+    for key in url_title_DICT.keys():
+        await ctx.send(str(number) + '. ' + key)
+        number+=1
+
+    
+
+    await ctx.send('Выбери число...)))')
+    choice = await bot.wait_for('message')
 
 
+    if choice.content == str(1):
+        url = 'https://www.youtube.com' + values[0]
+        print(url)
+
+
+    if choice.content == str(2):
+        url = 'https://www.youtube.com' + values[1]
+        print(url)
+
+
+    if choice.content == str(3):
+        url = 'https://www.youtube.com' + values[2]
+        print(url)
+
+
+    if choice.content == str(4):
+        url = 'https://www.youtube.com' + values[3]
+        print(url)
+
+
+    if choice.content == str(5):
+        url = 'https://www.youtube.com' + values[4]
+        print(url)
+
+    await play(ctx, url)
 
 @bot.command()
 async def obser(ctx):
