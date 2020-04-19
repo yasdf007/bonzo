@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() # загружает файл env
 
-game = discord.Game("v0.4.1a wenowspeak") # пишем боту в активити
+game = discord.Game("v0.5a osmplesher") # пишем боту в активити
 bot = commands.Bot(command_prefix='bd/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
@@ -29,6 +29,7 @@ def bonzo():
 async def evala(ctx, evcode=None):
     ownerids = [221246477630963722, 196314341572608000, 393807398047055883] # определяем овнеров
     if evcode == None: # проверяем, указан ли код
+        await discord.TextChannel.purge(ctx.message.channel, limit=1)
         await ctx.send("укажите код для экзекьюции.")
     else:
         if ctx.author.id in ownerids: # проверяем, овнер ли запросил команду?
@@ -39,12 +40,13 @@ async def evala(ctx, evcode=None):
             await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
 
 # импорт файла-фикса для импорта наших функций
-from botlib.func_blankfix import * 
+from botlib.blankfix import * 
 
 # импорт наших собственных функций в файл инстанции.
-from botlib.func_nohame import *
 from botlib.func_alone import *
 from botlib.func_vlaner import *
+from botlib.func_nohame import *
+from botlib.music import *
 
 # on_ready выполняется при полной готовности бота к действиям
 @bot.event 

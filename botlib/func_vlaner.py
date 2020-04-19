@@ -10,10 +10,7 @@ from bs4 import BeautifulSoup
 import requests
 from PIL import Image
 from io import BytesIO
-import youtube_dl
-from discord.utils import get
-import os
-import discord
+
 # функция говорит сама за себя
 @bot.command(pass_context=True)
 async def da(ctx): 
@@ -61,118 +58,7 @@ async def randImg(ctx):
     else:
         await ctx.send(iImgurUrl)
 
-# команда проигрывания музыки
-@bot.command()
-async def play(ctx, url: str):
-    isSongInDir = os.path.isfile("song.mp3") # есть ли файл song.mp3 в директории бота?
-    if isSongInDir: # выполняется, если файл существует
-        os.remove('song.mp3') # удаление файла, если он есть
-    
-    voice = get (bot.voice_clients, guild = ctx.guild) # получает список голосовых соединений бота
-    channel = ctx.message.author.voice.channel
-
-    if voice and voice.is_connected():
-        await voice.move_to(channel)
-        del(voice)
-    else:
-        await channel.connect()
-        del(voice)
-
-    voice = get (bot.voice_clients, guild = ctx.guild) # обновляет список голосовых соединений бота
-    ytdl_options = { 
-        'format' : 'bestaudio/best',
-        'postprocessors' : [{
-            'key' : 'FFmpegExtractAudio',
-            'preferredcodec' : 'mp3', # кодек
-            'preferredquality' : '192' # битрейт
-        }],
-    }
-
-    with youtube_dl.YoutubeDL(ytdl_options) as ydl:
-        ydl.download([url]) 
-
-    for file in os.listdir('./'): # проверяет файлы в корне директории бота
-        if file.endswith('mp3'): # если файл заканчивается на mp3
-            name = file 
-            os.rename(file, 'song.mp3') # заменяет название файла на song.mp3
-    voice.play(discord.FFmpegPCMAudio('song.mp3')) # запускает проигрывание song.mp3 через ffmpeg
-    voice.source = discord.PCMVolumeTransformer(voice.source)
-    voice.source.volume = 0.07 # == 100% громкости
-
-    song_name = name.rsplit('-', 2)
-    await ctx.send(f'Сейчас играет: {song_name[0]}')
-
-# команда остановки воспроизведения и выхода из канала
-@bot.command(pass_context=True)
-async def stop(ctx):
-    voice = get (bot.voice_clients, guild = ctx.guild)
-    voice.stop()
-    if voice and voice.is_connected():
-        await voice.disconnect()
-
-
-@bot.command()
-async def choice(ctx, *args):  #*args значит несколько слов))))
-    url_title_DICT = {}
-    max_URL = 0
-    urlYT = 'https://www.youtube.com/results?search_query='
-    for i in args:
-        urlYT = urlYT + i + '+' # соединяем ссылку со словами, получается норм ссылка
-
-    req = requests.get(urlYT, headers={'User-Agent': 'Mozilla/5.0'})
-    soup = BeautifulSoup(req.text, "html.parser")
-
-    await ctx.send('Жди...')
-    for item in soup.select("html body div h3"): # поиск по CSS селекторам, на ютубе под 3 заголовком норм инфа (название + href)
-        if item.find('a') == None:               #деюил находит три None а(англ) тэга
-            continue
-
-        url_title_DICT[(item.find('a').get('title'))] = (item.find('a').get('href'))
-        max_URL +=1
-        if max_URL > 5:
-            break
-
-    await ctx.send('Жди...')
-    values = list(url_title_DICT.values())
-    keys = list(url_title_DICT.keys())
-
-    number = 1
-    for key in url_title_DICT.keys():
-        await ctx.send(str(number) + '. ' + key)
-        number+=1
-
-    
-
-    await ctx.send('Выбери число...)))')
-    choice = await bot.wait_for('message')
-
-
-    if choice.content == str(1):
-        url = 'https://www.youtube.com' + values[0]
-        print(url)
-
-
-    if choice.content == str(2):
-        url = 'https://www.youtube.com' + values[1]
-        print(url)
-
-
-    if choice.content == str(3):
-        url = 'https://www.youtube.com' + values[2]
-        print(url)
-
-
-    if choice.content == str(4):
-        url = 'https://www.youtube.com' + values[3]
-        print(url)
-
-
-    if choice.content == str(5):
-        url = 'https://www.youtube.com' + values[4]
-        print(url)
-
-    await play(ctx, url)
-
+# виды обсёров - rofl
 @bot.command()
 async def obser(ctx):
     await ctx.send("https://sun1-16.userapi.com/NjDsxJrEr31xWKtAVMQiKZ5CzDH6cGS9XhaB-g/ZBfUwNHhdzw.jpg")
