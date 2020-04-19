@@ -90,21 +90,22 @@ async def choice(ctx, arges):  #*args значит несколько слов))
     await ctx.send(embed=embed) # высрать топ 5 по поиску
 
     choice = await bot.wait_for('message')
+    a = choice.content
 
-    if choice.content == (str(1) or str(2) or str(3) or str(4) or str(5)):
-        if choice.content == str(1):
+    if a == str(1) or a == str(2) or a == str(3) or a == str(4) or a == str(5):
+        if a == str(1):
             url = 'https://www.youtube.com' + values[0]
 
-        if choice.content == str(2):
+        if a == str(2):
             url = 'https://www.youtube.com' + values[1]
 
-        if choice.content == str(3):
+        if a == str(3):
             url = 'https://www.youtube.com' + values[2]
 
-        if choice.content == str(4):
+        if a == str(4):
             url = 'https://www.youtube.com' + values[3]
 
-        if choice.content == str(5):
+        if a == str(5):
             url = 'https://www.youtube.com' + values[4]
 
         await rock(ctx, url)
