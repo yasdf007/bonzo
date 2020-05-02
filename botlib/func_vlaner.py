@@ -34,12 +34,25 @@ async def roll(ctx, a=None, b=None):
 
 # отправляет случайный скриншот из базы prnt sc
 @bot.command(pass_context=True)
-async def pict(ctx):
-    symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
-    url = 'https://prnt.sc/'
-    symbolsStr = ''.join(sample(symbols, 6)) # делаем случайную строку из 6 символов
-    url += symbolsStr # соединяем строку выше с ссылкой url
-    await ctx.send(url)
+async def pict(ctx, Num=None):
+    if Num is None:
+        symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
+        url = 'https://prnt.sc/'
+        symbolsStr = ''.join(sample(symbols, 6)) # делаем случайную строку из 6 символов
+        url += symbolsStr # соединяем строку выше с ссылкой url
+        await ctx.send(url)
+    else:
+        Num = int(Num)
+        if Num > 15:
+            await ctx.send("Превышено допустимое количество ссылок")
+        else:
+            while Num > 0:
+                Num -= 1
+                symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
+                url = 'https://prnt.sc/'
+                symbolsStr = ''.join(sample(symbols, 6)) # делаем случайную строку из 6 символов
+                url += symbolsStr # соединяем строку выше с ссылкой url
+                await ctx.send(url)
 
 # отправляет пинг
 @bot.command(pass_context=True)
