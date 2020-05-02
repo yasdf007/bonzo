@@ -1,4 +1,4 @@
-# bonzo v0.5a wenowspeak
+# bonzo v0.5.1a wenowspeak
 
 ## made by yasdf007, vlaner & nohame
 
