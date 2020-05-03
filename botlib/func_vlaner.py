@@ -46,8 +46,7 @@ async def pict(ctx, Num=None):
         if Num > 15:
             await ctx.send("Превышено допустимое количество ссылок")
         else:
-            while Num > 0:
-                Num -= 1
+            for i in range(0, Num):
                 symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
                 url = 'https://prnt.sc/'
                 symbolsStr = ''.join(sample(symbols, 6)) # делаем случайную строку из 6 символов
