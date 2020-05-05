@@ -10,8 +10,16 @@ from asyncio import sleep
 
 # функция, отправляющая рандомного котика :3
 @bot.command()
-async def randomcat(ctx):
-    await ctx.send('https://cataas.com/cat?' + str(randint(0, 10**6)))
+async def randomcat(ctx, Num=None):
+    if Num is None:
+        await ctx.send('https://cataas.com/cat?' + str(randint(0, 10**6)))
+    else:
+        Num = int(Num)
+        if Num > 15:
+            await ctx.send("Превышено максимальное количество ссылок")
+        else:
+            for i in range(0, Num):
+                await ctx.send('https://cataas.com/cat?' + str(randint(0, 10**6)))
 
 # функция, отправляющая информацию о сервере
 @bot.command()
