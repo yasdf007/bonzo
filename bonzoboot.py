@@ -13,8 +13,8 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() # загружает файл env
 
-game = discord.Game("v0.5.1a osmplesher") # пишем боту в активити
-bot = commands.Bot(command_prefix='bd/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
+game = discord.Game("v0.5.1 osmplesher") # пишем боту в активити
+bot = commands.Bot(command_prefix='b/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
 def bonzo():
