@@ -13,10 +13,15 @@ import discord
 
 # функция проигрывания музыки
 async def rock(ctx, url: str):
-    isSongInDir = os.path.isfile("song.mp3") # есть ли файл song.mp3 в директории бота?
-    if isSongInDir: # выполняется, если файл существует
-        os.remove('song.mp3') # удаление файла, если он есть
-    
+
+    directory = "./"
+
+    files_in_directory = os.listdir(directory)
+    filtered_files = [file for file in files_in_directory if file.endswith(".mp3")]
+    for file in filtered_files:
+    	path_to_file = os.path.join(directory, file)
+    	os.remove(path_to_file)
+  
     voice = get (bot.voice_clients, guild = ctx.guild) # получает список голосовых соединений бота
     channel = ctx.message.author.voice.channel
 
@@ -27,7 +32,10 @@ async def rock(ctx, url: str):
         await channel.connect()
         del(voice)
 
+    await ctx.send("достаю этот трек из помойки...")
+
     voice = get (bot.voice_clients, guild = ctx.guild) # обновляет список голосовых соединений бота
+    
     ytdl_options = { 
         'format' : 'bestaudio/best',
         'postprocessors' : [{
@@ -43,13 +51,12 @@ async def rock(ctx, url: str):
     for file in os.listdir('./'): # проверяет файлы в корне директории бота
         if file.endswith('mp3'): # если файл заканчивается на mp3
             name = file 
-            os.rename(file, 'song.mp3') # заменяет название файла на song.mp3
-    voice.play(discord.FFmpegPCMAudio('song.mp3')) # запускает проигрывание song.mp3 через ffmpeg
+
+    voice.play(discord.FFmpegPCMAudio(name)) # запускает проигрывание song.mp3 через ffmpeg
     voice.source = discord.PCMVolumeTransformer(voice.source)
     voice.source.volume = 0.07 # == 100% громкости
 
-    song_name = name.rsplit('-', 2)
-    await ctx.send(f'Сейчас играет: {song_name[0]}')
+    await ctx.send(f'сейчас играет: {name}')
 
 # функция выбора из поиска по youtube
 async def choice(ctx, arges):  #*args значит несколько слов))))
@@ -129,3 +136,5 @@ async def stop(ctx):
     voice.stop()
     if voice and voice.is_connected():
         await voice.disconnect()
+    await discord.TextChannel.purge(ctx.message.channel, limit=1)
+    await ctx.send('пон, ливаю')
