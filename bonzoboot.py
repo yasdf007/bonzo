@@ -52,6 +52,13 @@ from botlib.music import *
 # on_ready выполняется при полной готовности бота к действиям
 @bot.event 
 async def on_ready():
+
+    discord.opus.load_opus()
+    if not discord.opus.is_loaded():
+        discord.opus.load_opus('opus')
+        if not discord.opus.is_loaded():
+            raise RunTimeError('Opus failed to load')
+
     global ctimest # переменная, содержащая разницу между временем прочтения кода и готовым к работе ботом
     await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру" которую мы задали в строке 13)
     ctimest = time() - ctimest # дельта времени: бот готов к работе
