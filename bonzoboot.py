@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() # загружает файл env
 
-game = discord.Game("v0.5.2 osmplesher") # пишем боту в активити
+game = discord.Game("v0.5.3 osmplesher") # пишем боту в активити
 bot = commands.Bot(command_prefix='b/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
 
 
