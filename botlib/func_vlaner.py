@@ -27,10 +27,16 @@ async def roll(ctx, a=None, b=None):
         await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, 100)))
     elif b is None:
         a = int(a)
-        await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, a)))
+        if a <= 10**6:
+            await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, a)))
+        else: 
+            await ctx.send('{0.author.mention}'.format(ctx) + ' больше мильёна роллить не буду')
     else:
         a, b = int(a), int(b)
-        await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(a, b)))
+        if b <= 10**6:
+            await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(a, b)))
+        else:
+            await ctx.send('{0.author.mention}'.format(ctx) + ' больше мильёна роллить не буду')
 
 # отправляет случайный скриншот из базы prnt sc
 @bot.command(pass_context=True)
