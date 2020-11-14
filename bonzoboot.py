@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() # загружает файл env
 
-game = discord.Game("v0.5.4 osmplesher") # пишем боту в активити
+game = discord.Game("v0.6.0 neuvo") # пишем боту в активити
 bot = commands.Bot(command_prefix='b/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
 
 
@@ -47,7 +47,7 @@ from botlib.blankfix import *
 from botlib.func_alone import *
 from botlib.func_vlaner import *
 from botlib.func_nohame import *
-from botlib.music import *
+# from botlib.music import *
 
 # on_ready выполняется при полной готовности бота к действиям
 @bot.event 
