@@ -1,4 +1,4 @@
-# bonzo v0.5.4 osmplesher
+# bonzo v0.6.0 neuvo
 
 ## made by yasdf007, vlaner & nohame
 
