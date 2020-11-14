@@ -11,15 +11,6 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-# функция говорит сама за себя
-@bot.command(pass_context=True)
-async def da(ctx): 
-    await ctx.send('{0.author.mention}'.format(ctx) + ' ' + "ПИЗДА АХАХАХХАХАХАХАХААХАХААХА")
-
-@bot.command(pass_context=True)
-async def net(ctx): 
-    await ctx.send('{0.author.mention}'.format(ctx) + ' ' + "ПИДОРА ОТВЕТ АХАХАХАХААХХАХАХА")
-
 #dota 2 roll
 @bot.command()
 async def roll(ctx, a=None, b=None):

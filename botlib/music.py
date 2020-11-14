@@ -32,7 +32,7 @@ async def rock(ctx, url: str):
         await channel.connect()
         del(voice)
 
-    await ctx.send("достаю этот трек из помойки...")
+    await ctx.send("Достаю этот трек...")
 
     voice = get (bot.voice_clients, guild = ctx.guild) # обновляет список голосовых соединений бота
     
@@ -94,7 +94,7 @@ async def choice(ctx, arges):  #*args значит несколько слов))
         embed.add_field(name='**' + str(number) + '.' + '**', value=key, inline=False)
         number+=1
 
-    await ctx.send(embed=embed) # высрать топ 5 по поиску
+    await ctx.send(embed=embed) # топ 5 по поиску
 
     choice = await bot.wait_for('message')
     a = choice.content
@@ -117,7 +117,7 @@ async def choice(ctx, arges):  #*args значит несколько слов))
 
         await rock(ctx, url)
     else:
-        await ctx.send('Ты нихуя не выбрал = ты **пошёл нахуй** (нахуя ты вообще просил......)')
+        await ctx.send('Трек надо выбирать :frowning:......')
 
 # команда запуска воспроизведения по ссылке или по запросу
 @bot.command(pass_context=True)

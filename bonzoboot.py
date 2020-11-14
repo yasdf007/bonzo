@@ -56,8 +56,8 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=game) # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру" которую мы задали в строке 13)
     ctimest = time() - ctimest # дельта времени: бот готов к работе
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' + str(round(ctimest,3)) + 's', 'discord latency is: ' + str(round(bot.latency, 3)) + 's', '/', sep='\n')
-    if not discord.opus.is_loaded():
-        discord.opus.load_opus('opus')
+#    if not discord.opus.is_loaded():
+#        discord.opus.load_opus('opus')
 
 # запускаем инстанцию бота
 bonzo()
