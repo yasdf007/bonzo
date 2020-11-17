@@ -66,6 +66,9 @@ class vlanerCog(commands.Cog):
         else:
             await ctx.send(iImgurUrl)
 
+    @commands.command()
+    async def ping(self, ctx):
+        await ctx.send('Pong! ' + str(round(self.bot.latency, 3)) + 'ms ' + '(задержка)')
 
 def setup(bot):
     bot.add_cog(vlanerCog(bot))
