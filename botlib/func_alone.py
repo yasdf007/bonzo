@@ -15,7 +15,7 @@ async def randomcat(ctx, Num=None):
         await ctx.send('https://cataas.com/cat?' + str(randint(0, 10**6)))
     else:
         Num = int(Num)
-        if Num > 15:
+        if Num > 2:
             await ctx.send("Превышено максимальное количество ссылок")
         else:
             for i in range(0, Num):
