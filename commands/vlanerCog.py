@@ -68,7 +68,8 @@ class vlanerCog(commands.Cog):
 
     @commands.command()
     async def ping(self, ctx):
-        await ctx.send('Pong! ' + str(round(self.bot.latency, 3)) + 'ms ' + '(задержка)')
+        botLatency = round(self.bot.latency * 1000, 3)
+        await ctx.send('Pong! ' + str(botLatency) + 'ms ' + '(задержка)')
 
 def setup(bot):
     bot.add_cog(vlanerCog(bot))
