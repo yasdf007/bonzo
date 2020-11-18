@@ -5,6 +5,7 @@ import requests
 from PIL import Image
 from io import BytesIO
 
+
 class vlanerCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
@@ -13,7 +14,7 @@ class vlanerCog(commands.Cog):
     async def obser(self, ctx):
         await ctx.send("https://sun1-16.userapi.com/NjDsxJrEr31xWKtAVMQiKZ5CzDH6cGS9XhaB-g/ZBfUwNHhdzw.jpg")
 
-    #dota 2 roll
+    # dota 2 roll
     @commands.command()
     async def roll(self, ctx, a=None, b=None):
         if a is None and b is None:
@@ -22,7 +23,7 @@ class vlanerCog(commands.Cog):
             a = int(a)
             if a <= 10**6:
                 await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, a)))
-            else: 
+            else:
                 await ctx.send('{0.author.mention}'.format(ctx) + ' больше мильёна роллить не буду')
         else:
             a, b = int(a), int(b)
@@ -36,8 +37,9 @@ class vlanerCog(commands.Cog):
         if Num is None:
             symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
             url = 'https://prnt.sc/'
-            symbolsStr = ''.join(sample(symbols, 6)) # делаем случайную строку из 6 символов
-            url += symbolsStr # соединяем строку выше с ссылкой url
+            # делаем случайную строку из 6 символов
+            symbolsStr = ''.join(sample(symbols, 6))
+            url += symbolsStr  # соединяем строку выше с ссылкой url
             await ctx.send(url)
         else:
             Num = int(Num)
@@ -47,8 +49,9 @@ class vlanerCog(commands.Cog):
                 for i in range(0, Num):
                     symbols = 'abcdefghijklmnopqrstuvwxyz1234567890'
                     url = 'https://prnt.sc/'
-                    symbolsStr = ''.join(sample(symbols, 6)) # делаем случайную строку из 6 символов
-                    url += symbolsStr # соединяем строку выше с ссылкой url
+                    # делаем случайную строку из 6 символов
+                    symbolsStr = ''.join(sample(symbols, 6))
+                    url += symbolsStr  # соединяем строку выше с ссылкой url
                     await ctx.send(url)
 
     @commands.command(pass_context=True)
@@ -62,14 +65,15 @@ class vlanerCog(commands.Cog):
 
         img = Image.open(BytesIO(req.content))
         if img.size[0] == 161 and img.size[1] == 81:
-            await randImg(ctx)
+            await ctx.invoke(await self.randImg(ctx))
         else:
             await ctx.send(iImgurUrl)
 
     @commands.command()
     async def ping(self, ctx):
-        botLatency = round(self.bot.latency * 1000, 3)
+        botLatency = round(self.bot.latency * 1000, 2)
         await ctx.send('Pong! ' + str(botLatency) + 'ms ' + '(задержка)')
+
 
 def setup(bot):
     bot.add_cog(vlanerCog(bot))
