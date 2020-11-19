@@ -1,4 +1,4 @@
-from discord import Embed
+from discord import Embed, Emoji
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
@@ -27,13 +27,15 @@ class weather(commands.Cog):
 
         jsonResult = json.loads(result.text)
 
+        weatherCountry = jsonResult['sys']['country'].lower()
         weatherType = jsonResult['weather'][0]['description']
         weatherTemp = jsonResult['main']['temp']
         weatherTempMin = jsonResult['main']['temp_min']
         weatherTempMax = jsonResult['main']['temp_max']
         weatherWind = jsonResult['wind']['speed']
 
-        embed = Embed(title=f'Погода {city}', color=0x543964)
+        embed = Embed(
+            title=f'Погода {city} :flag_{weatherCountry}:', color=0x543964)
         embed.add_field(name='Погода', value=weatherType, inline=False)
         embed.add_field(name='Температура', value=weatherTemp, inline=False)
         embed.add_field(name='Максимальная температура',
