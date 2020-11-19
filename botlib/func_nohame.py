@@ -11,7 +11,7 @@ async def help(ctx):
    embed=discord.Embed(
    title='**Команды бота:**', # title - головная часть, colour - hex-код цвета полоски
    colour=0xffff00)
-   embed.set_thumbnail(url='https://cdn.discordapp.com/avatars/680132907859443790/3d059b62a6c5b6dd6fa46fdfd432f009.webp?size=256')
+   embed.set_thumbnail(url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
 # inline отвечает за смещение вправо (репрезентация в одной строке)
    embed.add_field(name='ping', value='Понг!', inline=False)
    embed.add_field(name='roll', value='Ролит как в доте или между двумя числами', inline=False)

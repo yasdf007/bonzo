@@ -13,7 +13,7 @@ import os
 from dotenv import load_dotenv 
 load_dotenv() # загружает файл env
 
-game = discord.Game("v0.6.0 neuvo") # пишем боту в активити
+game = discord.Game("v0.6.1 neuvo") # пишем боту в активити
 bot = commands.Bot(command_prefix='b/', help_command=None) # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help 
 
 
