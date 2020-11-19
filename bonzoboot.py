@@ -13,9 +13,9 @@ import os
 from dotenv import load_dotenv
 load_dotenv()  # загружает файл env
 
-game = discord.Game("dev")  # пишем боту в активити
+game = discord.Game("0.7.3e neuvo")  # пишем боту в активити
 # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help
-bot = commands.Bot(command_prefix='bd/', help_command=None)
+bot = commands.Bot(command_prefix='b/', help_command=None)
 
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
