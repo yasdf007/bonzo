@@ -9,6 +9,11 @@ class randImg(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandOnCooldown):
+            await ctx.send(error)
+
+    @commands.cooldown(rate=1, per=5)
     @commands.command(pass_context=True)
     async def randImg(self, ctx):
         url = 'https://i.imgur.com/'
