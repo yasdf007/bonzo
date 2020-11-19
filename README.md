@@ -1,4 +1,4 @@
-# bonzo v0.8.1a neuvo
+# bonzo v0.8.2 neuvo
 
 ## made by yasdf007, vlaner & nohame
 

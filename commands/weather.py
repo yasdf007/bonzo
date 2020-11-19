@@ -29,13 +29,13 @@ class weather(commands.Cog):
 
         weatherCountry = jsonResult['sys']['country'].lower()
         weatherType = jsonResult['weather'][0]['description']
-        weatherTemp = jsonResult['main']['temp']
-        weatherTempMin = jsonResult['main']['temp_min']
-        weatherTempMax = jsonResult['main']['temp_max']
+        weatherTemp = round(jsonResult['main']['temp']) + "°C"
+        weatherTempMin = round(jsonResult['main']['temp_min']) + "°C"
+        weatherTempMax = round(jsonResult['main']['temp_max']) + "°C"
         weatherWind = jsonResult['wind']['speed']
 
         embed = Embed(
-            title=f'Погода {city} :flag_{weatherCountry}:', color=0x543964)
+            title=f'Погода: {city} :flag_{weatherCountry}:', color=0x543964)
         embed.add_field(name='Погода', value=weatherType, inline=False)
         embed.add_field(name='Температура', value=weatherTemp, inline=False)
         embed.add_field(name='Максимальная температура',
