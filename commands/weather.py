@@ -36,13 +36,13 @@ class weather(commands.Cog):
 
         embed = Embed(
             title=f'Погода: {city} :flag_{weatherCountry}:', color=0x543964)
-        embed.add_field(name='Погода', value=weatherType, inline=False)
-        embed.add_field(name='Температура', value=weatherTemp, inline=False)
-        embed.add_field(name='Максимальная температура',
+        embed.add_field(name='На улице:', value=weatherType, inline=False)
+        embed.add_field(name='Температура:', value=weatherTemp, inline=False)
+        embed.add_field(name='Суточный максимум:',
                         value=weatherTempMax, inline=False)
-        embed.add_field(name='Минимальная температура',
+        embed.add_field(name='Суточный минимум:',
                         value=weatherTempMin, inline=False)
-        embed.add_field(name='Скорость ветра',
+        embed.add_field(name='Скорость ветра:',
                         value=f'{weatherWind} м/c', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
