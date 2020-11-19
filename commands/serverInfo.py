@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-
+from commands.resources.animationFW import reColoring
 
 class info(commands.Cog):
     def __init__(self, bot):
@@ -20,8 +20,9 @@ class info(commands.Cog):
         embed.add_field(name='**Количество участников:**',
                         value=str(server.member_count), inline=False)
         embed.set_footer(text='/by bonzo/ for @' + ctx.message.author.name)
-        await ctx.send(embed=embed)
-
+        
+        sinfo = await ctx.send(embed=embed)
+        await reColoring(sinfo)
 
 def setup(bot):
     bot.add_cog(info(bot))
