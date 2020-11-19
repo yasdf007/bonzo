@@ -29,9 +29,9 @@ class weather(commands.Cog):
 
         weatherCountry = jsonResult['sys']['country'].lower()
         weatherType = jsonResult['weather'][0]['description']
-        weatherTemp = round(jsonResult['main']['temp']) + "°C"
-        weatherTempMin = round(jsonResult['main']['temp_min']) + "°C"
-        weatherTempMax = round(jsonResult['main']['temp_max']) + "°C"
+        weatherTemp = str(round(jsonResult['main']['temp'])) + "°C"
+        weatherTempMin = str(round(jsonResult['main']['temp_min'])) + "°C"
+        weatherTempMax = str(round(jsonResult['main']['temp_max'])) + "°C"
         weatherWind = jsonResult['wind']['speed']
 
         embed = Embed(
