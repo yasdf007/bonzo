@@ -17,7 +17,9 @@ class weather(commands.Cog):
             await ctx.send(error.original)
 
     @commands.command(aliases=['weather', 'погода'])
-    async def getWeatherInfo(self, ctx, city):
+    async def getWeatherInfo(self, ctx, *args):
+        city = ' '.join(args)
+
         weatherToken = os.getenv('WEATHER_TOKEN')
         query = f'https://api.openweathermap.org/data/2.5/weather?q={city}&lang=ru&units=metric&appid={weatherToken}'
         result = requests.get(query)
