@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 import requests
 import json
 load_dotenv()
-
+from commands.resources.animationFW import reColoring
 
 class weather(commands.Cog):
     def __init__(self, bot):
@@ -48,7 +48,9 @@ class weather(commands.Cog):
                         value=f'{weatherWind} м/c', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
-        await ctx.send(embed=embed)
+        
+        outp = await ctx.send(embed=embed)
+        await reColoring(outp)
 
 
 def setup(bot):
