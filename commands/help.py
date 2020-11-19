@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 
 
-class nohameCog(commands.Cog):
+class helpcmd(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -34,10 +34,10 @@ class nohameCog(commands.Cog):
         #   embed.add_field(name='play', value='Присоединяется к войсу! Проигрывает трек по ссылке или по выбору (!)',  inline=True)
         #   embed.add_field(name='leave', value='Останавливает воспроизведение и покидает войс!', inline=True)
         #  embed.add_field(name='', value='', inline=)
-        embed.set_footer(text="/by bonzo/ for @" +
-                         ctx.message.author.name)  # подпись внизу
+        embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
+                         icon_url=ctx.message.author.avatar_url)  # подпись внизу
         await ctx.send(embed=embed)
 
 
 def setup(bot):
-    bot.add_cog(nohameCog(bot))
+    bot.add_cog(helpcmd(bot))

@@ -34,16 +34,20 @@ async def on_ready():
     # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
     await bot.change_presence(status=discord.Status.online, activity=game)
     endTime = time() - ctimest
-    extensions = ['commands.vlanerCog',
-                  'commands.aloneCog',
-                  'commands.nohameCog',
-                  'commands.musicCog']
-    for ext in extensions:
-        bot.load_extension(ext)
+    for filename in os.listdir('./commands'):
+        if filename.endswith('.py'):
+            bot.load_extension('commands.%s' % filename[:-3])
+    # extensions = ['commands.vlanerCog',
+    #               'commands.aloneCog',
+    #               'commands.nohameCog',
+    #               'commands.musicCog',
+    #               'commands.help']
+    # for ext in extensions:
+    #     bot.load_extension(ext)
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' +
           str(round(endTime, 3)) + 's', 'discord latency is: ' + str(round(bot.latency, 3)) + 's', '/', sep='\n')
 
 
 # запускаем инстанцию бота
-if (__name__ == '__main__'):
+if __name__ == '__main__':
     main()
