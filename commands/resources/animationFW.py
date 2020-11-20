@@ -1,9 +1,9 @@
 # Created by vlaner (c) 2020.
 # Assisted by yasdf007 (functionalization) and discord.py community (reference onto library)
 
-from discord import Embed
 from asyncio import sleep
 from random import randint
+
 
 async def reColoring(x):
     embed = x.embeds[0]

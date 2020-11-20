@@ -1,11 +1,12 @@
-from discord import Embed, Emoji
+from commands.resources.animationFW import reColoring
+from discord import Embed, Color
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
 import requests
 import json
 load_dotenv()
-from commands.resources.animationFW import reColoring
+
 
 class weather(commands.Cog):
     def __init__(self, bot):
@@ -25,7 +26,7 @@ class weather(commands.Cog):
         result = requests.get(query)
 
         if(result.status_code == 404):
-            raise commands.CommandInvokeError('Город не найден')
+            raise commands.CommandInvokeError(f'Город {city} не найден')
 
         jsonResult = json.loads(result.text)
 
@@ -48,9 +49,7 @@ class weather(commands.Cog):
                         value=f'{weatherWind} м/c', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
-        
         outp = await ctx.send(embed=embed)
-        await reColoring(outp)
 
 
 def setup(bot):
