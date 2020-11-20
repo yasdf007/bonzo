@@ -25,7 +25,7 @@ class helpcmd(commands.Cog):
         embed.add_field(
             name='randImg', value='Отправляет случайное изображение из imgur', inline=False)
         embed.add_field(
-            name='serverinfo', value='Показывает информацию о сервере', inline=False)
+            name='serverinfo', value='Показывает информацию о сервере (BETA)', inline=False)
         embed.add_field(
             name='clear', value='Очищает последние x сообщений (только для разработчиков)', inline=False)
         embed.add_field(
@@ -34,6 +34,8 @@ class helpcmd(commands.Cog):
             name='obser', value='Виды обсёров.......', inline=False)
         embed.add_field(
             name='weather/погода', value='Погода по запрашиваемому городу (BETA)', inline=False)
+        embed.add_field(
+            name='info', value='Выдаёт информацию по пользователю (BETA)', inline=False)
 
         #  embed.add_field(name='', value='', inline=)
         embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
