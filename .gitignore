@@ -131,6 +131,3 @@ dmypy.json
 # Personal.
 .vscode/
 **/*.mp3
-commands/music.pyk
-.jar 
-.yml
