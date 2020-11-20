@@ -18,7 +18,7 @@ class weather(commands.Cog):
             await ctx.send(error.original)
 
     @commands.command(aliases=['weather', 'погода'])
-    async def getWeatherInfo(self, ctx, *args):
+    async def getWeather(self, ctx, *args):
         city = ' '.join(args)
 
         weatherToken = os.getenv('WEATHER_TOKEN')
@@ -49,7 +49,7 @@ class weather(commands.Cog):
                         value=f'{weatherWind} м/c', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
-        outp = await ctx.send(embed=embed)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):

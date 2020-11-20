@@ -6,17 +6,28 @@ class randomCat(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.send('Нужно ввести количество ссылок (до 2)')
+
     @commands.command()
     async def randomcat(self, ctx, Num=None):
         if Num is None:
-            await ctx.send('https://cataas.com/cat?' + str(randint(0, 10**6)))
+            cat = await self.makeCatUrl()
+            await ctx.send(cat)
         else:
             Num = int(Num)
+
             if Num > 2:
-                await ctx.send("Превышено максимальное количество ссылок")
+                raise commands.CommandInvokeError()
+
             else:
-                for i in range(0, Num):
-                    await ctx.send('https://cataas.com/cat?' + str(randint(0, 10**6)))
+                for _ in range(0, Num):
+                    cat = await self.makeCatUrl()
+                    await ctx.send(cat)
+
+    async def makeCatUrl(self):
+        return 'https://cataas.com/cat?' + str(randint(0, 10**6))
 
 
 def setup(bot):
