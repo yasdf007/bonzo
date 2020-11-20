@@ -32,10 +32,6 @@ def main():
 async def on_ready():
     # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
     await bot.change_presence(status=discord.Status.online, activity=game)
-    # Загрузка всех когов aka модулей
-    for filename in os.listdir('./commands'):
-        if filename.endswith('.py'):
-            bot.load_extension('commands.%s' % filename[:-3])
 
     endTime = time() - ctimest
     print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' +
@@ -43,4 +39,8 @@ async def on_ready():
 
 # запускаем инстанцию бота
 if __name__ == '__main__':
+    # Загрузка всех когов aka модулей
+    for filename in os.listdir('./commands'):
+        if filename.endswith('.py'):
+            bot.load_extension('commands.%s' % filename[:-3])
     main()
