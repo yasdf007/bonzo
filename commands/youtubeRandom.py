@@ -4,6 +4,7 @@ from os import getenv
 from dotenv import load_dotenv
 import json
 from random import randint, choice
+from string import digits, ascii_uppercase
 load_dotenv()
 
 
@@ -32,17 +33,22 @@ class YoutubeRandom(commands.Cog):
             self.API_SERVICE_NAMCE, self.API_VERSION, developerKey=self.YOUTUBE_API_KEY
         )
 
+        query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
+
         query = choice(self.videoNameStart) + \
             str(randint(1, 9999)) + choice(self.videoNameEnd)
         request = youtube.search().list(
-            q=query,
+            q=query2,
             maxResults=25,
             part='id'
         ).execute()
 
         requestJSON = json.loads(json.dumps(request))
-        totalResults = (requestJSON['pageInfo']['totalResults'] % 25) - 1
-        youtubeVideoId = requestJSON['items'][totalResults]['id']['videoId']
+
+        for searchResult in requestJSON['items']:
+            if searchResult['id']['kind'] == 'youtube#video':
+                youtubeVideoId = searchResult['id']['videoId']
+
         await ctx.send(f'https://www.youtube.com/watch?v={youtubeVideoId}')
 
 
