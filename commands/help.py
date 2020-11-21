@@ -33,7 +33,7 @@ class helpcmd(commands.Cog):
         embed.add_field(
             name='obser', value='Виды обсёров.......', inline=False)
         embed.add_field(
-            name='weather/погода', value='Погода по запрашиваемому городу (BETA)', inline=False)
+            name='weather/погода', value='Погода по запрашиваемому городу', inline=False)
         embed.add_field(
             name='info', value='Выдаёт информацию по пользователю (BETA)', inline=False)
 
