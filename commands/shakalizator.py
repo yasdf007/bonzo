@@ -30,7 +30,7 @@ class Shakalizator(commands.Cog):
         img = img.resize((450, 450))
 
         with BytesIO() as image_binary:
-            img.save(image_binary, "jpeg", quality=-100)
+            img.save(image_binary, "jpeg", quality=0)
             image_binary.seek(0)
             await ctx.send(file=File(fp=image_binary, filename='now.jpeg'))
 
