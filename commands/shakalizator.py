@@ -27,6 +27,7 @@ class Shakalizator(commands.Cog):
             requestImage = requests.get(urlFromPhoto)
 
         img = Image.open(BytesIO(requestImage.content))
+        img = img.convert('RGB')
         img = img.resize((450, 450))
 
         with BytesIO() as image_binary:
