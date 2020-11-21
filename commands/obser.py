@@ -1,4 +1,5 @@
 from discord.ext import commands
+from discord import File
 
 
 class obser(commands.Cog):
@@ -7,7 +8,7 @@ class obser(commands.Cog):
 
     @commands.command(pass_context=True)
     async def obser(self, ctx):
-        await ctx.send("https://sun1-16.userapi.com/NjDsxJrEr31xWKtAVMQiKZ5CzDH6cGS9XhaB-g/ZBfUwNHhdzw.jpg")
+        await ctx.send(file=File('./static/pictOBSER.jpg'))
 
 
 def setup(bot):
