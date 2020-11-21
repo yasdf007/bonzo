@@ -1,4 +1,4 @@
-# bonzo v0.9.2 readyset
+# bonzo v0.9.26x readyset
 
 ## made by yasdf007, vlaner & nohame
 
