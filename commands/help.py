@@ -1,4 +1,4 @@
-import discord
+from discord import Embed
 from discord.ext import commands
 
 
@@ -8,7 +8,7 @@ class helpcmd(commands.Cog):
 
     @commands.command()
     async def help(self, ctx):
-        embed = discord.Embed(
+        embed = Embed(
             title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
             colour=0xffff00)
         embed.set_thumbnail(
@@ -36,6 +36,8 @@ class helpcmd(commands.Cog):
             name='weather/погода', value='Погода по запрашиваемому городу', inline=False)
         embed.add_field(
             name='info', value='Выдаёт информацию по пользователю (BETA)', inline=False)
+        embed.add_field(
+            name='invite', value='Ссылка на приглашение бота', inline=False)
 
         #  embed.add_field(name='', value='', inline=)
         embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
