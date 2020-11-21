@@ -49,11 +49,11 @@ class weather(commands.Cog):
             title=f'Погода: {city} :flag_{weatherCountry}:', color=0x543964)
 
         embed.add_field(name='На улице:', value=weatherType + '' + weatherId, inline=False)
-        embed.add_field(name='Температура :thermometer::',
+        embed.add_field(name='Температура :thermometer:',
                         value=f'{weatherTemp} °C', inline=False)
-        embed.add_field(name='Скорость ветра :dash::',
+        embed.add_field(name='Скорость ветра :dash:',
                         value=f'{weatherDirection} {weatherWindSpeed} м/c', inline=False)
-        embed.add_field(name='Влажность:droplet::',
+        embed.add_field(name='Влажность:droplet:',
                         value=f'{weatherHumidity} %', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
