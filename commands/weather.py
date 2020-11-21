@@ -32,24 +32,34 @@ class weather(commands.Cog):
 
         weatherCountry = jsonResult['sys']['country'].lower()
         weatherType = jsonResult['weather'][0]['description']
-        weatherTemp = str(round(jsonResult['main']['temp'])) + "°C"
-        weatherTempMin = str(round(jsonResult['main']['temp_min'])) + "°C"
-        weatherTempMax = str(round(jsonResult['main']['temp_max'])) + "°C"
-        weatherWind = jsonResult['wind']['speed']
-
+        weatherTemp = round(jsonResult['main']['temp'])
+        weatherWindSpeed = jsonResult['wind']['speed']
+        weatherHumidity = jsonResult['main']['humidity']
+        weatherDirection = await self.convertWindDirection((jsonResult['wind']['deg']))
         embed = Embed(
             title=f'Погода: {city} :flag_{weatherCountry}:', color=0x543964)
+
         embed.add_field(name='На улице:', value=weatherType, inline=False)
-        embed.add_field(name='Температура:', value=weatherTemp, inline=False)
-        embed.add_field(name='Суточный максимум:',
-                        value=weatherTempMax, inline=False)
-        embed.add_field(name='Суточный минимум:',
-                        value=weatherTempMin, inline=False)
-        embed.add_field(name='Скорость ветра:',
-                        value=f'{weatherWind} м/c', inline=False)
+        embed.add_field(name='Температура :thermometer::',
+                        value=f'{weatherTemp} °C', inline=False)
+        embed.add_field(name='Скорость ветра :dash::',
+                        value=f'{weatherDirection} {weatherWindSpeed} м/c', inline=False)
+        embed.add_field(name='Влажность:droplet::',
+                        value=f'{weatherHumidity} %', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
         await ctx.send(embed=embed)
+
+    async def convertWindDirection(self, directionInNumbers):
+        # Надеюсь правильно
+        possibleDirections = ["Северный", "Северо-Северо-Восточный ", "Северо-Восточный", "Восточно-Северо-Восточный ",
+                              "Восточный", "Восточно-Юго-Восточный", "Юго-Восточный", "Юго-Юго-Восточный",
+                              "Южный", "Юго-Юго-Западный", "Юго-Западный", "Западно-Юго-Западный",
+                              "Западный", "Западо-Северо-Западный", "Северо-Западный", "Северо-Северо-Западный"]
+
+        value = int((directionInNumbers/22.5) + 0.5)
+
+        return possibleDirections[value % 16]
 
 
 def setup(bot):

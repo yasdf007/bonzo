@@ -29,14 +29,13 @@ class YoutubeRandom(commands.Cog):
     @commands.cooldown(rate=1, per=5)
     @commands.command()
     async def randomVideo(self, ctx):
+        query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
+        youtubeVideoId = ''
+
         youtube = build(
             self.API_SERVICE_NAMCE, self.API_VERSION, developerKey=self.YOUTUBE_API_KEY
         )
 
-        query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
-
-        query = choice(self.videoNameStart) + \
-            str(randint(1, 9999)) + choice(self.videoNameEnd)
         request = youtube.search().list(
             q=query2,
             maxResults=25,
