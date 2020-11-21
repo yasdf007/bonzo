@@ -38,6 +38,8 @@ class helpcmd(commands.Cog):
             name='info', value='Выдаёт информацию по пользователю (BETA)', inline=False)
         embed.add_field(
             name='invite', value='Ссылка на приглашение бота', inline=False)
+        embed.add_field(
+            name='shakalizator/shakal/шакал/сжать', value='ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку', inline=False)
 
         #  embed.add_field(name='', value='', inline=)
         embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
