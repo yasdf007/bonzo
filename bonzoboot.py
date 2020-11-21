@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # загружает файл env
 
-game = discord.Game("b/help | v0.9.2")  # пишем боту в активити
+game = discord.Game("b/help | v0.9.25")  # пишем боту в активити
 # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help
 bot = commands.Bot(command_prefix=str(os.getenv('PREFIX')), help_command=None)
 
@@ -33,6 +33,8 @@ async def on_ready():
     # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
     await bot.change_presence(status=discord.Status.online, activity=game)
     for filename in os.listdir('./commands'):
+        if filename.startswith('music'):
+            break
         if filename.endswith('.py'):
             bot.load_extension('commands.%s' % filename[:-3])
     endTime = time() - ctimest
