@@ -11,9 +11,9 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.MemberNotFound):
-            await ctx.send(f'{error.argument} не найден')
+    # async def cog_command_error(self, ctx, error):
+    #     if isinstance(error, commands.MemberNotFound):
+    #         await ctx.send(f'{error.argument} не найден')
 
     @commands.command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member):
@@ -23,6 +23,13 @@ class Info(commands.Cog):
         embed.add_field(name='Учетная запись:',
                         value=f'{member.name}#{member.discriminator}', inline=False)
         embed.add_field(name='ID:', value=member.id, inline=False)
+        if ctx.message.guild.id == 664485208745050112:
+            if 779242942303830016 in member.roles:
+                embed.add_field(name='Партия:', value='ANTINOHAME :white_check_mark:')
+            elif 779242739337789451 in member.roles:
+                embed.add_field(name='Партия:', value='АУЕ ПУДЖ :white_check_mark:')
+            else:
+                embed.add_field(name='Партия:', value='Беспартийный :negative_squared_cross_mark:')
         embed.add_field(
             name='Цвет ника:', value=f'HEX: {member.color} \n RGB: {member.color.to_rgb()}', inline=False)
         embed.add_field(name='Подрубился на сервер:',
@@ -31,6 +38,8 @@ class Info(commands.Cog):
                         value=member.joined_at.strftime('%d %B %Y %R UTC'), inline=False)
         embed.add_field(name='Появился на свет:',
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)
+        
+        print(member.roles)
         await ctx.send(embed=embed)
 
 
