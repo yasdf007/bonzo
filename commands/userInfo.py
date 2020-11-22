@@ -23,13 +23,17 @@ class Info(commands.Cog):
         embed.add_field(name='Учетная запись:',
                         value=f'{member.name}#{member.discriminator}', inline=False)
         embed.add_field(name='ID:', value=member.id, inline=False)
+
         if ctx.message.guild.id == 664485208745050112:
-            if 779242942303830016 in member.roles:
-                embed.add_field(name='Партия:', value='ANTINOHAME :white_check_mark:')
-            elif 779242739337789451 in member.roles:
-                embed.add_field(name='Партия:', value='АУЕ ПУДЖ :white_check_mark:')
+
+            party = await self.getPartyRoleId((member.roles))
+
+            if party:
+                embed.add_field(name='Партия:', value=f'{party}')
             else:
-                embed.add_field(name='Партия:', value='Беспартийный :negative_squared_cross_mark:')
+                embed.add_field(
+                    name='Партия:', value='Беспартийный :negative_squared_cross_mark:')
+
         embed.add_field(
             name='Цвет ника:', value=f'HEX: {member.color} \n RGB: {member.color.to_rgb()}', inline=False)
         embed.add_field(name='Подрубился на сервер:',
@@ -38,9 +42,15 @@ class Info(commands.Cog):
                         value=member.joined_at.strftime('%d %B %Y %R UTC'), inline=False)
         embed.add_field(name='Появился на свет:',
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)
-        
-        print(member.roles)
+
         await ctx.send(embed=embed)
+
+    async def getPartyRoleId(self, listOfRoles):
+        for element in listOfRoles:
+            if element.name == 'ANTINOHAME (Партия)':
+                return f'{element.name} :white_check_mark:'
+            if element.name == 'АУЕ ПУДЖ (Партия)':
+                return f'{element.name} :white_check_mark:'
 
 
 def setup(bot):
