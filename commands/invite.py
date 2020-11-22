@@ -1,13 +1,15 @@
 import discord
 from discord.ext import commands
 
+name='invite'
+description='Ссылка на приглашение бота'
 
 class invite(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # функция, отправляющая инвайт-ссылку бота в чат
-    @commands.command(name='invite', description='Ссылка на приглашение бота')
+    @commands.command(name=name, description=description)
     async def invite(self, ctx):
         embedd = discord.Embed(
             title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)

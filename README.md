@@ -1,4 +1,4 @@
-# bonzo v0.9.990a readyset
+# bonzo v1.0 RC1 (Release Candidate)
 
 ## made by yasdf007, vlaner & nohame
 

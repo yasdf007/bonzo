@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # загружает файл env
 
-game = discord.Game("b/help | v0.9.990a")  # пишем боту в активити
+game = discord.Game("b/help | v1.0 RC1")  # пишем боту в активити
 # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help
 bot = commands.Bot(command_prefix=str(os.getenv('PREFIX')), help_command=None)
 

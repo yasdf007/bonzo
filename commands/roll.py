@@ -1,6 +1,8 @@
 from discord.ext import commands
 from random import randint
 
+name='roll'
+description='Ролит как в доте или между двумя числами'
 
 class roll(commands.Cog):
     def __init__(self, bot):
@@ -17,7 +19,7 @@ class roll(commands.Cog):
 
     # dota 2 roll
     @commands.cooldown(rate=1, per=3)
-    @commands.command(name='roll', description='Ролит как в доте или между двумя числами')
+    @commands.command(name=name, description=description)
     async def roll(self, ctx, a=None, b=None):
         # Если оба числа не указаны
         if a is None and b is None:

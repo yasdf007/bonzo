@@ -2,6 +2,8 @@ import discord
 from discord.ext import commands
 from asyncio import sleep
 
+name= 'clear'
+description='Очищает последние x сообщений (только для разработчиков)'
 
 class Clear(commands.Cog):
     def __init__(self, bot):
@@ -22,7 +24,7 @@ class Clear(commands.Cog):
 
     # функция, удаляющая X сообщений из чата
     @commands.has_role('bonzodev')
-    @commands.command(name='clear', description='Очищает последние x сообщений (только для разработчиков)')
+    @commands.command(name=name, description=description)
     async def clear(self, ctx, count: int):
         # удаляем запрошенное кол-во сообщений!
         await discord.TextChannel.purge(ctx.message.channel, limit=count + 1)

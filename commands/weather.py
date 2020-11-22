@@ -7,6 +7,8 @@ import requests
 import json
 load_dotenv()
 
+name='weather'
+description='Погода по запрашиваемому городу'
 
 class weather(commands.Cog):
     def __init__(self, bot):
@@ -17,7 +19,7 @@ class weather(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send(error.original)
 
-    @commands.command(name='weather', description='Погода по запрашиваемому городу', aliases=['погода'])
+    @commands.command(name=name, description=description, aliases=['погода'])
     async def getWeather(self, ctx, *args):
         # Если город состоит из нескольких слов, объединяем в одну строку
         city = ' '.join(args)

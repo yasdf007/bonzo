@@ -1,6 +1,8 @@
 from discord.ext import commands
 from random import sample
 
+name='pict'
+description='Отправляет случайное изображение из prnt.sc :o'
 
 class pict(commands.Cog):
     def __init__(self, bot):
@@ -11,7 +13,7 @@ class pict(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
-    @commands.command(name='pict', description='Отправляет случайное изображение из prnt.sc :o')
+    @commands.command(name=name, description=description)
     async def pict(self, ctx, Num=None):
         # Если количество не указано
         if Num is None:

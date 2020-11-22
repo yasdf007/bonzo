@@ -7,6 +7,8 @@ from random import randint, choice
 from string import digits, ascii_uppercase
 load_dotenv()
 
+name='randomVideo'
+description='Рандомны видос из ютуба (BETA)'
 
 class YoutubeRandom(commands.Cog):
     def __init__(self, bot):
@@ -28,7 +30,7 @@ class YoutubeRandom(commands.Cog):
     #         await ctx.send(error)
 
     @commands.cooldown(rate=1, per=5)
-    @commands.command(name='randomVideo', description='Рандомны видос из ютуба (BETA)', aliases=['randvid', 'video'])
+    @commands.command(name=name, description=description, aliases=['randvid', 'video'])
     async def randomVideo(self, ctx):
         # Делаем рандомное название запроса из 4 символов и цифр
         query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))

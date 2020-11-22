@@ -9,7 +9,11 @@ class helping(commands.Cog):
 
     @commands.command(name='help2', description='Все команды бота')
     async def help2(self, ctx):
-        embed = Embed(title='Команды', color=randint(0, 0xFFFFFF))
+        embed = Embed(
+            title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
+            color=randint(0, 0xFFFFFF))
+        embed.set_thumbnail(
+            url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
 
         # Получаем список всех команд из когов
         cogs = [cogg for cogg in self.bot.cogs.keys()]
@@ -41,6 +45,9 @@ class helping(commands.Cog):
                         # Отправляем название команды в ембед
                         embed.add_field(
                             name=f'{command.name}', value=f'{command.description}', inline=False)
+
+        embed.add_field(name='play', value='Проигрывает музыку с YT по запросу (ALPHA)', inline=True)
+        embed.add_field(name='stop', value='Останавливает воспроизведение', inline=True)
 
         await ctx.send(embed=embed)
 

@@ -5,6 +5,8 @@ from io import BytesIO
 from discord.ext.commands.errors import CommandInvokeError
 import requests
 
+name='shakalizator'
+description='ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку'
 
 class Shakalizator(commands.Cog):
     def __init__(self, bot):
@@ -20,7 +22,7 @@ class Shakalizator(commands.Cog):
             await ctx.send(error)
 
     @commands.cooldown(rate=1, per=5)
-    @commands.command(name='shakalizator', description='ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку', aliases=['шакал', 'сжать', 'shakal'])
+    @commands.command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, imageUrl=None):
         # Если нет прикрепленной фотки, то обрабатываем фото из ссылки
         if imageUrl != None:

@@ -4,6 +4,8 @@ import requests
 from PIL import Image
 from io import BytesIO
 
+name='randImg'
+description='Отправляет случайное изображение из imgur'
 
 class randImg(commands.Cog):
     def __init__(self, bot):
@@ -15,7 +17,7 @@ class randImg(commands.Cog):
             await ctx.send(error)
 
     @commands.cooldown(rate=1, per=5)
-    @commands.command(name='randImg', description='Отправляет случайное изображение из imgur', aliases=['randimg'])
+    @commands.command(name=name, description=description, aliases=['randimg'])
     async def randImg(self, ctx):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'

@@ -2,13 +2,15 @@ import discord
 from discord.ext import commands
 from commands.resources.animationFW import reColoring
 
+name='serverinfo'
+description='Показывает информацию о сервере (BETA)'
 
 class info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # функция, отправляющая информацию о сервере
-    @commands.command(name='serverinfo', description='Показывает информацию о сервере (BETA)')
+    @commands.command(name=name, description=description)
     async def serverinfo(self, ctx):
         server = ctx.message.guild
         embed = discord.Embed(

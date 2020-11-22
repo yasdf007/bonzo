@@ -1,6 +1,8 @@
 from discord.ext import commands
 from random import randint
 
+name='randomcat'
+description='Отправляет случайного котика :3'
 
 class randomCat(commands.Cog):
     def __init__(self, bot):
@@ -11,7 +13,7 @@ class randomCat(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
-    @commands.command(name='randomcat', description='Отправляет случайного котика :3')
+    @commands.command(name=name, description=description)
     async def randomcat(self, ctx, Num=None):
         # Если количество не указано
         if Num is None:

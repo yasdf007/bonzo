@@ -160,7 +160,7 @@ class Music(commands.Cog):
             await player.play()
 
     @commands.command(aliases=['dc'])
-    async def disconnect(self, ctx):
+    async def stop(self, ctx):
         """ Отрубается и чистит очередь. """
 
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
