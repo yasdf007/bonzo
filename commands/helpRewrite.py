@@ -7,8 +7,8 @@ class helping(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name='help2', description='Все команды бота')
-    async def help2(self, ctx):
+    @commands.command(name='help', description='Все команды бота')
+    async def help(self, ctx):
         embed = Embed(
             title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
             color=randint(0, 0xFFFFFF))
