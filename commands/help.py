@@ -6,7 +6,7 @@ class helpcmd(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name='help', description='Все команды бота before revision')
     async def help(self, ctx):
         embed = Embed(
             title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски

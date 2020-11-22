@@ -12,7 +12,7 @@ class Info(commands.Cog):
         if isinstance(error, commands.MemberNotFound):
             await ctx.send(f'{error.argument} не найден')
 
-    @commands.command()
+    @commands.command(name='info', description='Выдаёт информацию по пользователю (BETA)', aliases=['userinfo'])
     async def info(self, ctx, member: Member):
         embed = Embed(
             title=f'Информация о {member.display_name}', color=randint(0, 0xFFFFFF))

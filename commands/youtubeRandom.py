@@ -27,7 +27,7 @@ class YoutubeRandom(commands.Cog):
     #         await ctx.send(error)
 
     @commands.cooldown(rate=1, per=5)
-    @commands.command()
+    @commands.command(name='randomVideo', description='Рандомны видос из ютуба (BETA)', aliases=['randvid', 'video'])
     async def randomVideo(self, ctx):
         query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
         youtubeVideoId = ''

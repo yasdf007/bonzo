@@ -16,7 +16,7 @@ class roll(commands.Cog):
 
     # dota 2 roll
     @commands.cooldown(rate=1, per=3)
-    @commands.command()
+    @commands.command(name='roll', description='Ролит как в доте или между двумя числами')
     async def roll(self, ctx, a=None, b=None):
         if a is None and b is None:
             await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, 100)))

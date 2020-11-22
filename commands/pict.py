@@ -10,7 +10,7 @@ class pict(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
-    @commands.command()
+    @commands.command(name='pict', description='Отправляет случайное изображение из prnt.sc :o')
     async def pict(self, ctx, Num=None):
         if Num is None:
             url = await self.makePictUrl()

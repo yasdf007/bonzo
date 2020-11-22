@@ -16,7 +16,7 @@ class Clear(commands.Cog):
             await ctx.send('Нужно ввести количество сообщений целым числом')
 
     # функция, удаляющая X сообщений из чата
-    @commands.command()
+    @commands.command(name='clear', description='Очищает последние x сообщений (только для разработчиков)')
     async def clear(self, ctx, count: int):
 
         # создание читаемого списка ролей запрашивающего выполнения команды

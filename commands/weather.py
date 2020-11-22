@@ -17,7 +17,7 @@ class weather(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send(error.original)
 
-    @commands.command(aliases=['weather', 'погода'])
+    @commands.command(name='weather', description='Погода по запрашиваемому городу', aliases=['погода'])
     async def getWeather(self, ctx, *args):
         city = ' '.join(args)
 
@@ -44,11 +44,11 @@ class weather(commands.Cog):
 
         weatherId = await self.getWeatherMoji(str((jsonResult['weather'][0]['id'])), weatherIsDay)
 
-
         embed = Embed(
             title=f'Погода: {city} :flag_{weatherCountry}:', color=0x543964)
 
-        embed.add_field(name='На улице:', value=weatherType + '' + weatherId, inline=False)
+        embed.add_field(name='На улице:', value=weatherType +
+                        '' + weatherId, inline=False)
         embed.add_field(name='Температура :thermometer:',
                         value=f'{weatherTemp} °C', inline=False)
         embed.add_field(name='Скорость ветра :dash:',
@@ -71,7 +71,7 @@ class weather(commands.Cog):
         elif weatherId.startswith('800'):
             if weatherIsDay:
                 return ':sunny:'
-            else: 
+            else:
                 return ':first_quarter_moon_with_face:'
         elif weatherId.startswith('80'):
             return ':cloud:'

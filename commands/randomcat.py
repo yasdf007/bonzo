@@ -10,7 +10,7 @@ class randomCat(commands.Cog):
         if isinstance(error, commands.CommandInvokeError):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
-    @commands.command()
+    @commands.command(name='randomcat', description='Отправляет случайного котика :3')
     async def randomcat(self, ctx, Num=None):
         if Num is None:
             cat = await self.makeCatUrl()

@@ -7,7 +7,7 @@ class invite(commands.Cog):
         self.bot = bot
 
     # функция, отправляющая инвайт-ссылку бота в чат
-    @commands.command()
+    @commands.command(name='invite', description='Ссылка на приглашение бота')
     async def invite(self, ctx):
         embedd = discord.Embed(
             title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)

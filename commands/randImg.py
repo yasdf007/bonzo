@@ -14,7 +14,7 @@ class randImg(commands.Cog):
             await ctx.send(error)
 
     @commands.cooldown(rate=1, per=5)
-    @commands.command(pass_context=True)
+    @commands.command(name='randImg', description='Отправляет случайное изображение из imgur', aliases=['randimg'])
     async def randImg(self, ctx):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'

@@ -18,7 +18,7 @@ class Shakalizator(commands.Cog):
             await ctx.send(error)
 
     @commands.cooldown(rate=1, per=5)
-    @commands.command(aliases=['шакал', 'сжать', 'shakal'])
+    @commands.command(name='shakalizator', description='ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку', aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, imageUrl=None):
         if imageUrl != None:
             requestImage = requests.get(imageUrl)
