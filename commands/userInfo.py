@@ -11,9 +11,9 @@ class Info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # async def cog_command_error(self, ctx, error):
-    #     if isinstance(error, commands.MemberNotFound):
-    #         await ctx.send(f'{error.argument} не найден')
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.MemberNotFound):
+            await ctx.send(f'{error.argument} не найден')
 
     @commands.command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member):
