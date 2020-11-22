@@ -18,6 +18,8 @@ class Info(commands.Cog):
             title=f'Информация о {member.display_name}', color=randint(0, 0xFFFFFF))
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='Подрубился на сервер',
+                        # когда зашел на сервер # %d - день месяца # ---- # %B - полное название месяца #
+                        # # %Y - год # ---- # %R - время в 24-часовом формате #
                         value=member.joined_at.strftime('%d %B %Y %R UTC'), inline=False)
         embed.add_field(name='Появился на свет',
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)

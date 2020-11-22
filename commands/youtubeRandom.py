@@ -12,6 +12,7 @@ class YoutubeRandom(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.CommandOnCooldown):
             await ctx.send(error)
@@ -29,23 +30,30 @@ class YoutubeRandom(commands.Cog):
     @commands.cooldown(rate=1, per=5)
     @commands.command(name='randomVideo', description='Рандомны видос из ютуба (BETA)', aliases=['randvid', 'video'])
     async def randomVideo(self, ctx):
+        # Делаем рандомное название запроса из 4 символов и цифр
         query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
         youtubeVideoId = ''
 
+        #
         youtube = build(
             self.API_SERVICE_NAMCE, self.API_VERSION, developerKey=self.YOUTUBE_API_KEY
         )
 
+        # Ищем в ютубе
         request = youtube.search().list(
             q=query2,
             maxResults=25,
             part='id'
         ).execute()
 
+        # JSON
         requestJSON = json.loads(json.dumps(request))
 
+        # Для каждого результата
         for searchResult in requestJSON['items']:
+            # Выбираем видос (может быть плейлист, но нужен видос)
             if searchResult['id']['kind'] == 'youtube#video':
+                # Сохраняем ID видоса
                 youtubeVideoId = searchResult['id']['videoId']
 
         await ctx.send(f'https://www.youtube.com/watch?v={youtubeVideoId}')

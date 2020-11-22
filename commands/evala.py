@@ -5,6 +5,7 @@ from discord.ext import commands
 class evala(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+    # Обработка ошибок
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.CommandInvokeError):
@@ -25,6 +26,7 @@ class evala(commands.Cog):
             else:
                 await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
         else:
+            # Ошибка
             raise commands.CommandInvokeError()
 
 

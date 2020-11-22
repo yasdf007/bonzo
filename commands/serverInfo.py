@@ -23,6 +23,7 @@ class info(commands.Cog):
         embed.set_footer(text='/by bonzo/ for @' + ctx.message.author.name)
 
         sinfo = await ctx.send(embed=embed)
+        # Цветная анимация границы
         await reColoring(sinfo)
 
 

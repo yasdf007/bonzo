@@ -7,6 +7,7 @@ class Clear(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.BadArgument):
             await ctx.send('Нужно ввести количество сообщений целым числом')
