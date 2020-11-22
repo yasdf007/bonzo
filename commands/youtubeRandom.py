@@ -8,7 +8,7 @@ from string import digits, ascii_uppercase
 load_dotenv()
 
 name='randomVideo'
-description='Рандомны видос из ютуба (BETA)'
+description='Рандомный видос из ютуба (BETA)'
 
 class YoutubeRandom(commands.Cog):
     def __init__(self, bot):
