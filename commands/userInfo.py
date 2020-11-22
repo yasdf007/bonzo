@@ -3,8 +3,9 @@ from discord.ext import commands
 from discord.member import Member
 from random import randint
 
-name='info'
-description='Выдаёт информацию по пользователю'
+name = 'info'
+description = 'Выдаёт информацию по пользователю'
+
 
 class Info(commands.Cog):
     def __init__(self, bot):
@@ -17,10 +18,13 @@ class Info(commands.Cog):
     @commands.command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member):
         embed = Embed(
-            title=f'Информация о {member.display_name}', color=randint(0, 0xFFFFFF))
+            title=f'Информация о {member.display_name}', color=member.top_role.colour)
         embed.set_thumbnail(url=member.avatar_url)
-        embed.add_field(name='Учетная запись:', value=f'{member.name}#{member.discriminator}', inline=False)
+        embed.add_field(name='Учетная запись:',
+                        value=f'{member.name}#{member.discriminator}', inline=False)
         embed.add_field(name='ID:', value=member.id, inline=False)
+        embed.add_field(
+            name='Цвет ника:', value=f'HEX: {member.color} \n RGB: {member.color.to_rgb()}', inline=False)
         embed.add_field(name='Подрубился на сервер:',
                         # когда зашел на сервер # %d - день месяца # ---- # %B - полное название месяца #
                         # # %Y - год # ---- # %R - время в 24-часовом формате #
