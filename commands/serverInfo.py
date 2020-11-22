@@ -2,12 +2,15 @@ import discord
 from discord.ext import commands
 from commands.resources.animationFW import reColoring
 
+name='serverinfo'
+description='Показывает информацию о сервере (BETA)'
+
 class info(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # функция, отправляющая информацию о сервере
-    @commands.command()
+    @commands.command(name=name, description=description)
     async def serverinfo(self, ctx):
         server = ctx.message.guild
         embed = discord.Embed(
@@ -20,9 +23,11 @@ class info(commands.Cog):
         embed.add_field(name='**Количество участников:**',
                         value=str(server.member_count), inline=False)
         embed.set_footer(text='/by bonzo/ for @' + ctx.message.author.name)
-        
+
         sinfo = await ctx.send(embed=embed)
+        # Цветная анимация границы
         await reColoring(sinfo)
+
 
 def setup(bot):
     bot.add_cog(info(bot))

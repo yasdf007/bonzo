@@ -1,4 +1,4 @@
-# bonzo v0.8.12 neuvo
+# bonzo v1.0 RC1 (Release Candidate)
 
 ## made by yasdf007, vlaner & nohame
 

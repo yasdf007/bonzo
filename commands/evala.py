@@ -1,10 +1,13 @@
 import discord
 from discord.ext import commands
 
+name='evala'
+description='Исполняет код (только для разработчиков)'
 
 class evala(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+    # Обработка ошибок
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.CommandInvokeError):
@@ -12,7 +15,7 @@ class evala(commands.Cog):
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)
-    @commands.command()
+    @commands.command(name=name, description=description)
     async def evala(self, ctx, evcode=None):
         ownerids = [221246477630963722, 196314341572608000,
                     393807398047055883]  # определяем овнеров
@@ -25,6 +28,7 @@ class evala(commands.Cog):
             else:
                 await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
         else:
+            # Ошибка
             raise commands.CommandInvokeError()
 
 
