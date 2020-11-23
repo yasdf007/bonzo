@@ -1,4 +1,4 @@
-from discord import Embed
+from discord import Embed, File
 from discord.ext import commands
 from random import randint
 
@@ -9,11 +9,13 @@ class helping(commands.Cog):
 
     @commands.command(name='help', description='Все команды бота')
     async def help(self, ctx):
+        file = File('./static/bonzo.png')
+
         embed = Embed(
             title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
             color=randint(0, 0xFFFFFF))
         embed.set_thumbnail(
-            url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
+            url="attachment://bonzo.png")
 
         # Получаем список всех команд из когов
         cogs = [cogg for cogg in self.bot.cogs.keys()]
@@ -46,10 +48,12 @@ class helping(commands.Cog):
                         embed.add_field(
                             name=f'{command.name}', value=f'{command.description}', inline=False)
 
-        embed.add_field(name='play', value='Проигрывает музыку с YT по запросу (ALPHA)', inline=True)
-        embed.add_field(name='stop', value='Останавливает воспроизведение', inline=True)
+        embed.add_field(
+            name='play', value='Проигрывает музыку с YT по запросу (ALPHA)', inline=True)
+        embed.add_field(
+            name='stop', value='Останавливает воспроизведение', inline=True)
 
-        await ctx.send(embed=embed)
+        await ctx.send(embed=embed, file=file)
 
 
 def setup(bot):
