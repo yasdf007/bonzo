@@ -75,39 +75,10 @@ class helping2(commands.Cog):
         # embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
         #                  icon_url=ctx.message.author.avatar_url)
 
-        # # Для каждого кога из списка
-        # for cog in cogs:
-        #     # Ищем команды
-        #     cog_command = self.bot.get_cog(cog).get_commands()
-
-        #     # Для каждой команды
-        #     for command in cog_command:
-
-        #         # Если есть название и описание команды
-        #         if len(command.name) and len(command.description) > 0:
-
-        #             # Если есть другие названия команды
-        #             if len(command.aliases) > 0:
-        #                 helpAliases = f'{"/".join(command.aliases)}'
-
-        #                 # Отправляем название команд в ембед
-        #                 embed.add_field(
-        #                     name=f'{command.name}/{helpAliases}', value=f'{command.description}', inline=False)
-
-        #             # Если нет других названий команды
-        #             else:
-        #                 # Отправляем название команды в ембед
-        #                 embed.add_field(
-        #                     name=f'{command.name}', value=f'{command.description}', inline=False)
-
         # embed.add_field(
         #     name='play', value='Проигрывает музыку с YT по запросу (ALPHA)', inline=True)
         # embed.add_field(
         #     name='stop', value='Останавливает воспроизведение', inline=True)
-
-        # message = await ctx.send(embed=embed, file=file)
-        # for reaction in reactions:
-        #     await message.add_reaction(reaction)
 
     async def generateEmbed(self, cogsArray):
         embeds = []
@@ -117,7 +88,8 @@ class helping2(commands.Cog):
             embed = Embed(
                 title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
-
+            embed.set_footer(text=f"/by bonzo/ for {self.author}",
+                             icon_url=self.author.avatar_url)
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
 

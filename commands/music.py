@@ -6,8 +6,13 @@ import os
 from dotenv import load_dotenv
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
-
 load_dotenv()
+
+playName = 'play'
+playDescription = 'Проигрывает музыку с YT по запросу (ALPHA)'
+dcName = 'disconnect'
+dcDescription = 'Останавливает воспроизведение'
+
 
 class Music(commands.Cog):
     def __init__(self, bot):
@@ -17,7 +22,8 @@ class Music(commands.Cog):
             bot.lavalink = lavalink.Client(bot.user.id)
             lavapassword = os.getenv('LAVAPASS')
             # Host, Port, Password, Region, Name
-            bot.lavalink.add_node('185.43.7.82', 2333, str(lavapassword), 'eu', 'music')
+            bot.lavalink.add_node('185.43.7.82', 2333,
+                                  str(lavapassword), 'eu', 'music')
             bot.add_listener(bot.lavalink.voice_update_handler,
                              'on_socket_response')
 
@@ -81,7 +87,7 @@ class Music(commands.Cog):
         ws = self.bot._connection._get_websocket(guild_id)
         await ws.voice_state(str(guild_id), channel_id)
 
-    @commands.command(aliases=['p'])
+    @commands.command(name=playName, description=playDescription, aliases=['p'])
     async def play(self, ctx, *, query: str):
         """ Ищет и проигрывает музыку исходя из запроса. """
 
@@ -159,7 +165,7 @@ class Music(commands.Cog):
         if not player.is_playing:
             await player.play()
 
-    @commands.command(aliases=['dc'])
+    @commands.command(name=dcName, description=dcDescription, aliases=['dc'])
     async def stop(self, ctx):
         """ Отрубается и чистит очередь. """
 
