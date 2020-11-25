@@ -5,6 +5,8 @@ import asyncio
 from commands.resources.hangmanRes import hangmanArr
 from commands.resources.hangmanRes import wordList
 
+name='hangman'
+description='Игра виселица [ALPHA]'
 
 class Hangman(commands.Cog):
     def __init__(self, bot):
@@ -26,10 +28,10 @@ class Hangman(commands.Cog):
         self.makeWord()
         embed = Embed(title='Виселица', color=randint(0, 0xFFFFFF))
         embed.add_field(
-            name='Буквы', value='Тут буквы', inline=True)
-        embed.add_field(name='a', value=self.hangman[self.lives], inline=True)
+            name='Буквы, которых нет:', value='Недоступно в ALPHA', inline=True)
+        embed.add_field(name='Статус:', value=self.hangman[self.lives], inline=True)
         embed.add_field(name='Угадываемое слово',
-                        value=f'{self.dotsInWord} ({len(self.word)} букв)', inline=False)
+                        value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
 
         return embed
 
@@ -50,6 +52,7 @@ class Hangman(commands.Cog):
         for checkLetter in self.word:
             if checkLetter == letter:
                 storeCounter.append(counter)
+        # else: - здесь должно быть добавление использованных букв в массив
             counter += 1
 
         if len(storeCounter) == 0:
@@ -71,9 +74,9 @@ class Hangman(commands.Cog):
 
     async def checkWord(self):
         if self.word == self.dotsInWord:
-            await self.message.edit(embed=Embed(title='Победа :star:'))
+            await self.message.edit(embed=Embed(title='Победа :star:', value=f'Ответом было слово: {self.word}'))
 
-    @commands.command(name='hangman', description='Игра виселица [ALPHA]')
+    @commands.command(name=name, description=description)
     async def hangmanLogic(self, ctx):
         self.dotsInWord = '.' * len(self.word)
         self.author = ctx.author
@@ -88,7 +91,7 @@ class Hangman(commands.Cog):
                 if getLetterFromUser.content == 'стоп':
                     break
                 if getLetterFromUser.content == self.word:
-                    await self.message.edit(embed=Embed(title='Победа :star:'))
+                    await self.message.edit(embed=Embed(title='Победа :star:', value=f'Ответом было слово: {self.word}'))
                     break
                 if getLetterFromUser:
                     # на каком(их) местах есть эта буква
@@ -101,10 +104,10 @@ class Hangman(commands.Cog):
                         await self.checkWord()
                     else:
                         self.lives += 1
-                        self.gameEmbed.set_field_at(1, name='а', value=hangmanArr[self.lives], inline=True)
+                        self.gameEmbed.set_field_at(1, name='Статус:', value=hangmanArr[self.lives], inline=True)
                         await self.message.edit(embed=self.gameEmbed)
                         if self.lives == 7:
-                            await self.message.edit(embed=Embed(title='Проигрыш :('))
+                            await self.message.edit(embed=Embed(title='Проигрыш :(', value=f'Ответом было слово: {self.word}'))
                             break
                         await ctx.send('Буквы нет')
                         await TextChannel.purge(ctx.message.channel, limit=1)
