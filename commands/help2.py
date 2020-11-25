@@ -26,7 +26,7 @@ class helping2(commands.Cog):
             self.index += 1
             await self.message.edit(embed=self.embeds[self.index])
 
-    async def addRaction(self):
+    async def addReaction(self):
         for reaction in self.reactions:
             await self.message.add_reaction(reaction)
 
@@ -52,22 +52,25 @@ class helping2(commands.Cog):
         self.message = await ctx.send(embed=self.embeds[self.index])
 
         #['◀', '▶']
-        await self.addRaction()
+        await self.addReaction()
 
-        try:
-            add_reaction = await self.bot.wait_for(
-                'reaction_add', timeout=30, check=self.check)
-            if add_reaction[0].emoji == '◀':
-                await self.goPrev()
-                await self.message.remove_reaction('◀', self.author)
+        while True:
+            try:
+                add_reaction = await self.bot.wait_for(
+                    'reaction_add', timeout=30, check=self.check)
 
-            elif add_reaction[0].emoji == '▶':
-                await self.goNext()
-                await self.message.remove_reaction('▶', self.author)
+                if add_reaction[0].emoji == '◀':
+                    await self.goPrev()
+                    await self.message.remove_reaction('◀', self.author)
 
-        # если timeout (сек) вышел
-        except asyncio.TimeoutError:
-            return
+                elif add_reaction[0].emoji == '▶':
+                    await self.goNext()
+                    await self.message.remove_reaction('▶', self.author)
+
+            # если timeout (сек) вышел
+            except asyncio.TimeoutError:
+                await ctx.send('Время вышло')
+                break
 
         # embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
         #                  icon_url=ctx.message.author.avatar_url)
