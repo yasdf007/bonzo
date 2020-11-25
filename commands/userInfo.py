@@ -18,7 +18,7 @@ class Info(commands.Cog):
     @commands.command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member):
         embed = Embed(
-            title=f'Информация о {member.display_name}', color=member.top_role.colour)
+            title=f'Информация о {member.display_name}', color=member.color)
         embed.set_thumbnail(url=member.avatar_url)
         embed.add_field(name='Учетная запись:',
                         value=f'{member.name}#{member.discriminator}', inline=False)
