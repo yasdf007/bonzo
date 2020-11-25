@@ -1,5 +1,4 @@
 import asyncio
-from asyncio.tasks import FIRST_COMPLETED
 from discord import Embed, File
 from discord.ext import commands
 from random import randint
