@@ -1,6 +1,6 @@
 import asyncio
+from asyncio.tasks import FIRST_COMPLETED
 from discord import Embed, File
-import discord
 from discord.ext import commands
 from random import randint
 
@@ -10,66 +10,65 @@ class helping2(commands.Cog):
         self.bot = bot
         self.reactions = ['◀',
                           '▶']
-        self.index = 0
-        self.embeds = []
+        # Передаем значения из функции в self, чтобы можно было их юзать вне функции
+        self.embeds = None
+        self.message = None
+        self.index = None
+        self.author = None
 
-    # @commands.Cog.listener()
-    # async def on_reaction_add(self, reaction, user):
-    #     if user.id != self.bot.user.id:
-    #         print(reaction.emoji, user)
-    #         if reaction.emoji == '◀':
-    #             await reaction.message.edit(embed=Embed(title='Нажал влево'))
-    #         if reaction.emoji == '▶':
-    #             await reaction.message.edit(embed=Embed(title='Нажал вправо'))
-
-    async def goPrev(self, message):
+    async def goPrev(self):
         if self.index == 0:
             return
         self.index -= 1
-        await message.edit(embed=self.embeds[self.index])
+        await self.message.edit(embed=self.embeds[self.index])
 
-    async def goNext(self, message):
-        if self.index != len(self.embeds):
+    async def goNext(self):
+        if self.index != len(self.embeds) - 1:
             self.index += 1
-            await message.edit(embed=self.embeds[self.index])
+            await self.message.edit(embed=self.embeds[self.index])
+
+    async def addRaction(self):
+        for reaction in self.reactions:
+            await self.message.add_reaction(reaction)
+
+    def check(self, reaction, user):
+        # id отправителя = id кто поставил эимодзи +
+        # id отправителя не равен id бота +
+        # поставленная реакция есть в пуле реакций
+        return user.id == self.author.id and user.id != self.bot.user.id and reaction.emoji in self.reactions
 
     @commands.command(name='help2', description='Все команды бота')
     async def help2(self, ctx):
         file = File('./static/bonzo.png')
-        reactions = self.reactions
-
-        # embed = Embed(
-        #     title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
-        #     color=randint(0, 0xFFFFFF))
-        # embed.set_thumbnail(
-        #     url="attachment://bonzo.png")
 
         # Получаем список всех команд из когов
         cogs = [cogg for cogg in self.bot.cogs.keys()]
+        # получаем автора сообщения
+        self.author = ctx.author
+        # получаем ембед
+        self.embeds = await self.generateEmbed(cogs)
+        # идем с нуля
+        self.index = 0
+        # отправляем ембед с индексом
+        self.message = await ctx.send(embed=self.embeds[self.index])
 
-        embedList = await self.generateEmbed(cogs)
-        index = self.index
-
-        message = await ctx.send(embed=embedList[index])
-
-        def check(reaction, user):
-            return user.id == ctx.author.id and user.id != self.bot.user.id and reaction.emoji in reactions
-
-        for reaction in reactions:
-            await message.add_reaction(reaction)
+        #['◀', '▶']
+        await self.addRaction()
 
         try:
-            reactionAdded = await self.bot.wait_for(
-                'reaction_add', check=check)
-            if reactionAdded[0].emoji == '◀':
-                await self.goPrev(message)
-                self.index = 0
-            elif reactionAdded[0].emoji == '▶':
-                await self.goNext(message)
-                self.index = 0
+            add_reaction = await self.bot.wait_for(
+                'reaction_add', timeout=30, check=self.check)
+            if add_reaction[0].emoji == '◀':
+                await self.goPrev()
+                await self.message.remove_reaction('◀', self.author)
 
+            elif add_reaction[0].emoji == '▶':
+                await self.goNext()
+                await self.message.remove_reaction('▶', self.author)
+
+        # если timeout (сек) вышел
         except asyncio.TimeoutError:
-            await ctx.send('Время вышло')
+            return
 
         # embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
         #                  icon_url=ctx.message.author.avatar_url)
@@ -148,8 +147,8 @@ class helping2(commands.Cog):
                             embed.add_field(
                                 name=f'{command.name}', value=f'{command.description}', inline=False)
 
-            self.embeds.append(embed)
-        return self.embeds
+            embeds.append(embed)
+        return embeds
 
 
 def setup(bot):
