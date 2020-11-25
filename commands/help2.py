@@ -2,6 +2,7 @@ import asyncio
 from discord import Embed, File
 from discord.ext import commands
 from random import randint
+from math import ceil
 
 
 class helping2(commands.Cog):
@@ -69,6 +70,7 @@ class helping2(commands.Cog):
 
             # если timeout (сек) вышел
             except asyncio.TimeoutError:
+                # чистим реакции
                 await self.message.clear_reactions()
                 break
 
@@ -82,12 +84,20 @@ class helping2(commands.Cog):
 
     async def generateEmbed(self, cogsArray):
         embeds = []
+        # ceil - округляем в большую стороню
+        # 17/10 = 1.8 => 2
+        # 20/10 = 2 => 2
+        # 21/10 = 2.1 => 3
+        pages = round(ceil(len(cogsArray) / 10))
 
         for i in range(0, len(cogsArray), 10):
             embed = Embed(
                 title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
-            embed.set_footer(text=f"/by bonzo/ for {self.author}",
+            # i // 10 + 1:
+            # 0/10 + 1 = 0 + 1 = 1 page
+            # 10/10 +1 = 1 + 1 = 2 page и тд
+            embed.set_footer(text=f"/by bonzo/ for {self.author}  / Page {1 + (i // 10)}/{pages} /",
                              icon_url=self.author.avatar_url)
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
