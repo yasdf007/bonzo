@@ -3,13 +3,14 @@ from discord.ext import commands
 from random import choice, randint
 import asyncio
 from commands.resources.hangmanRes import hangmanArr
+from commands.resources.hangmanRes import wordList
 
 
 class Hangman(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.hangman = hangmanArr
-        self.word = 'пидарас'
+        self.word = wordList
         self.dotsInWord = None
         self.gameEmbed = None
         self.letters = None
@@ -17,12 +18,12 @@ class Hangman(commands.Cog):
         self.lives = None
         self.message = None
 
-    async def makeWord(self):
-        # self.word = random...
-        # return
-        pass
-
-    async def generateHangmanGame(self):
+    def makeWord(self):
+        self.word = choice(wordList)
+        return
+        
+    def generateHangmanGame(self):
+        self.makeWord()
         embed = Embed(title='Виселица', color=randint(0, 0xFFFFFF))
         embed.add_field(
             name='Буквы', value='Тут буквы', inline=True)
@@ -36,9 +37,6 @@ class Hangman(commands.Cog):
         # id отправителя = id кто поставил эимодзи +
         # id отправителя не равен id бота +
         return user.author.id == self.author.id and user.author.id != self.bot.user.id
-
-    def getLives(self):
-        pass
 
     def ensureLetterInWord(self, letter):
         if len(letter) > 1:
@@ -73,14 +71,14 @@ class Hangman(commands.Cog):
 
     async def checkWord(self):
         if self.word == self.dotsInWord:
-            await self.message.edit(embed=Embed(title='Победа'))
+            await self.message.edit(embed=Embed(title='Победа :star:'))
 
-    @commands.command(name='hangman', description='Игра виселица')
+    @commands.command(name='hangman', description='Игра виселица [ALPHA]')
     async def hangmanLogic(self, ctx):
         self.dotsInWord = '.' * len(self.word)
         self.author = ctx.author
         self.lives = 0
-        self.gameEmbed = await self.generateHangmanGame()
+        self.gameEmbed = self.generateHangmanGame()
         self.message = await ctx.send(embed=self.gameEmbed)
 
         while True:
@@ -88,6 +86,9 @@ class Hangman(commands.Cog):
                 getLetterFromUser = await self.bot.wait_for('message', timeout=60, check=self.check)
                 await TextChannel.purge(ctx.message.channel, limit=1)
                 if getLetterFromUser.content == 'стоп':
+                    break
+                if getLetterFromUser.content == self.word:
+                    await self.message.edit(embed=Embed(title='Победа :star:'))
                     break
                 if getLetterFromUser:
                     # на каком(их) местах есть эта буква
@@ -100,16 +101,15 @@ class Hangman(commands.Cog):
                         await self.checkWord()
                     else:
                         self.lives += 1
+                        self.gameEmbed.set_field_at(1, name='а', value=hangmanArr[self.lives], inline=True)
+                        await self.message.edit(embed=self.gameEmbed)
                         if self.lives == 7:
-                            await self.message.edit(embed=Embed(title='Проебал'))
+                            await self.message.edit(embed=Embed(title='Проигрыш :('))
                             break
-                        # зафигарь ембед новым повешенным
-                        # self.lives +=1
-                        # chekLives()
-                        await ctx.send('lox')
+                        await ctx.send('Буквы нет')
                         await TextChannel.purge(ctx.message.channel, limit=1)
             except asyncio.TimeoutError:
-                await ctx.send('время вышло')
+                await ctx.send('Время вышло')
                 break
 
 
