@@ -61,15 +61,16 @@ class helping2(commands.Cog):
 
                 if add_reaction[0].emoji == '◀':
                     await self.goPrev()
-                    await self.message.remove_reaction('◀', self.author)
 
                 elif add_reaction[0].emoji == '▶':
                     await self.goNext()
-                    await self.message.remove_reaction('▶', self.author)
+
+                await self.message.remove_reaction(add_reaction[0], self.author)
 
             # если timeout (сек) вышел
             except asyncio.TimeoutError:
-                await ctx.send('Время вышло')
+                for reaction in self.reactions:
+                    await self.message.clear_reaction(reaction)
                 break
 
         # embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
@@ -82,7 +83,6 @@ class helping2(commands.Cog):
 
     async def generateEmbed(self, cogsArray):
         embeds = []
-        k = 10
 
         for i in range(0, len(cogsArray), 10):
             embed = Embed(
@@ -93,8 +93,7 @@ class helping2(commands.Cog):
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
 
-            currentEmbeds = cogsArray[i:k]
-            k += 10
+            currentEmbeds = cogsArray[i:i+10]
 
             # Для каждого кога из списка
             for cog in currentEmbeds:
