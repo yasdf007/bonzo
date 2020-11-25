@@ -69,8 +69,7 @@ class helping2(commands.Cog):
 
             # если timeout (сек) вышел
             except asyncio.TimeoutError:
-                for reaction in self.reactions:
-                    await self.message.clear_reaction(reaction)
+                await self.message.clear_reactions()
                 break
 
         # embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
