@@ -100,6 +100,9 @@ class Hangman(commands.Cog):
             return True
         return False
 
+    async def rules(self):
+        pass
+
     @commands.command(name=name, description=description)
     async def hangmanLogic(self, ctx):
         self.assignVars()
@@ -109,7 +112,6 @@ class Hangman(commands.Cog):
         while True:
             try:
                 getLetterFromUser = await self.bot.wait_for('message', timeout=60, check=self.check)
-                await getLetterFromUser.delete()
 
                 if getLetterFromUser.content == 'стоп':
                     await self.botMessage.delete()
@@ -117,6 +119,8 @@ class Hangman(commands.Cog):
                 if getLetterFromUser.content == self.word:
                     await self.botMessage.edit(embed=self.embedWin)
                     break
+
+                await getLetterFromUser.delete()
 
                 if getLetterFromUser:
                     # на каком(их) местах есть эта буква
