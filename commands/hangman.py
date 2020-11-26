@@ -19,7 +19,7 @@ class Hangman(commands.Cog):
         self.letters = None
         self.author = None
         self.lives = None
-        self.message = None
+        self.botMessage = None
         self.embedWin = None
 
     def generateHangmanGame(self):
@@ -65,14 +65,14 @@ class Hangman(commands.Cog):
 
         self.dotsInWord = ''.join(newWord)
 
-        embed = self.message.embeds[0]
+        embed = self.botMessage.embeds[0]
         embed.set_field_at(2, name='Угадываемое слово',
-                           value=self.dotsInWord, inline=False)
+                           value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
         return embed
 
     async def checkWord(self):
         if self.word == self.dotsInWord:
-            await self.message.edit(embed=self.embedWin)
+            await self.botMessage.edit(embed=self.embedWin)
 
     def setHangMan(self):
         self.gameEmbed.set_field_at(
@@ -96,7 +96,7 @@ class Hangman(commands.Cog):
 
     async def hasLost(self):
         if self.lives == 7:
-            await self.message.edit(embed=self.embedLost)
+            await self.botMessage.edit(embed=self.embedLost)
             return True
         return False
 
@@ -104,17 +104,18 @@ class Hangman(commands.Cog):
     async def hangmanLogic(self, ctx):
         self.assignVars()
         self.author = ctx.author
-        self.message = await ctx.send(embed=self.gameEmbed)
+        self.botMessage = await ctx.send(embed=self.gameEmbed)
 
         while True:
             try:
                 getLetterFromUser = await self.bot.wait_for('message', timeout=60, check=self.check)
-                await TextChannel.purge(ctx.message.channel, limit=1)
+                await getLetterFromUser.delete()
 
                 if getLetterFromUser.content == 'стоп':
+                    await self.botMessage.delete()
                     break
                 if getLetterFromUser.content == self.word:
-                    await self.message.edit(embed=self.embedWin)
+                    await self.botMessage.edit(embed=self.embedWin)
                     break
 
                 if getLetterFromUser:
@@ -125,19 +126,23 @@ class Hangman(commands.Cog):
                     if positions:
                         embed2 = self.openLetters(
                             positions, getLetterFromUser.content)
-                        await self.message.edit(embed=embed2)
+                        await self.botMessage.edit(embed=embed2)
 
                         if (await self.checkWord()):
-                            await self.message.edit(embed=self.embedWin)
+                            await self.botMessage.edit(embed=self.embedWin)
                             break
                     else:
                         self.lives += 1
                         self.setHangMan()
+
                         if await self.hasLost():
                             break
-                        await self.message.edit(embed=self.gameEmbed)
-                        await ctx.send('Буквы нет')
-                        await TextChannel.purge(ctx.message.channel, limit=1)
+
+                        await self.botMessage.edit(embed=self.gameEmbed)
+
+                        noLetter = await ctx.send('Буквы нет')
+                        await noLetter.delete()
+
             except asyncio.TimeoutError:
                 await ctx.send('Время вышло')
                 break
