@@ -22,10 +22,6 @@ class Hangman(commands.Cog):
         self.message = None
         self.embedWin = None
 
-    def makeWord(self):
-        self.word = choice(wordList)
-        return
-
     def generateHangmanGame(self):
         embed = Embed(title='Виселица', color=randint(0, 0xFFFFFF))
         embed.add_field(
@@ -78,18 +74,35 @@ class Hangman(commands.Cog):
         if self.word == self.dotsInWord:
             await self.message.edit(embed=self.embedWin)
 
-    async def assignVars(self):
-        self.makeWord()
+    def setHangMan(self):
+        self.gameEmbed.set_field_at(
+            1, name='Статус:', value=hangmanArr[self.lives], inline=True)
+        self.gameEmbed.set_field_at(2, name='Угадываемое слово',
+                                    value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
+
+    def assignVars(self):
+        self.word = choice(wordList)
         self.dotsInWord = '.'*len(self.word)
         self.lives = 0
         self.gameEmbed = self.generateHangmanGame()
+
         self.embedWin = Embed(title='Победа :star:')
         self.embedWin.add_field(
             name='КРАСАВА', value=f'Ответом было слово: {self.word}', inline=False)
 
+        self.embedLost = Embed(title='Проигрыш :(')
+        self.embedLost.add_field(
+            name='НЕ КРАСАВА', value=f'Ответом было слово: {self.word}', inline=False)
+
+    async def hasLost(self):
+        if self.lives == 7:
+            await self.message.edit(embed=self.embedLost)
+            return True
+        return False
+
     @commands.command(name=name, description=description)
     async def hangmanLogic(self, ctx):
-        await self.assignVars()
+        self.assignVars()
         self.author = ctx.author
         self.message = await ctx.send(embed=self.gameEmbed)
 
@@ -119,13 +132,9 @@ class Hangman(commands.Cog):
                             break
                     else:
                         self.lives += 1
-                        if self.lives == 8:
-                            await self.message.edit(embed=Embed(title='Проигрыш :(', value=f'Ответом было слово: {self.word}'))
+                        self.setHangMan()
+                        if await self.hasLost():
                             break
-                        self.gameEmbed.set_field_at(
-                            1, name='Статус:', value=hangmanArr[self.lives], inline=True)
-                        self.gameEmbed.set_field_at(2, name='Угадываемое слово',
-                                                    value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
                         await self.message.edit(embed=self.gameEmbed)
                         await ctx.send('Буквы нет')
                         await TextChannel.purge(ctx.message.channel, limit=1)
