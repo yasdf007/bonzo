@@ -113,9 +113,6 @@ class Hangman(commands.Cog):
             try:
                 getLetterFromUser = await self.bot.wait_for('message', timeout=60, check=self.check)
                 if len(getLetterFromUser.content) == 1: 
-                    if getLetterFromUser.content == self.word:
-                        await self.botMessage.edit(embed=self.embedWin)
-                        break
 
                     await getLetterFromUser.delete()
 
@@ -146,6 +143,9 @@ class Hangman(commands.Cog):
 
                 elif getLetterFromUser.content == 'стоп':
                     await self.botMessage.delete()
+                    break
+                elif getLetterFromUser.content == self.word:
+                    await self.botMessage.edit(embed=self.embedWin)
                     break
 
             except asyncio.TimeoutError:
