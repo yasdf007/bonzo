@@ -54,21 +54,6 @@ class Demotivator(commands.Cog):
             temp.seek(0)
             await ctx.send(file=File(fp=temp, filename='now.jpeg'))
 
-        # img = Image.open(BytesIO(requestImage.content))
-        # img = img.convert('RGB')
-
-        # # Изменение фотки
-        # img = img.resize((int(img.size[0]/2), int(img.size[1]/2)))
-
-        # # Изменение фотки
-
-        # # Создаем новую фотку
-        # with BytesIO() as image_binary:
-        #     # Шакалим
-        #     img.save(image_binary, "jpeg", quality=0)
-        #     image_binary.seek(0)
-        #     await ctx.send(file=File(fp=image_binary, filename='now.jpeg'))
-
 
 def setup(bot):
     bot.add_cog(Demotivator(bot))
