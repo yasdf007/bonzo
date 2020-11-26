@@ -112,40 +112,41 @@ class Hangman(commands.Cog):
         while True:
             try:
                 getLetterFromUser = await self.bot.wait_for('message', timeout=60, check=self.check)
+                if len(getLetterFromUser.content) == 1: 
+                    if getLetterFromUser.content == self.word:
+                        await self.botMessage.edit(embed=self.embedWin)
+                        break
 
-                if getLetterFromUser.content == 'стоп':
+                    await getLetterFromUser.delete()
+
+                    if getLetterFromUser:
+                        # на каком(их) местах есть эта буква
+                        positions = self.ensureLetterInWord(
+                            getLetterFromUser.content.lower())
+
+                        if positions:
+                            embed2 = self.openLetters(
+                                positions, getLetterFromUser.content)
+                            await self.botMessage.edit(embed=embed2)
+
+                            if (await self.checkWord()):
+                                await self.botMessage.edit(embed=self.embedWin)
+                                break
+                        else:
+                            self.lives += 1
+                            self.setHangMan()
+
+                            if await self.hasLost():
+                                break
+
+                            await self.botMessage.edit(embed=self.gameEmbed)
+
+                            noLetter = await ctx.send('Буквы нет')
+                            await noLetter.delete()
+
+                elif getLetterFromUser.content == 'стоп':
                     await self.botMessage.delete()
                     break
-                if getLetterFromUser.content == self.word:
-                    await self.botMessage.edit(embed=self.embedWin)
-                    break
-
-                await getLetterFromUser.delete()
-
-                if getLetterFromUser:
-                    # на каком(их) местах есть эта буква
-                    positions = self.ensureLetterInWord(
-                        getLetterFromUser.content.lower())
-
-                    if positions:
-                        embed2 = self.openLetters(
-                            positions, getLetterFromUser.content)
-                        await self.botMessage.edit(embed=embed2)
-
-                        if (await self.checkWord()):
-                            await self.botMessage.edit(embed=self.embedWin)
-                            break
-                    else:
-                        self.lives += 1
-                        self.setHangMan()
-
-                        if await self.hasLost():
-                            break
-
-                        await self.botMessage.edit(embed=self.gameEmbed)
-
-                        noLetter = await ctx.send('Буквы нет')
-                        await noLetter.delete()
 
             except asyncio.TimeoutError:
                 await ctx.send('Время вышло')
