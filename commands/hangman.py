@@ -65,20 +65,19 @@ class Hangman(commands.Cog):
 
         self.dotsInWord = ''.join(newWord)
 
-        embed = self.botMessage.embeds[0]
-        embed.set_field_at(2, name='Угадываемое слово',
-                           value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
-        return embed
+        self.gameEmbed.set_field_at(2, name='Угадываемое слово',
+                                    value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
+        return
 
     async def checkWord(self):
         if self.word == self.dotsInWord:
             await self.botMessage.edit(embed=self.embedWin)
+        else:
+            return False
 
     def setHangMan(self):
         self.gameEmbed.set_field_at(
             1, name='Статус:', value=hangmanArr[self.lives], inline=True)
-        self.gameEmbed.set_field_at(2, name='Угадываемое слово',
-                                    value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
 
     def assignVars(self):
         self.word = choice(wordList)
@@ -112,7 +111,7 @@ class Hangman(commands.Cog):
         while True:
             try:
                 getLetterFromUser = await self.bot.wait_for('message', timeout=60, check=self.check)
-                if len(getLetterFromUser.content) == 1: 
+                if len(getLetterFromUser.content) == 1:
 
                     await getLetterFromUser.delete()
 
@@ -122,9 +121,9 @@ class Hangman(commands.Cog):
                             getLetterFromUser.content.lower())
 
                         if positions:
-                            embed2 = self.openLetters(
+                            self.openLetters(
                                 positions, getLetterFromUser.content)
-                            await self.botMessage.edit(embed=embed2)
+                            await self.botMessage.edit(embed=self.gameEmbed)
 
                             if (await self.checkWord()):
                                 await self.botMessage.edit(embed=self.embedWin)
