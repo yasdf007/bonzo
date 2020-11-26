@@ -83,15 +83,15 @@ class Hangman(commands.Cog):
         self.dotsInWord = '.'*len(self.word)
         self.lives = 0
         self.gameEmbed = self.generateHangmanGame()
+        self.embedWin = Embed(title='Победа :star:')
+        self.embedWin.add_field(
+            name='КРАСАВА', value=f'Ответом было слово: {self.word}', inline=False)
 
     @commands.command(name=name, description=description)
     async def hangmanLogic(self, ctx):
         await self.assignVars()
         self.author = ctx.author
         self.message = await ctx.send(embed=self.gameEmbed)
-        self.embedWin = Embed(title='Победа :star:')
-        self.embedWin.add_field(
-            name='КРАСАВА', value=f'Ответом было слово: {self.word}', inline=False)
 
         while True:
             try:
