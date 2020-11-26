@@ -104,11 +104,13 @@ class Hangman(commands.Cog):
                         await self.checkWord()
                     else:
                         self.lives += 1
-                        self.gameEmbed.set_field_at(1, name='Статус:', value=hangmanArr[self.lives], inline=True)
-                        await self.message.edit(embed=self.gameEmbed)
-                        if self.lives == 7:
+                        if self.lives == 8:
                             await self.message.edit(embed=Embed(title='Проигрыш :(', value=f'Ответом было слово: {self.word}'))
                             break
+                        self.gameEmbed.set_field_at(1, name='Статус:', value=hangmanArr[self.lives], inline=True)
+                        self.gameEmbed.set_field_at(2, name='Угадываемое слово',
+                            value=f'{self.dotsInWord} (Количество букв: {len(self.word)})', inline=False)
+                        await self.message.edit(embed=self.gameEmbed)
                         await ctx.send('Буквы нет')
                         await TextChannel.purge(ctx.message.channel, limit=1)
             except asyncio.TimeoutError:
