@@ -71,7 +71,7 @@ class Hangman(commands.Cog):
 
     async def checkWord(self):
         if self.word == self.dotsInWord:
-            await self.botMessage.edit(embed=self.embedWin)
+            return True
         else:
             return False
 
