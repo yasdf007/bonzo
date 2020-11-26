@@ -74,21 +74,13 @@ class helping2(commands.Cog):
                 await self.message.clear_reactions()
                 break
 
-        # embed.set_footer(text=f"/by bonzo/ for {ctx.message.author}",
-        #                  icon_url=ctx.message.author.avatar_url)
-
-        # embed.add_field(
-        #     name='play', value='Проигрывает музыку с YT по запросу (ALPHA)', inline=True)
-        # embed.add_field(
-        #     name='stop', value='Останавливает воспроизведение', inline=True)
-
     async def generateEmbed(self, cogsArray):
         embeds = []
         # ceil - округляем в большую стороню
         # 17/10 = 1.8 => 2
         # 20/10 = 2 => 2
         # 21/10 = 2.1 => 3
-        pages = round(ceil(len(cogsArray) / 10))
+        pages = ceil(len(cogsArray) / 10)
 
         for i in range(0, len(cogsArray), 10):
             embed = Embed(
