@@ -49,7 +49,8 @@ class info(commands.Cog):
         embed.add_field(name='**Бустов сервера**',
                         value=f'{server.premium_subscription_count}', inline=False)
 
-        embed.set_footer(text=f'/by bonzo/ for { ctx.message.author}')
+        embed.set_footer(
+            text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
 
         await ctx.send(embed=embed)
 
