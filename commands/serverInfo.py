@@ -37,9 +37,6 @@ class info(commands.Cog):
         embed.add_field(name='**Всего голосовых каналов:**',
                         value=f'{len(server.voice_channels)}', inline=False)
 
-        embed.add_field(name='**Битрейт голосовых каналов:**',
-                        value=f'{int(server.bitrate_limit/1000)} кбит/сек', inline=False)
-
         embed.add_field(name='**Максимальное количество эмодзи:**',
                         value=f'{server.emoji_limit} ', inline=False)
 
