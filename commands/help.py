@@ -4,8 +4,9 @@ from discord.ext import commands
 from random import randint
 from math import ceil
 
-name='help'
-description='Все команды бота [BETA]'
+name = 'help'
+description = 'Все команды бота [BETA]'
+
 
 class helping(commands.Cog):
     def __init__(self, bot):
@@ -43,12 +44,10 @@ class helping(commands.Cog):
     async def help(self, ctx):
         file = File('./static/bonzo.png')
 
-        # Получаем список всех команд из когов
-        cogs = [cogg for cogg in self.bot.cogs.keys()]
         # получаем автора сообщения
         self.author = ctx.author
-        # получаем ембед
-        self.embeds = await self.generateEmbed(cogs)
+        # генерируем ембед
+        await self.generateEmbed()
         # идем с нуля
         self.index = 0
         # отправляем ембед с индексом
@@ -76,7 +75,8 @@ class helping(commands.Cog):
                 await self.message.clear_reactions()
                 break
 
-    async def generateEmbed(self, cogsArray):
+    async def generateEmbed(self):
+        cogsArray = [cogg for cogg in self.bot.cogs.keys()]
         embeds = []
         # ceil - округляем в большую стороню
         # 17/10 = 1.8 => 2
@@ -107,24 +107,25 @@ class helping(commands.Cog):
                 for command in cog_command:
 
                     # Если есть название и описание команды
-                    if len(command.name) and len(command.description) > 0:
+                    if command.name and command.description:
 
                         # Если есть другие названия команды
-                        if len(command.aliases) > 0:
+                        if command.aliases:
                             helpAliases = f'{"/".join(command.aliases)}'
 
                             # Отправляем название команд в ембед
                             embed.add_field(
-                                name=f'{command.name}/{helpAliases}', value=f'{command.description}', inline=False)
+                                name=f'`{command.name}/{helpAliases}`', value=f'{command.description}', inline=False)
 
                         # Если нет других названий команды
                         else:
                             # Отправляем название команды в ембед
                             embed.add_field(
-                                name=f'{command.name}', value=f'{command.description}', inline=False)
+                                name=f'`{command.name}`', value=f'{command.description}', inline=False)
 
             embeds.append(embed)
-        return embeds
+        self.embeds = embeds
+        return
 
 
 def setup(bot):
