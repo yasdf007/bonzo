@@ -44,7 +44,7 @@ class Demotivator(commands.Cog):
 
         template.paste(img, (50, 50))
         draw = ImageDraw.Draw(template)
-        font = ImageFont.truetype('C:\\Windows\\Fonts\\Arial.ttf', 54)
+        font = ImageFont.truetype('./static/arial.ttf', 54)
         textWidth = font.getsize(underText)[0]
         draw.text(((760-textWidth)/2, 720), underText, (255, 255, 255),
                   font=font, align='right')
