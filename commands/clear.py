@@ -2,8 +2,9 @@ import discord
 from discord.ext import commands
 from asyncio import sleep
 
-name= 'clear'
-description='Очищает последние x сообщений (только для разработчиков)'
+name = 'clear'
+description = 'Очищает последние x сообщений (только для разработчиков)'
+
 
 class Clear(commands.Cog):
     def __init__(self, bot):
@@ -21,6 +22,10 @@ class Clear(commands.Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, commands.MissingRole):
             await ctx.send('**слыш,** тебе нельзя такое исполнять')
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandInvokeError):
+            await ctx.send('**слыш,** введи число емое')
 
     # функция, удаляющая X сообщений из чата
     @commands.has_role('bonzodev')

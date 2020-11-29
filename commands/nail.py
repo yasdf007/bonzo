@@ -11,7 +11,7 @@ class Nail(commands.Cog):
 
     # Прикол ахахха
     @commands.command(name=name, description=description)
-    async def Nail(self, ctx):
+    async def nail(self, ctx):
         await ctx.send(file=File('./static/nail.jpg'))
 
 

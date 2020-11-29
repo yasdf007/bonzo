@@ -1,8 +1,9 @@
 from discord.ext import commands
 from random import randint
 
-name='randomcat'
-description='Отправляет случайного котика :3'
+name = 'randomcat'
+description = 'Отправляет случайного котика :3'
+
 
 class randomCat(commands.Cog):
     def __init__(self, bot):
@@ -14,24 +15,24 @@ class randomCat(commands.Cog):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
     @commands.command(name=name, description=description)
-    async def randomcat(self, ctx, Num=None):
+    async def randomcat(self, ctx, num=None):
         # Если количество не указано
-        if Num is None:
+        if num is None:
             # Отправляем одну ссылку
             cat = await self.makeCatUrl()
             await ctx.send(cat)
 
         # Если указано
         else:
-            Num = int(Num)
+            num = int(num)
 
-            if Num > 2:
+            if num > 2:
                 # Если число больше максимума, отправляем ошибку
                 raise commands.CommandInvokeError()
 
             else:
                 # Делаем Num ссылок
-                for _ in range(0, Num):
+                for _ in range(0, num):
                     cat = await self.makeCatUrl()
                     await ctx.send(cat)
     # Функци создания картинки

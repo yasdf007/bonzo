@@ -1,8 +1,9 @@
 from discord.ext import commands
 from random import sample
 
-name='pict'
-description='Отправляет случайное изображение из prnt.sc :o'
+name = 'pict'
+description = 'Отправляет случайное изображение из prnt.sc :o'
+
 
 class pict(commands.Cog):
     def __init__(self, bot):
@@ -14,21 +15,21 @@ class pict(commands.Cog):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
     @commands.command(name=name, description=description)
-    async def pict(self, ctx, Num=None):
+    async def pict(self, ctx, num=None):
         # Если количество не указано
-        if Num is None:
+        if num is None:
             # Делаем одну ссылку
             url = await self.makePictUrl()
             await ctx.send(url)
         # Если количество указано
         else:
-            Num = int(Num)
+            num = int(num)
 
-            if Num > 2:
+            if num > 2:
                 # Если число больше максимума, отправляем ошибку
                 raise commands.CommandInvokeError()
-            # Делаем Num ссылок
-            for _ in range(0, Num):
+            # Делаем num ссылок
+            for _ in range(0, num):
                 url = await self.makePictUrl()
                 await ctx.send(url)
 

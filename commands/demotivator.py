@@ -5,7 +5,7 @@ from io import BytesIO
 import requests
 
 name = 'demotivator'
-description = 'Как в мемах'
+description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
 
 
 class Demotivator(commands.Cog):
@@ -27,8 +27,8 @@ class Demotivator(commands.Cog):
 
     @commands.cooldown(rate=1, per=5)
     @commands.command(name=name, description=description)
-    async def demotivator(self, ctx, *args):
-        underText = ' '.join(args)
+    async def demotivator(self, ctx, *text):
+        underText = ' '.join(text)
         if len(underText) > 25:
             raise commands.BadArgument()
 
