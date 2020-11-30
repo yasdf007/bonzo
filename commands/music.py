@@ -154,7 +154,7 @@ class Music(commands.Cog):
                 track = tracks[int(user_respone.content)-1]
                 player.add(requester=ctx.author.id, track=track)
                 embed.description = f'**Playing** {track["info"]["title"]}'
-            except ValueError:
+            except:
                 embed.title = 'Ты лох'
                 embed.description = 'Нужно выбрать цифру из списка, закажи заново'
 
@@ -190,6 +190,79 @@ class Music(commands.Cog):
         # Отрубаемся из войса
         await self.connect_to(ctx.guild.id, None)
         await ctx.send('Disconnected.')
+
+    @commands.command(name='queue', description='Показывает очередь (до 10 треков)')
+    async def queue(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if not player.is_connected:
+            # Не в войсе
+            return await ctx.send('Не подрублен в войс')
+
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
+            return await ctx.send('You\'re not in my voicechannel!')
+
+        if len(player.queue) > 0:
+            print(player.equalizer)
+            i = 1
+            result = ''
+            embed = discord.Embed(title='Треки в очереди', color=0xc1caca)
+
+            for track in player.queue[0:(len(player.queue) % 10)]:
+                result += f'{i}) {track.title} \n'
+                i += 1
+
+            embed.description = result
+            await ctx.send(embed=embed)
+        else:
+            await ctx.send('Очередь пустая')
+        return
+
+    @commands.command(name='volume', description='Изменяет громкость')
+    async def volume(self, ctx, vol: int):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if not player.is_connected:
+            # Не в войсе
+            return await ctx.send('Не подрублен в войс')
+
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
+            return await ctx.send('You\'re not in my voicechannel!')
+
+        try:
+            await player.set_volume(vol)
+            embed = discord.Embed(
+                title=f'Громоксть теперь {vol}', color=discord.Color.dark_gold())
+            await ctx.send(embed=embed)
+        except:
+            raise commands.CommandInvokeError('Ошибка при изменении громкости')
+        return
+
+    @commands.command(name='skip', description='Скипает к следующему треку в очереди (если есть)')
+    async def skip(self, ctx):
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if not player.is_connected:
+            # Не в войсе
+            return await ctx.send('Не подрублен в войс')
+
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
+            return await ctx.send('You\'re not in my voicechannel!')
+
+        try:
+            embed = discord.Embed(
+                title=f'`{player.current.title}` Скипнут', color=discord.Color.dark_theme())
+
+            await player.skip()
+
+            await ctx.send(embed=embed)
+        except:
+            raise commands.CommandInvokeError('Ошибка при скипе')
+
+        return
 
 
 def setup(bot):
