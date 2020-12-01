@@ -4,6 +4,7 @@ from discord.ext import commands
 import re
 import os
 from dotenv import load_dotenv
+from time import strftime, gmtime
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
 load_dotenv()
@@ -12,6 +13,9 @@ playName = 'play'
 playDescription = 'Проигрывает музыку с YT по запросу (ALPHA)'
 dcName = 'disconnect'
 dcDescription = 'Останавливает воспроизведение'
+
+#            bot.lavalink.add_node('localhost', 5000,
+#   '', 'eu', 'music')
 
 
 class Music(commands.Cog):
@@ -102,7 +106,7 @@ class Music(commands.Cog):
         if not results or not results['tracks']:
             return await ctx.send('Nothing found!')
 
-        embed = discord.Embed(color=discord.Color.blurple())
+        embed = discord.Embed(color=discord.Color.dark_theme())
 
         # Типы loadTypes:
         #   TRACK_LOADED    - Одно видео или ссылка на видео
@@ -112,18 +116,45 @@ class Music(commands.Cog):
         #   LOAD_FAILED     - Ошибка во время загрузки (возможно)
 
         if results['loadType'] == 'PLAYLIST_LOADED':
+            trackLength = 0
             tracks = results['tracks']
+
             for track in tracks:
+                trackLength += (track['info']['length'])//1000
+
                 # Добавить все треки из плейлиста в очередь
                 player.add(requester=ctx.author.id, track=track)
+            embed.set_author(
+                name='Плейлист загружен!', icon_url=ctx.author.avatar_url)
 
-            embed.title = 'Плейлист загружен!'
-            embed.description = f'{results["playlistInfo"]["name"]} - {len(tracks)} треков'
+            embed.add_field(
+                name='Название', value=f'{results["playlistInfo"]["name"]}', inline=False)
+
+            trackLength = strftime(
+                '%H:%M:%S', gmtime(trackLength))
+            embed.add_field(name='Загружено',
+                            value=f'{len(tracks)} треков', inline=True)
+
+            embed.add_field(name='Длительность',
+                            value=f'{trackLength}', inline=True)
 
         if results['loadType'] == 'TRACK_LOADED':
             track = results['tracks'][0]
-            embed.title = 'Трек загружен'
-            embed.description = f'[{track["info"]["title"]}]({track["info"]["uri"]})'
+
+            embed.set_author(
+                name='Добавил в очередь', icon_url=ctx.author.avatar_url)
+
+            embed.add_field(
+                name='Название', value=f'[{track["info"]["title"]}]({track["info"]["uri"]})', inline=False)
+
+            trackLength = strftime(
+                '%M:%S', gmtime((track["info"]["length"])//1000))
+            embed.add_field(name='Длительность',
+                            value=f'{trackLength}', inline=True)
+
+            embed.set_thumbnail(
+                url=f'https://img.youtube.com/vi/{track["info"]["identifier"]}/0.jpg')
+
             track = lavalink.models.AudioTrack(
                 track, ctx.author.id, recommended=True)
             player.add(requester=ctx.author.id, track=track)
@@ -153,7 +184,20 @@ class Music(commands.Cog):
             try:
                 track = tracks[int(user_respone.content)-1]
                 player.add(requester=ctx.author.id, track=track)
-                embed.description = f'**Playing** {track["info"]["title"]}'
+
+                embed.set_author(
+                    name='Добавил в очередь', icon_url=ctx.author.avatar_url)
+
+                embed.add_field(
+                    name='Название', value=f'[{track["info"]["title"]}]({track["info"]["uri"]})', inline=False)
+
+                trackLength = strftime(
+                    '%M:%S', gmtime((track["info"]["length"])//1000))
+                embed.add_field(name='Длительность',
+                                value=f'{trackLength}', inline=True)
+
+                embed.set_thumbnail(
+                    url=f'https://img.youtube.com/vi/{track["info"]["identifier"]}/0.jpg')
             except:
                 embed.title = 'Ты лох'
                 embed.description = 'Нужно выбрать цифру из списка, закажи заново'
@@ -204,7 +248,6 @@ class Music(commands.Cog):
             return await ctx.send('You\'re not in my voicechannel!')
 
         if len(player.queue) > 0:
-            print(player.equalizer)
             i = 1
             result = ''
             embed = discord.Embed(title='Треки в очереди', color=0xc1caca)
