@@ -1,5 +1,4 @@
-from commands.resources.animationFW import reColoring
-from discord import Embed, Color
+from discord import Embed
 from discord.ext import commands
 import os
 from dotenv import load_dotenv
