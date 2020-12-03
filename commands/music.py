@@ -1,4 +1,5 @@
 import discord
+from discord.embeds import Embed
 import lavalink
 from discord.ext import commands
 import re
@@ -248,13 +249,11 @@ class Music(commands.Cog):
             return await ctx.send('You\'re not in my voicechannel!')
 
         if len(player.queue) > 0:
-            i = 1
             result = ''
             embed = discord.Embed(title='Треки в очереди', color=0xc1caca)
 
-            for track in player.queue[0:(len(player.queue) % 10)]:
-                result += f'{i}) {track.title} \n'
-                i += 1
+            for id, track in enumerate(player.queue[0:(len(player.queue) % 10)]):
+                result += f'{id+1}) {track.title} \n'
 
             embed.description = result
             await ctx.send(embed=embed)
@@ -262,8 +261,11 @@ class Music(commands.Cog):
             await ctx.send('Очередь пустая')
         return
 
-    @commands.command(name='volume', description='Изменяет громкость')
+    @commands.command(name='volume', description='Изменяет громкость (до 1000)')
     async def volume(self, ctx, vol: int):
+        if vol > 1000:
+            await ctx.send(embed=Embed(title='Оглохнешь емое че творишь', color=0xba55d3))
+            return
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
@@ -297,7 +299,7 @@ class Music(commands.Cog):
 
         try:
             embed = discord.Embed(
-                title=f'`{player.current.title}` Скипнут', color=discord.Color.dark_theme())
+                title=f'{player.current.title} `Скипнут`', color=discord.Color.dark_theme())
 
             await player.skip()
 
@@ -305,6 +307,28 @@ class Music(commands.Cog):
         except:
             raise commands.CommandInvokeError('Ошибка при скипе')
 
+        return
+
+    @commands.command(name='pause', description='Паузит/анпаузит музыку')
+    async def pause(self, ctx):
+
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if not player.is_connected:
+            # Не в войсе
+            return await ctx.send('Не подрублен в войс')
+
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
+            return await ctx.send('You\'re not in my voicechannel!')
+
+        try:
+            if player.paused:
+                await player.set_pause(False)
+            else:
+                await player.set_pause(True)
+        except:
+            raise commands.CommandInvokeError('Ошибка при паузе')
         return
 
 
