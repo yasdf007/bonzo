@@ -33,8 +33,6 @@ class Music(commands.Cog):
             bot.add_listener(bot.lavalink.voice_update_handler,
                              'on_socket_response')
 
-    ######## ----- БЕЗ ЭТОГО НИЧЕ НЕ РАБОТАЕТ НЕ ХОЧУ РАЗБИРАТЬСЯ ПОЧЕМУ ----- ########
-
     async def cog_before_invoke(self, ctx):
         """ Command before-invoke handler. """
         guild_check = ctx.guild is not None
@@ -54,8 +52,6 @@ class Music(commands.Cog):
             # This shouldn't be a problem as the only errors thrown in this cog are from `ensure_voice`
             # which contain a reason string, such as "Join a voicechannel" etc. You can modify the above
             # if you want to do things differently.
-
-    ######## ----- БЕЗ ЭТОГО НИЧЕ НЕ РАБОТАЕТ НЕ ХОЧУ РАЗБИРАТЬСЯ ПОЧЕМУ ----- ########
 
     async def ensure_voice(self, ctx):
         """ Чекает бота и автора команды на войс. """
@@ -130,15 +126,15 @@ class Music(commands.Cog):
                 name='Плейлист загружен!', icon_url=ctx.author.avatar_url)
 
             embed.add_field(
-                name='Название', value=f'{results["playlistInfo"]["name"]}', inline=False)
+                name='Название', value=f'`{results["playlistInfo"]["name"]}`', inline=False)
 
             trackLength = strftime(
                 '%H:%M:%S', gmtime(trackLength))
             embed.add_field(name='Загружено',
-                            value=f'{len(tracks)} треков', inline=True)
+                            value=f'`{len(tracks)} треков`', inline=True)
 
             embed.add_field(name='Длительность',
-                            value=f'{trackLength}', inline=True)
+                            value=f'`{trackLength}`', inline=True)
 
         if results['loadType'] == 'TRACK_LOADED':
             track = results['tracks'][0]
@@ -162,12 +158,10 @@ class Music(commands.Cog):
             player.add(requester=ctx.author.id, track=track)
 
         if results['loadType'] == 'SEARCH_RESULT':
-            i = 0
             query_result = ''
             tracks = results['tracks'][0:10]
-            for track in tracks:
-                i += 1
-                query_result += f'{i}) {track["info"]["title"]} \n'
+            for id, track in enumerate(tracks):
+                query_result += f'{id+1}) {track["info"]["title"]} \n'
 
             embed = discord.Embed()
             embed.title = 'Выбери трек'
@@ -211,7 +205,7 @@ class Music(commands.Cog):
         if not player.is_playing:
             await player.play()
 
-    @commands.command(name=dcName, description=dcDescription, aliases=['dc'])
+    @commands.command(name=dcName, description=dcDescription, aliases=['dc', 'leave'])
     async def stop(self, ctx):
         """ Отрубается и чистит очередь. """
 
@@ -252,8 +246,9 @@ class Music(commands.Cog):
         if len(player.queue) > 0:
             result = ''
             embed = discord.Embed(title='Треки в очереди', color=0xc1caca)
+            embed.set_footer(text=f'Всего очереди {len(player.queue)}')
 
-            for id, track in enumerate(player.queue[0:(len(player.queue) % 10)]):
+            for id, track in enumerate(player.queue[0:10]):
                 result += f'{id+1}) {track.title} \n'
 
             embed.description = result
