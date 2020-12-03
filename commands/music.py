@@ -6,6 +6,7 @@ import re
 import os
 from dotenv import load_dotenv
 from time import strftime, gmtime
+from random import shuffle
 
 url_rx = re.compile(r'https?://(?:www\.)?.+')
 load_dotenv()
@@ -329,6 +330,25 @@ class Music(commands.Cog):
                 await player.set_pause(True)
         except:
             raise commands.CommandInvokeError('Ошибка при паузе')
+        return
+
+    @commands.command(name='shuffle', description='Проигрывает очередь в случайном порядке')
+    async def _shuffle(self, ctx):
+
+        player = self.bot.lavalink.player_manager.get(ctx.guild.id)
+
+        if not player.is_connected:
+            # Не в войсе
+            return await ctx.send('Не подрублен в войс')
+
+        if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
+            # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
+            return await ctx.send('You\'re not in my voicechannel!')
+
+        try:
+            shuffle(player.queue)
+        except:
+            raise commands.CommandInvokeError('Ошибка при шафле')
         return
 
 
