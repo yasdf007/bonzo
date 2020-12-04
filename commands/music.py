@@ -282,7 +282,8 @@ class Music(commands.Cog):
 
         if len(player.queue) > 0:
             result = ''
-            embed = discord.Embed(title='Треки в очереди', color=0xc1caca)
+            embed = discord.Embed(title='Треки в очереди',
+                                  color=discord.Color.dark_theme())
             embed.set_footer(text=f'Всего очереди {len(player.queue)}')
 
             for id, track in enumerate(player.queue[0:10]):
@@ -297,7 +298,7 @@ class Music(commands.Cog):
     @commands.command(name='volume', description='Изменяет громкость (до 1000)')
     async def volume(self, ctx, vol: int):
         if vol > 1000:
-            await ctx.send(embed=Embed(title='Оглохнешь емое че творишь', color=0xba55d3))
+            await ctx.send(embed=Embed(title='Оглохнешь емое че творишь', color=discord.Color.dark_theme()))
             return
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
@@ -312,7 +313,7 @@ class Music(commands.Cog):
         try:
             await player.set_volume(vol)
             embed = discord.Embed(
-                title=f'Громоксть теперь {vol}', color=discord.Color.dark_gold())
+                title=f'Громоксть теперь {vol}', color=discord.Color.dark_theme())
             await ctx.send(embed=embed)
         except:
             raise commands.CommandInvokeError('Ошибка при изменении громкости')
