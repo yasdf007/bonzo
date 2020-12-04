@@ -33,6 +33,8 @@ class Music(commands.Cog):
             bot.add_listener(bot.lavalink.voice_update_handler,
                              'on_socket_response')
 
+        lavalink.add_event_hook(self.track_hook)
+
     async def cog_before_invoke(self, ctx):
         """ Command before-invoke handler. """
         guild_check = ctx.guild is not None
@@ -83,6 +85,28 @@ class Music(commands.Cog):
             if int(player.channel_id) != ctx.author.voice.channel.id:
                 raise commands.CommandInvokeError(
                     'You need to be in my voicechannel.')
+
+    async def track_hook(self, event):
+        if isinstance(event, lavalink.events.QueueEndEvent):
+            # When this track_hook receives a "QueueEndEvent" from lavalink.py
+            # it indicates that there are no tracks left in the player's queue.
+            # To save on resources, we can tell the bot to disconnect from the voicechannel.
+            guild_id = int(event.player.guild_id)
+            await self.connect_to(guild_id, None)
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if member.bot:
+            return
+        if player := self.bot.lavalink.player_manager.get(member.guild.id):
+            if before.channel and not after.channel:
+                channelInfo = self.bot.get_channel(int(player.channel_id))
+                if len(channelInfo.members) <= 1:
+                    player.queue.clear()
+                    await player.stop()
+                    await self.connect_to(member.guild.id, None)
+        else:
+            return
 
     async def connect_to(self, guild_id: int, channel_id: str):
         """ Заходит в войс по ID. channel_id `None` значит дисконнект. """
