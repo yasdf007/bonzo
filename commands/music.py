@@ -98,15 +98,28 @@ class Music(commands.Cog):
     async def on_voice_state_update(self, member, before, after):
         if member.bot:
             return
-        if player := self.bot.lavalink.player_manager.get(member.guild.id):
-            if before.channel and not after.channel:
-                channelInfo = self.bot.get_channel(int(player.channel_id))
+
+        # получаем инстанс музыки
+        player = self.bot.lavalink.player_manager.get(member.guild.id)
+
+        # если есть инстанс И есть канал куда он подрублен
+        if player and player.channel_id:
+            # получаем инфу канала, где подрублен
+            channelInfo = self.bot.get_channel(int(player.channel_id))
+            #              Если чел вышел             ИЛИ            Сменил канал
+            if (before.channel and not after.channel) or (before.channel.id != after.channel.id):
+                # Проверяем количество челов в канале с ботом
+                # Если бот остался один
                 if len(channelInfo.members) <= 1:
+                    # Отрубаемся (аналогия функции stop (disconnect, dc))
                     player.queue.clear()
                     await player.stop()
                     await self.connect_to(member.guild.id, None)
+        # иначе ничего
         else:
             return
+
+        return
 
     async def connect_to(self, guild_id: int, channel_id: str):
         """ Заходит в войс по ID. channel_id `None` значит дисконнект. """
