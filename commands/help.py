@@ -110,18 +110,19 @@ class helping(commands.Cog):
         return f'`{commandAndAliases} {parameters}`'
 
     async def generateEmbed(self):
-        cogsArray = [cogg for cogg in self.bot.cogs.keys()]
         embeds = []
+        allCommands = list(self.bot.commands)
         # ceil - округляем в большую стороню
         # 17/10 = 1.8 => 2
         # 20/10 = 2 => 2
         # 21/10 = 2.1 => 3
-        pages = ceil(len(cogsArray) / 10)
+        pages = ceil(len(allCommands) / 10)
 
-        for i in range(0, len(cogsArray), 10):
+        for i in range(0, len(allCommands), 10):
             embed = Embed(
                 title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
+
             # i // 10 + 1:
             # 0/10 + 1 = 0 + 1 = 1 page
             # 10/10 +1 = 1 + 1 = 2 page и тд
@@ -130,32 +131,25 @@ class helping(commands.Cog):
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
 
-            currentEmbeds = cogsArray[i:i+10]
+            slicedCommands = allCommands[i:i+10]
 
-            # Для каждого кога из списка
-            for cog in currentEmbeds:
-                # Ищем команды
-                cog_command = self.bot.get_cog(cog).get_commands()
+            for command in slicedCommands:
+                # Если есть название и описание команды
+                if command.name and command.description:
 
-                # Для каждой команды
-                for command in cog_command:
+                    # Если есть другие названия команды
+                    if command.aliases:
+                        helpAliases = f'{"/".join(command.aliases)}'
 
-                    # Если есть название и описание команды
-                    if command.name and command.description:
+                        # Отправляем название команд в ембед
+                        embed.add_field(
+                            name=f'`{command.name}/{helpAliases}`', value=f'{command.description}', inline=False)
 
-                        # Если есть другие названия команды
-                        if command.aliases:
-                            helpAliases = f'{"/".join(command.aliases)}'
-
-                            # Отправляем название команд в ембед
-                            embed.add_field(
-                                name=f'`{command.name}/{helpAliases}`', value=f'{command.description}', inline=False)
-
-                        # Если нет других названий команды
-                        else:
-                            # Отправляем название команды в ембед
-                            embed.add_field(
-                                name=f'`{command.name}`', value=f'{command.description}', inline=False)
+                    # Если нет других названий команды
+                    else:
+                        # Отправляем название команды в ембед
+                        embed.add_field(
+                            name=f'`{command.name}`', value=f'{command.description}', inline=False)
 
             embeds.append(embed)
         self.embeds = embeds
