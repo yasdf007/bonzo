@@ -197,8 +197,8 @@ class Music(commands.Cog):
         if results['loadType'] == 'SEARCH_RESULT':
             query_result = ''
             tracks = results['tracks'][0:10]
-            for id, track in enumerate(tracks):
-                query_result += f'{id+1}) {track["info"]["title"]} \n'
+            for id, track in enumerate(tracks, 1):
+                query_result += f'{id}) {track["info"]["title"]} \n'
 
             embed = discord.Embed()
             embed.title = 'Выбери трек'
@@ -284,10 +284,11 @@ class Music(commands.Cog):
             result = ''
             embed = discord.Embed(title='Треки в очереди',
                                   color=discord.Color.dark_theme())
-            embed.set_footer(text=f'Всего очереди {len(player.queue)}')
+            embed.set_footer(
+                text=f'Всего в очереди {len(player.queue)} треков')
 
-            for id, track in enumerate(player.queue[0:10]):
-                result += f'{id+1}) {track.title} \n'
+            for id, track in enumerate(player.queue[0:10], 1):
+                result += f'{id}) {track.title} \n'
 
             embed.description = result
             await ctx.send(embed=embed)

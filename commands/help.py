@@ -39,12 +39,11 @@ class helping(commands.Cog):
         # id отправителя = id кто поставил эимодзи +
         # id отправителя не равен id бота +
         # поставленная реакция есть в пуле реакций
-        return user.id == self.author.id and user.id != self.bot.user.id and reaction.emoji in self.reactions
+        return user.id == self.author.id and user.id != self.bot.user.id and reaction.emoji in self.reactions and reaction.message.id == self.message.id
 
     @commands.command(name=name, description=description)
     async def help(self, ctx, cmd=None):
         if cmd is None:
-            file = File('./static/bonzo.png')
 
             # получаем автора сообщения
             self.author = ctx.author
