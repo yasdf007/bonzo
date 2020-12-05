@@ -6,7 +6,7 @@ from random import randint
 from math import ceil
 
 name = 'help'
-description = 'Все команды бота [BETA]'
+description = 'Все команды бота [почти рабочий], инфа о команде help <cmd>'
 
 
 class helping(commands.Cog):
@@ -110,7 +110,7 @@ class helping(commands.Cog):
 
     async def generateEmbed(self):
         embeds = []
-        allCommands = list(self.bot.commands)
+        allCommands = sorted(list(self.bot.commands), key=lambda x: x.name)
         # ceil - округляем в большую стороню
         # 17/10 = 1.8 => 2
         # 20/10 = 2 => 2

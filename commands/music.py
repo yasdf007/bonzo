@@ -12,7 +12,7 @@ url_rx = re.compile(r'https?://(?:www\.)?.+')
 load_dotenv()
 
 playName = 'play'
-playDescription = 'Проигрывает музыку с YT по запросу (ALPHA)'
+playDescription = 'Проигрывает музыку по запросу'
 dcName = 'disconnect'
 dcDescription = 'Останавливает воспроизведение'
 
