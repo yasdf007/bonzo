@@ -4,6 +4,7 @@ from discord.utils import get
 from discord.ext import commands
 from random import randint
 from math import ceil
+from commands.resources.paginator import Paginator
 
 name = 'help'
 description = 'Все команды бота [почти рабочий], инфа о команде help <cmd>'
@@ -12,69 +13,23 @@ description = 'Все команды бота [почти рабочий], ин�
 class helping(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.reactions = ['◀',
-                          '▶']
         # Передаем значения из функции в self, чтобы можно было их юзать вне функции
         self.embeds = None
-        self.message = None
-        self.index = None
         self.author = None
-
-    async def goPrev(self):
-        if self.index == 0:
-            return
-        self.index -= 1
-        await self.message.edit(embed=self.embeds[self.index])
-
-    async def goNext(self):
-        if self.index != len(self.embeds) - 1:
-            self.index += 1
-            await self.message.edit(embed=self.embeds[self.index])
-
-    async def addReaction(self):
-        for reaction in self.reactions:
-            await self.message.add_reaction(reaction)
-
-    def check(self, reaction, user):
-        # id отправителя = id кто поставил эимодзи +
-        # id отправителя не равен id бота +
-        # поставленная реакция есть в пуле реакций
-        return user.id == self.author.id and user.id != self.bot.user.id and reaction.emoji in self.reactions and reaction.message.id == self.message.id
 
     @commands.command(name=name, description=description)
     async def help(self, ctx, cmd=None):
         if cmd is None:
-
-            # получаем автора сообщения
             self.author = ctx.author
-            # генерируем ембед
             await self.generateEmbed()
-            # идем с нуля
-            self.index = 0
-            # отправляем ембед с индексом
-            self.message = await ctx.send(embed=self.embeds[self.index])
+            # получаем автора сообщения
 
-            #['◀', '▶']
-            await self.addReaction()
+            p = Paginator(ctx)
+            embeds = self.embeds
+            for x in embeds:
+                p.add_page(x)
+            await p.call_controller()
 
-            while True:
-                try:
-                    add_reaction = await self.bot.wait_for(
-                        'reaction_add', timeout=30, check=self.check)
-
-                    if add_reaction[0].emoji == '◀':
-                        await self.goPrev()
-
-                    elif add_reaction[0].emoji == '▶':
-                        await self.goNext()
-
-                    await self.message.remove_reaction(add_reaction[0], self.author)
-
-                # если timeout (сек) вышел
-                except asyncio.TimeoutError:
-                    # чистим реакции
-                    await self.message.clear_reactions()
-                    break
         else:
             # проверяем есть ли команда -> получаем инфу о комнде
             if (cmd := get(self.bot.commands, name=cmd)):
