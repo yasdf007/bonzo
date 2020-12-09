@@ -1,8 +1,9 @@
 from discord.ext import commands
 from random import randint
 
-name='roll'
-description='Ролит как в доте или между двумя числами (Будет переписан)'
+name = 'roll'
+description = 'Ролит как в доте или между двумя числами (Будет переписан)'
+
 
 class roll(commands.Cog):
     def __init__(self, bot):
@@ -20,26 +21,26 @@ class roll(commands.Cog):
     # dota 2 roll
     @commands.cooldown(rate=1, per=3)
     @commands.command(name=name, description=description)
-    async def roll(self, ctx, a=None, b=None):
+    async def roll(self, ctx, numberFrom=None, numberTo=None):
         # Если оба числа не указаны
-        if a is None and b is None:
+        if numberFrom is None and numberTo is None:
             # Ролим от 1 до 100
             await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, 100)))
 
         # Если одна из границ не указана
-        elif b is None:
+        elif numberTo is None:
             # Ролим от 1 до того числа, который был указан
-            a = int(a)
-            if a <= 10**6:
-                await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, a)))
+            numberFrom = int(numberFrom)
+            if numberFrom <= 10**6:
+                await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, numberFrom)))
             else:
                 # Если число больше миллиона, отправляем ошибку
                 raise commands.CommandInvokeError()
         else:
             # Роляем по границам
-            a, b = int(a), int(b)
-            if b <= 10**6:
-                await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(a, b)))
+            numberFrom, numberTo = int(numberFrom), int(numberTo)
+            if numberTo <= 10**6:
+                await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(numberFrom, numberTo)))
             else:
                 await ctx.send('{0.author.mention}'.format(ctx) + ' больше мильёна роллить не буду')
 

@@ -2,8 +2,9 @@ from discord import Embed
 from discord.ext import commands
 from requests import get
 import json
+
 name = 'nasapict'
-description = 'Картнка дня от NASA'
+description = 'Картинка дня от NASA'
 
 
 class Nasa(commands.Cog):
