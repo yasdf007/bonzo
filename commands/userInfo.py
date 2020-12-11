@@ -1,7 +1,6 @@
 from discord import Embed
 from discord.ext import commands
 from discord.member import Member
-from random import randint
 
 name = 'info'
 description = 'Выдаёт информацию по пользователю'
@@ -42,8 +41,30 @@ class Info(commands.Cog):
         embed.add_field(
             name='Роли:', value=f'{allRoles}', inline=False)
 
+        try:
+
+            embed.add_field(
+                name='Статус:', value=f'`{member.activity.type.name} {member.activity.name}`', inline=True)
+
+            for usrActivity in member.activities:
+                if usrActivity.name == 'Spotify':
+                    embed.set_thumbnail(url=usrActivity.album_cover_url)
+                    embed.color = usrActivity.color
+
+                    trackArtists = ', '.join(usrActivity.artists)
+
+                    embed.add_field(
+                        name='Автор:', value=f'`{trackArtists}`', inline=True)
+                    embed.add_field(
+                        name='Название:', value=f'`{usrActivity.title}`', inline=True)
+                    break
+
+        except:
+            pass
+
         embed.add_field(
-            name='Цвет ника:', value=f'HEX: {member.color} \n RGB: {member.color.to_rgb()}', inline=False)
+            name='Цвет ника:', value=f'HEX: {member.color} \n \
+                                        RGB: {member.color.to_rgb()}', inline=False)
 
         embed.add_field(name='Подрубился на сервер:',
                         # когда зашел на сервер # %d - день месяца # ---- # %B - полное название месяца #
@@ -57,9 +78,7 @@ class Info(commands.Cog):
 
     async def getPartyRoleId(self, listOfRoles):
         for element in listOfRoles:
-            if element.name == 'ANTINOHAME (Партия)':
-                return f'{element.name} :white_check_mark:'
-            if element.name == 'АУЕ ПУДЖ (Партия)':
+            if element.name.endswith('(Партия)'):
                 return f'{element.name} :white_check_mark:'
 
 

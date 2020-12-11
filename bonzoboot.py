@@ -12,9 +12,12 @@ from dotenv import load_dotenv
 
 load_dotenv()  # загружает файл env
 
+intents = discord.Intents.all()
+
 game = discord.Game("b/help | v1.0 RC1")  # пишем боту в активити
 # лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help
-bot = commands.Bot(command_prefix=str(os.getenv('PREFIX')), help_command=None)
+bot = commands.Bot(command_prefix=str(os.getenv('PREFIX')),
+                   help_command=None, intents=intents)
 
 # функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
 
@@ -43,6 +46,4 @@ async def on_ready():
 
 # запускаем инстанцию бота
 if __name__ == '__main__':
-    # Загрузка всех когов aka модулей
-
     main()
