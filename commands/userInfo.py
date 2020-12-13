@@ -1,9 +1,9 @@
-from discord import Embed
+from discord import Embed, Spotify
 from discord.ext import commands
 from discord.member import Member
 
 name = 'info'
-description = 'Выдаёт информацию по пользователю'
+description = 'Выдаёт информацию о пользователе'
 
 
 class Info(commands.Cog):
@@ -15,7 +15,9 @@ class Info(commands.Cog):
             await ctx.send(f'{error.argument} не найден')
 
     @commands.command(name=name, description=description, aliases=['userinfo'])
-    async def info(self, ctx, member: Member):
+    async def info(self, ctx, member: Member = None):
+        if not member:
+            member = ctx.author
         embed = Embed(
             title=f'Информация о {member.display_name}', color=member.top_role.colour)
 
@@ -35,29 +37,33 @@ class Info(commands.Cog):
             else:
                 embed.add_field(
                     name='Партия:', value='Беспартийный :negative_squared_cross_mark:')
+
         # получаем все роли юзера
         allRoles = ', '.join([i.name for i in member.roles[1::]])
 
         embed.add_field(
             name='Роли:', value=f'{allRoles}', inline=False)
 
+        embed.add_field(
+            name='Статус:', value=f'`{member.activity}`', inline=False)
+
         try:
-
-            embed.add_field(
-                name='Статус:', value=f'`{member.activity.type.name} {member.activity.name}`', inline=True)
-
             for usrActivity in member.activities:
-                if usrActivity.name == 'Spotify':
+                if isinstance(usrActivity, Spotify):
                     embed.set_thumbnail(url=usrActivity.album_cover_url)
                     embed.color = usrActivity.color
 
                     trackArtists = ', '.join(usrActivity.artists)
 
+                    embed.set_field_at(index=4,
+                                       name='Статус:', value=f'`{usrActivity.type.name} {usrActivity}`', inline=False)
+
                     embed.add_field(
                         name='Автор:', value=f'`{trackArtists}`', inline=True)
                     embed.add_field(
                         name='Название:', value=f'`{usrActivity.title}`', inline=True)
-                    break
+                    embed.add_field(
+                        name='Альбом:', value=f'`{usrActivity.album}`', inline=True)
 
         except:
             pass
