@@ -44,8 +44,11 @@ class Info(commands.Cog):
         embed.add_field(
             name='Роли:', value=f'{allRoles}', inline=False)
 
-        embed.add_field(
-            name='Статус:', value=f'`{member.activity}`', inline=False)
+        try:
+            embed.add_field(
+                name='Статус:', value=f'`{member.activity.type.name} {member.activity}`', inline=False)
+        except:
+            pass
 
         try:
             for usrActivity in member.activities:
