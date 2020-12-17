@@ -1,21 +1,21 @@
-import discord
-from discord.ext import commands
+from discord import Embed
+from discord.ext.commands import Cog, command
 
 
 name = 'serverinfo'
 description = 'Показывает информацию о сервере (BETA)'
 
 
-class info(commands.Cog):
+class info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # функция, отправляющая информацию о сервере
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def serverinfo(self, ctx):
         server = ctx.message.guild
 
-        embed = discord.Embed(
+        embed = Embed(
             title='**Информация о сервере:**',
             colour=0x7D07DE
         )

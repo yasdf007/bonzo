@@ -1,14 +1,14 @@
 import discord
 from discord.embeds import Embed
 import lavalink
-from discord.ext import commands
-import re
-import os
+from discord.ext.commands import Cog, CommandInvokeError, command
+from re import compile
+from os import getenv
 from dotenv import load_dotenv
 from time import strftime, gmtime
 from random import shuffle
 
-url_rx = re.compile(r'https?://(?:www\.)?.+')
+url_rx = compile(r'https?://(?:www\.)?.+')
 load_dotenv()
 
 playName = 'play'
@@ -20,13 +20,13 @@ dcDescription = 'Останавливает воспроизведение'
 #   '', 'eu', 'music')
 
 
-class Music(commands.Cog):
+class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
 
         if not hasattr(bot, 'lavalink'):
             bot.lavalink = lavalink.Client(bot.user.id)
-            lavapassword = os.getenv('LAVAPASS')
+            lavapassword = getenv('LAVAPASS')
             # Host, Port, Password, Region, Name
             bot.lavalink.add_node('185.43.7.82', 2333,
                                   str(lavapassword), 'eu', 'music')
@@ -48,7 +48,7 @@ class Music(commands.Cog):
         return guild_check
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send(error.original)
             # The above handles errors thrown in this cog and shows them to the user.
             # This shouldn't be a problem as the only errors thrown in this cog are from `ensure_voice`
@@ -66,24 +66,24 @@ class Music(commands.Cog):
 
         if not ctx.author.voice or not ctx.author.voice.channel:
             # cog_command_error handler ловит ошибку.
-            raise commands.CommandInvokeError('Join a voicechannel first.')
+            raise CommandInvokeError('Join a voicechannel first.')
 
         if not player.is_connected:
             if not should_connect:
-                raise commands.CommandInvokeError('Not connected.')
+                raise CommandInvokeError('Not connected.')
 
             permissions = ctx.author.voice.channel.permissions_for(ctx.me)
 
             # Чекам возможность бота зайти в войс и играть музыку
             if not permissions.connect or not permissions.speak:
-                raise commands.CommandInvokeError(
+                raise CommandInvokeError(
                     'I need the `CONNECT` and `SPEAK` permissions.')
 
             player.store('channel', ctx.channel.id)
             await self.connect_to(ctx.guild.id, str(ctx.author.voice.channel.id))
         else:
             if int(player.channel_id) != ctx.author.voice.channel.id:
-                raise commands.CommandInvokeError(
+                raise CommandInvokeError(
                     'You need to be in my voicechannel.')
 
     async def track_hook(self, event):
@@ -94,7 +94,7 @@ class Music(commands.Cog):
             guild_id = int(event.player.guild_id)
             await self.connect_to(guild_id, None)
 
-    @commands.Cog.listener()
+    @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.bot:
             return
@@ -126,7 +126,7 @@ class Music(commands.Cog):
         ws = self.bot._connection._get_websocket(guild_id)
         await ws.voice_state(str(guild_id), channel_id)
 
-    @commands.command(name=playName, description=playDescription, aliases=['p'])
+    @command(name=playName, description=playDescription, aliases=['p'])
     async def play(self, ctx, *, query: str):
         """ Ищет и проигрывает музыку исходя из запроса. """
 
@@ -155,7 +155,7 @@ class Music(commands.Cog):
             tracks = results['tracks']
 
             for track in tracks:
-                trackLength += (track['info']['length'])//1000
+                trackLength += (track['info']['length']) // 1000
 
                 # Добавить все треки из плейлиста в очередь
                 player.add(requester=ctx.author.id, track=track)
@@ -183,7 +183,7 @@ class Music(commands.Cog):
                 name='Название', value=f'[{track["info"]["title"]}]({track["info"]["uri"]})', inline=False)
 
             trackLength = strftime(
-                '%M:%S', gmtime((track["info"]["length"])//1000))
+                '%M:%S', gmtime((track["info"]["length"]) // 1000))
             embed.add_field(name='Длительность',
                             value=f'{trackLength}', inline=True)
 
@@ -215,7 +215,7 @@ class Music(commands.Cog):
             embed = discord.Embed()
             # Проверяем цифру ли отправил юзер и добавляем трек в очередь
             try:
-                track = tracks[int(user_respone.content)-1]
+                track = tracks[int(user_respone.content) - 1]
                 player.add(requester=ctx.author.id, track=track)
 
                 embed.set_author(
@@ -225,7 +225,7 @@ class Music(commands.Cog):
                     name='Название', value=f'[{track["info"]["title"]}]({track["info"]["uri"]})', inline=False)
 
                 trackLength = strftime(
-                    '%M:%S', gmtime((track["info"]["length"])//1000))
+                    '%M:%S', gmtime((track["info"]["length"]) // 1000))
                 embed.add_field(name='Длительность',
                                 value=f'{trackLength}', inline=True)
 
@@ -242,7 +242,7 @@ class Music(commands.Cog):
         if not player.is_playing:
             await player.play()
 
-    @commands.command(name=dcName, description=dcDescription, aliases=['dc', 'leave'])
+    @command(name=dcName, description=dcDescription, aliases=['dc', 'leave'])
     async def stop(self, ctx):
         """ Отрубается и чистит очередь. """
 
@@ -268,7 +268,7 @@ class Music(commands.Cog):
         await self.connect_to(ctx.guild.id, None)
         await ctx.send('Disconnected.')
 
-    @commands.command(name='queue', description='Показывает очередь (до 10 треков)')
+    @command(name='queue', description='Показывает очередь (до 10 треков)')
     async def queue(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
@@ -296,7 +296,7 @@ class Music(commands.Cog):
             await ctx.send('Очередь пустая')
         return
 
-    @commands.command(name='volume', description='Изменяет громкость (до 1000)')
+    @command(name='volume', description='Изменяет громкость (до 1000)')
     async def volume(self, ctx, vol: int):
         if vol > 1000:
             await ctx.send(embed=Embed(title='Оглохнешь емое че творишь', color=discord.Color.dark_theme()))
@@ -317,10 +317,10 @@ class Music(commands.Cog):
                 title=f'Громоксть теперь {vol}', color=discord.Color.dark_theme())
             await ctx.send(embed=embed)
         except:
-            raise commands.CommandInvokeError('Ошибка при изменении громкости')
+            raise CommandInvokeError('Ошибка при изменении громкости')
         return
 
-    @commands.command(name='skip', description='Скипает к следующему треку в очереди (если есть)')
+    @command(name='skip', description='Скипает к следующему треку в очереди (если есть)')
     async def skip(self, ctx):
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
@@ -340,11 +340,11 @@ class Music(commands.Cog):
 
             await ctx.send(embed=embed)
         except:
-            raise commands.CommandInvokeError('Ошибка при скипе')
+            raise CommandInvokeError('Ошибка при скипе')
 
         return
 
-    @commands.command(name='pause', description='Паузит/анпаузит музыку')
+    @command(name='pause', description='Паузит/анпаузит музыку')
     async def pause(self, ctx):
 
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
@@ -363,10 +363,10 @@ class Music(commands.Cog):
             else:
                 await player.set_pause(True)
         except:
-            raise commands.CommandInvokeError('Ошибка при паузе')
+            raise CommandInvokeError('Ошибка при паузе')
         return
 
-    @commands.command(name='shuffle', description='Проигрывает очередь в случайном порядке')
+    @command(name='shuffle', description='Проигрывает очередь в случайном порядке')
     async def _shuffle(self, ctx):
 
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
@@ -382,7 +382,7 @@ class Music(commands.Cog):
         try:
             shuffle(player.queue)
         except:
-            raise commands.CommandInvokeError('Ошибка при шафле')
+            raise CommandInvokeError('Ошибка при шафле')
         return
 
 

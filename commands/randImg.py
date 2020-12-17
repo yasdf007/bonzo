@@ -1,23 +1,24 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
 from random import sample
 import requests
 from PIL import Image
 from io import BytesIO
 
-name='randImg'
-description='Отправляет случайное изображение из imgur'
+name = 'randImg'
+description = 'Отправляет случайное изображение из imgur'
 
-class randImg(commands.Cog):
+
+class randImg(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, CommandOnCooldown):
             await ctx.send(error)
 
-    @commands.cooldown(rate=1, per=5)
-    @commands.command(name=name, description=description, aliases=['randimg'])
+    @cooldown(rate=1, per=5)
+    @command(name=name, description=description, aliases=['randimg'])
     async def randImg(self, ctx):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'

@@ -1,49 +1,54 @@
 # Created by ムAloneStranger (c) 2020.
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
+from discord import Intents, Game, Status
+from discord.ext import tasks
+from discord.ext.commands import Bot as bonzoBot, Cog
 
-import discord
-from discord.ext import commands
-import platform
+from platform import platform
 from time import time
-
-import os
+from os import listdir, getenv
+from dbLite import db
 from dotenv import load_dotenv
 
 load_dotenv()  # загружает файл env
 
-intents = discord.Intents.all()
 
-game = discord.Game("b/help | v1.0 RC1")  # пишем боту в активити
-# лёгкая референс-комманда для нашего бота, задаём префикс и встроенную команду help
-bot = commands.Bot(command_prefix=str(os.getenv('PREFIX')),
-                   help_command=None, intents=intents)
+class Bot(bonzoBot):
+    def __init__(self):
+        intents = Intents.all()
+        self.game = Game("b/help | v1.0 RC1")
+        self.dbAutosave.start()
+        self.startTime = None
 
-# функция запуска (можно узнать разницу между прочитыванием кода компьютером и связью с discord api)
+        super().__init__(command_prefix=getenv('PREFIX'),
+                         help_command=None, intents=intents)
+
+    def cogsLoad(self):
+        for filename in listdir('./commands'):
+            if filename.endswith('.py'):
+                self.load_extension(f'commands.{filename[:-3]}')
+                print(f'loaded {filename}')
+
+    def run(self):
+        self.startTime = time()  # таймштамп: код успешно прочитан
+        print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
+        super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
+
+    @tasks.loop(seconds=60)
+    async def dbAutosave(self):
+        db.commit()
+
+    @Cog.listener()
+    async def on_ready(self):
+        # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
+        await self.change_presence(status=Status.online, activity=self.game)
+        self.cogsLoad()
+        endTime = time() - self.startTime
+
+        print(
+            f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n /')
 
 
-def main():
-    global ctimest  # переменная, содержащая разницу между временем прочтения кода и готовым к работе ботом
-    ctimest = time()  # таймштамп: код успешно прочитан
-    print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
-    bot.run(os.getenv('TOKEN'))  # берёт переменную TOKEN из .env
-
-# on_ready выполняется при полной готовности бота к действиям
-
-
-@bot.event
-async def on_ready():
-    # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
-    await bot.change_presence(status=discord.Status.online, activity=game)
-    for filename in os.listdir('./commands'):
-
-        if filename.endswith('.py'):
-            bot.load_extension('commands.%s' % filename[:-3])
-            print(f'loadded {filename}')
-    endTime = time() - ctimest
-    print('/', 'bonzo has been successfully initialized on ' + platform.platform(), 'timestamp delta is: ' +
-          str(round(endTime, 3)) + 's', 'discord latency is: ' + str(round(bot.latency, 3)) + 's', '/', sep='\n')
-
-# запускаем инстанцию бота
-if __name__ == '__main__':
-    main()
+bot = Bot()
+bot.run()

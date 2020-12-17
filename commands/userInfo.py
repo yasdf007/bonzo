@@ -1,20 +1,20 @@
 from discord import Embed, Spotify
-from discord.ext import commands
+from discord.ext.commands import Cog, MemberNotFound, command
 from discord.member import Member
 
 name = 'info'
 description = 'Выдаёт информацию о пользователе'
 
 
-class Info(commands.Cog):
+class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.MemberNotFound):
+        if isinstance(error, MemberNotFound):
             await ctx.send(f'{error.argument} не найден')
 
-    @commands.command(name=name, description=description, aliases=['userinfo'])
+    @command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member = None):
         if not member:
             member = ctx.author

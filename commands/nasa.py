@@ -1,5 +1,5 @@
 from discord import Embed
-from discord.ext import commands
+from discord.ext.commands import Cog, command
 from requests import get
 import json
 
@@ -7,11 +7,11 @@ name = 'nasapict'
 description = 'Картинка дня от NASA'
 
 
-class Nasa(commands.Cog):
+class Nasa(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def nasapict(self, ctx):
         embed = Embed(title='Картинка дня от NASA', color=0x0000ff)
 

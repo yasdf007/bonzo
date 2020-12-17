@@ -1,14 +1,15 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, command
 
-name='ping'
-description='Понг!'
+name = 'ping'
+description = 'Понг!'
 
-class ping(commands.Cog):
+
+class ping(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Задержка
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def ping(self, ctx):
         botLatency = round(self.bot.latency * 1000, 2)
         await ctx.send('Pong! ' + str(botLatency) + 'ms ' + '(задержка)')

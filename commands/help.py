@@ -1,7 +1,6 @@
-import asyncio
 from discord import Embed, File
 from discord.utils import get
-from discord.ext import commands
+from discord.ext.commands import Cog, command
 from random import randint
 from math import ceil
 from commands.resources.paginator import Paginator
@@ -10,14 +9,14 @@ name = 'help'
 description = 'Все команды бота [почти рабочий], инфа о команде help <cmd>'
 
 
-class helping(commands.Cog):
+class helping(Cog):
     def __init__(self, bot):
         self.bot = bot
         # Передаем значения из функции в self, чтобы можно было их юзать вне функции
         self.embeds = None
         self.author = None
 
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def help(self, ctx, cmd=None):
         if cmd is None:
             self.author = ctx.author
@@ -85,7 +84,7 @@ class helping(commands.Cog):
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
 
-            slicedCommands = allCommands[i:i+10]
+            slicedCommands = allCommands[i:i + 10]
 
             for command in slicedCommands:
                 # Если есть название и описание команды

@@ -1,39 +1,39 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, BadArgument, cooldown, command
 from discord import File
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-import requests
+from requests import get
 
 name = 'demotivator'
 description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
 
 
-class Demotivator(commands.Cog):
+class Demotivator(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send('Где фотка')
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, CommandOnCooldown):
             await ctx.send(error)
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.BadArgument):
+        if isinstance(error, BadArgument):
             await ctx.send('Максимум 25 символов')
 
-    @commands.cooldown(rate=1, per=5)
-    @commands.command(name=name, description=description)
+    @cooldown(rate=1, per=5)
+    @command(name=name, description=description)
     async def demotivator(self, ctx, *text):
         underText = ' '.join(text)
         if len(underText) > 25:
-            raise commands.BadArgument()
+            raise BadArgument()
 
         urlFromPhoto = ctx.message.attachments[0].url
-        requestImage = requests.get(urlFromPhoto)
+        requestImage = get(urlFromPhoto)
 
         img = Image.open(BytesIO(requestImage.content))
         img = img.convert('RGB')
@@ -46,7 +46,7 @@ class Demotivator(commands.Cog):
         draw = ImageDraw.Draw(template)
         font = ImageFont.truetype('./static/arial.ttf', 54)
         textWidth = font.getsize(underText)[0]
-        draw.text(((760-textWidth)/2, 720), underText, (255, 255, 255),
+        draw.text(((760 - textWidth) / 2, 720), underText, (255, 255, 255),
                   font=font, align='right')
 
         with BytesIO() as temp:

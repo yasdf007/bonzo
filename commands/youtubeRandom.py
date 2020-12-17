@@ -1,4 +1,4 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
 from googleapiclient.discovery import build
 from os import getenv
 from dotenv import load_dotenv
@@ -7,16 +7,17 @@ from random import randint, choice
 from string import digits, ascii_uppercase
 load_dotenv()
 
-name='randomVideo'
-description='Рандомный видос из ютуба (BETA)'
+name = 'randomVideo'
+description = 'Рандомный видос из ютуба (BETA)'
 
-class YoutubeRandom(commands.Cog):
+
+class YoutubeRandom(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, CommandOnCooldown):
             await ctx.send(error)
 
     YOUTUBE_API_KEY = getenv('YOUTUBE_API_KEY')
@@ -29,8 +30,8 @@ class YoutubeRandom(commands.Cog):
     #     if isinstance(error, commands.CommandOnCooldown):
     #         await ctx.send(error)
 
-    @commands.cooldown(rate=1, per=5)
-    @commands.command(name=name, description=description, aliases=['randvid', 'video'])
+    @cooldown(rate=1, per=5)
+    @command(name=name, description=description, aliases=['randvid', 'video'])
     async def randomVideo(self, ctx):
         # Делаем рандомное название запроса из 4 символов и цифр
         query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
