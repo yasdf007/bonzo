@@ -198,7 +198,7 @@ class Music(Cog):
             query_result = ''
             tracks = results['tracks'][0:10]
             for id, track in enumerate(tracks, 1):
-                query_result += f'{id}) {track["info"]["title"]} \n'
+                query_result += f'`{id})` {track["info"]["title"]} \n'
 
             embed = discord.Embed()
             embed.title = 'Выбери трек'

@@ -16,8 +16,8 @@ class Info(Cog):
 
     @command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member = None):
-        if not member:
-            member = ctx.author
+
+        member = member or ctx.author
         embed = Embed(
             title=f'Информация о {member.display_name}', color=member.top_role.colour)
 

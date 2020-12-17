@@ -1,4 +1,5 @@
 from sqlite3 import connect
+from apscheduler.triggers.cron import CronTrigger
 
 connection = connect('./dbLite/database.sqlite', check_same_thread=False)
 cursor = connection.cursor()
@@ -21,3 +22,7 @@ def execute(command, *values):
 
 def commit():
     connection.commit()
+
+
+def autoSave(sched):
+    sched.add_job(commit, CronTrigger(second=0))

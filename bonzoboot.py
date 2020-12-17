@@ -4,7 +4,7 @@
 from discord import Intents, Game, Status
 from discord.ext import tasks
 from discord.ext.commands import Bot as bonzoBot, Cog
-
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from platform import platform
 from time import time
 from os import listdir, getenv
@@ -18,9 +18,9 @@ class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.all()
         self.game = Game("b/help | v1.0 RC1")
-        self.dbAutosave.start()
         self.startTime = None
-
+        self.scheduler = AsyncIOScheduler()
+        db.autoSave(self.scheduler)
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
 
@@ -35,15 +35,12 @@ class Bot(bonzoBot):
         print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
-    @tasks.loop(seconds=60)
-    async def dbAutosave(self):
-        db.commit()
-
     @Cog.listener()
     async def on_ready(self):
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
         self.cogsLoad()
+        self.scheduler.start()
         endTime = time() - self.startTime
 
         print(
