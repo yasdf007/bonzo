@@ -1,22 +1,17 @@
-from asyncio.tasks import sleep
-from discord.ext.commands import Cog
-from dbLite import db
+from discord.ext.commands import Cog, command
+from database import db
 from random import randint
-from discord import Member
-from asyncio import create_task, sleep
+from discord import Member, Embed
 
 
 class AddXP(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cursor = db.cursor
-        self.textChannel = self.bot.get_channel(681179689775398943)
-        self.voiceChannel = self.bot.get_channel(700677946607927356)
-        self.tasksDict = {}
 
     @Cog.listener()
     async def on_message(self, message):
-        if not message.author.bot and message.channel == self.textChannel:
+        if not message.author.bot:
             self.addXp(message.author)
         return
 
@@ -25,44 +20,51 @@ class AddXP(Cog):
         if not member.bot:
 
             if not before.channel:
-                task = create_task(self.voiceTask(member))
-                self.tasksDict.update({member.id: task})
-            if before.channel and not after.channel:
-                for key, value in self.tasksDict.items():
-                    if member.id == key:
-                        value.cancel()
-                del self.tasksDict[member.id]
+                self.bot.scheduler.add_job(
+                    self.addVoiceXp, 'interval', seconds=3, id=f'{member.id}', args=[member])
+
+            elif before.channel and not after.channel:
+                self.bot.scheduler.remove_job(f'{member.id}')
+
         return
 
     def addXp(self, member: Member):
-        cursor = self.cursor
 
-        cursor.execute(f'SELECT XP from exp where UserID = {member.id}', )
-        result = cursor.fetchone()
-        if result is None:
-            cursor.execute(
-                'INSERT INTO exp VALUES (?, ?, ?)', (member.name, member.id, 0))
-        else:
-            cursor.execute(
-                f'UPDATE exp set XP = XP + {randint(1, 15)} where UserID = {member.id}')
+        self.cursor.execute(f'SELECT XP from exp where UserID = {member.id}', )
+        self.cursor.fetchone()
+        self.cursor.execute(
+            f'UPDATE exp set XP = XP + {randint(10, 15)} where UserID = {member.id}')
+
+        return
 
     def addVoiceXp(self, member: Member):
-        cursor = self.cursor
 
-        cursor.execute(f'SELECT XP from exp where UserID = {member.id}', )
-        result = cursor.fetchone()
+        self.cursor.execute(f'SELECT XP from exp where UserID = {member.id}', )
+        self.cursor.fetchone()
+        self.cursor.execute(
+            f'UPDATE exp set XP = XP + {randint(30, 50)} where UserID = {member.id}')
+
+        return
+
+    @command(name='leaderboard', aliases=['top'])
+    async def leaderboard(self, ctx):
+
+        self.cursor.execute('SELECT username, XP from exp order by xp desc')
+        result = self.cursor.fetchmany(10)
+
         if result is None:
-            cursor.execute(
-                'INSERT INTO exp VALUES (?, ?, ?)', (member.name, member.id, 0))
-        else:
-            cursor.execute(
-                f'UPDATE exp set XP = XP + {randint(50, 100)} where UserID = {member.id}')
-        pass
+            await ctx.send('Значения не найдены')
 
-    async def voiceTask(self, member):
-        while True:
-            self.addVoiceXp(member)
-            await sleep(3)
+        embed = Embed(
+            title=f'Топ 10 по опыту {ctx.guild.name}', color=ctx.author.color)
+        embed.set_footer(
+            text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
+        embed.set_thumbnail(url=ctx.guild.icon_url)
+        for name, exp in result:
+            embed.add_field(name=f'`{name}`', value=exp, inline=False)
+        await ctx.send(embed=embed)
+
+        return
 
 
 def setup(bot):

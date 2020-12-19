@@ -2,13 +2,12 @@
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
 from discord import Intents, Game, Status
-from discord.ext import tasks
 from discord.ext.commands import Bot as bonzoBot, Cog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from platform import platform
 from time import time
 from os import listdir, getenv
-from dbLite import db
+from database import db
 from dotenv import load_dotenv
 
 load_dotenv()  # загружает файл env
@@ -20,6 +19,7 @@ class Bot(bonzoBot):
         self.game = Game("b/help | v1.0 RC1")
         self.startTime = None
         self.scheduler = AsyncIOScheduler()
+        self.guild = None
         db.autoSave(self.scheduler)
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
@@ -35,12 +35,19 @@ class Bot(bonzoBot):
         print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
+    def update_db(self):
+        db.cursor.executemany(
+            "INSERT  into exp (username, UserID) VALUES (%s, %s) ON CONFLICT (UserID) DO NOTHING;", ((member.name, member.id) for member in self.guild.members if not member.bot))
+        db.commit()
+
     @Cog.listener()
     async def on_ready(self):
+        self.guild = self.get_guild(664485208745050112)
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
         self.cogsLoad()
         self.scheduler.start()
+        self.update_db()
         endTime = time() - self.startTime
 
         print(
