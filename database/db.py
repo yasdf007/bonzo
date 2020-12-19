@@ -6,15 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()  # загружает файл env
 
 
-database = getenv('DB_DATABASENAME')
-user = getenv('DB_USERNAME')
-password = getenv('DB_PASSWORD')
-host = getenv('DB_HOST')
-port = getenv('DB_PORT')
+connection_string = getenv('CONNECTION_STRING')
 
-connection = psycopg2.connect(host=f'{host}',
-                              database=f'{database}', user=f'{user}', password=f'{password}')
-
+connection = psycopg2.connect(connection_string)
 cursor = connection.cursor()
 
 
