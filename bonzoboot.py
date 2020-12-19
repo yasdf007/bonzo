@@ -17,22 +17,24 @@ class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.all()
         self.game = Game("b/help | v1.0 RC1")
-        self.startTime = None
         self.scheduler = AsyncIOScheduler()
+        self.startTime = None
         self.guild = None
+
         db.autoSave(self.scheduler)
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
 
     def cogsLoad(self):
         for filename in listdir('./commands'):
-            if filename.endswith('.py'):
+            if filename.endswith('.py') and not filename.startswith('music'):
                 self.load_extension(f'commands.{filename[:-3]}')
                 print(f'loaded {filename}')
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
         print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
+        self.cogsLoad()
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
     def update_db(self):
@@ -42,12 +44,14 @@ class Bot(bonzoBot):
 
     @Cog.listener()
     async def on_ready(self):
+
         self.guild = self.get_guild(664485208745050112)
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        self.cogsLoad()
+        self.load_extension('commands.music')
         self.scheduler.start()
         self.update_db()
+
         endTime = time() - self.startTime
 
         print(

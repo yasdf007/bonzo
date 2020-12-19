@@ -10,6 +10,15 @@ class AddXP(Cog):
         self.cursor = db.cursor
 
     @Cog.listener()
+    async def on_ready(self):
+        guild = self.bot.get_guild(664485208745050112)
+
+        for channel in guild.voice_channels:
+            for voiceInfo in self.bot.get_channel(channel.id).members:
+                self.bot.scheduler.add_job(
+                    self.addVoiceXp, 'interval', seconds=30, id=f'{voiceInfo.id}', args=[voiceInfo])
+
+    @Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
             self.addXp(message.author)
