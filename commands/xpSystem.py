@@ -14,9 +14,9 @@ class AddXP(Cog):
         guild = self.bot.get_guild(664485208745050112)
 
         for channel in guild.voice_channels:
-            for voiceInfo in self.bot.get_channel(channel.id).members:
+            for voiceUser in self.bot.get_channel(channel.id).members:
                 self.bot.scheduler.add_job(
-                    self.addVoiceXp, 'interval', seconds=30, id=f'{voiceInfo.id}', args=[voiceInfo])
+                    self.addVoiceXp, 'interval', seconds=30, id=f'{voiceUser.id}', args=[voiceUser])
 
     @Cog.listener()
     async def on_message(self, message):
