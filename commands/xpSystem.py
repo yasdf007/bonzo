@@ -15,13 +15,14 @@ class AddXP(Cog):
 
         for channel in guild.voice_channels:
             for voiceUser in self.bot.get_channel(channel.id).members:
-                self.bot.scheduler.add_job(
-                    self.addVoiceXp, 'interval', seconds=30, id=f'{voiceUser.id}', args=[voiceUser])
+                if not voiceUser.bot:
+                    self.bot.scheduler.add_job(
+                        self.addVoiceXp, 'interval', seconds=30, id=f'{voiceUser.id}', args=[voiceUser])
 
     @Cog.listener()
     async def on_message(self, message):
         if not message.author.bot:
-            self.addXp(message.author)
+            await self.addXp(message.author)
         return
 
     @Cog.listener()
@@ -37,7 +38,7 @@ class AddXP(Cog):
 
         return
 
-    def addXp(self, member: Member):
+    async def addXp(self, member: Member):
 
         self.cursor.execute(f'SELECT XP from exp where UserID = {member.id}', )
         self.cursor.fetchone()
@@ -46,7 +47,7 @@ class AddXP(Cog):
 
         return
 
-    def addVoiceXp(self, member: Member):
+    async def addVoiceXp(self, member: Member):
 
         self.cursor.execute(f'SELECT XP from exp where UserID = {member.id}', )
         self.cursor.fetchone()

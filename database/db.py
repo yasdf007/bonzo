@@ -27,7 +27,7 @@ def execute(command, *values):
                    tuple(values))
 
 
-def commit():
+async def commit():
     connection.commit()
 
 
