@@ -6,9 +6,9 @@ from dotenv import load_dotenv
 load_dotenv()  # загружает файл env
 
 
-connection_string = getenv('CONNECTION_STRING')
+connection_string = getenv('DATABASE_URL')
 
-connection = psycopg2.connect(connection_string)
+connection = psycopg2.connect(connection_string, sslmode='require')
 cursor = connection.cursor()
 
 

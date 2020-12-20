@@ -58,7 +58,8 @@ class AddXP(Cog):
     @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
 
-        self.cursor.execute('SELECT username, XP from exp order by xp desc')
+        self.cursor.execute(
+            'SELECT username, XP from exp where (XP > 0) order by xp desc')
         result = self.cursor.fetchmany(10)
 
         if result is None:
