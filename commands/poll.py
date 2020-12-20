@@ -1,15 +1,19 @@
 from discord import Embed
-from discord.ext import commands
+from discord.ext.commands import Cog, MissingRole, has_any_role, command
 from datetime import datetime, timedelta
 
 
-class Poll(commands.Cog):
+class Poll(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣']
         self.pollIds = []
 
-    @commands.Cog.listener()
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MissingRole):
+            await ctx.send('**слыш,** тебе нельзя такое исполнять')
+
+    @Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if payload.message_id in (poll[1] for poll in self.pollIds):
             message = await self.bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
@@ -20,9 +24,10 @@ class Poll(commands.Cog):
                         and reaction.emoji != payload.emoji.name):
                     await message.remove_reaction(reaction.emoji, payload.member)
 
-    @commands.command(name='poll', description='Выборы')
+    @command(name='poll', description='Выборы (только для разрабов, персоны клуба)')
+    @has_any_role('bonzodev', 'Персона Клуба')
     async def poll(self, ctx, seconds: int, question: str, *options):
-
+        await ctx.message.delete()
         if len(options) > len(self.emojis):
             await ctx.send(f'Максимум {len(self.emojis)} значений')
             return
@@ -49,6 +54,7 @@ class Poll(commands.Cog):
                       color=0xff0000, timestamp=datetime.utcnow())
 
         message = await self.bot.get_channel(channel_id).fetch_message(message_id)
+        await message.delete()
         # получаем ембед с сообщения голосовлки
         res = message.embeds[0].fields[0].value.split('\n')
         # у кого больше голосов
