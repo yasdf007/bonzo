@@ -1,20 +1,20 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, CommandInvokeError, command
 from random import randint
 
 name = 'randomcat'
 description = 'Отправляет случайного котика :3'
 
 
-class randomCat(commands.Cog):
+class randomCat(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработа ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def randomcat(self, ctx, num=None):
         # Если количество не указано
         if num is None:
@@ -28,7 +28,7 @@ class randomCat(commands.Cog):
 
             if num > 2:
                 # Если число больше максимума, отправляем ошибку
-                raise commands.CommandInvokeError()
+                raise CommandInvokeError()
 
             else:
                 # Делаем Num ссылок

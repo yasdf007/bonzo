@@ -1,17 +1,18 @@
-import discord
-from discord.ext import commands
+from discord import Embed
+from discord.ext.commands import Cog, command
 
-name='invite'
-description='Ссылка на приглашение бота'
+name = 'invite'
+description = 'Ссылка на приглашение бота'
 
-class invite(commands.Cog):
+
+class invite(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # функция, отправляющая инвайт-ссылку бота в чат
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def invite(self, ctx):
-        embedd = discord.Embed(
+        embedd = Embed(
             title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)
         embedd.set_thumbnail(
             url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')

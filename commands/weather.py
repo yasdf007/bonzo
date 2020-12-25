@@ -1,8 +1,8 @@
 from discord import Embed
-from discord.ext import commands
-import os
+from discord.ext.commands import Cog, CommandInvokeError, command
+from os import getenv
 from dotenv import load_dotenv
-import requests
+from requests import get
 import json
 load_dotenv()
 
@@ -10,29 +10,29 @@ name = 'weather'
 description = 'Погода по запрашиваемому городу'
 
 
-class weather(commands.Cog):
+class weather(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send(error.original)
 
-    @commands.command(name=name, description=description, aliases=['погода'])
+    @command(name=name, description=description, aliases=['погода'])
     async def getWeather(self, ctx, *city):
         # Если город состоит из нескольких слов, объединяем в одну строку
         city = ' '.join(city)
 
         # Получаем токен
-        weatherToken = os.getenv('WEATHER_TOKEN')
+        weatherToken = getenv('WEATHER_TOKEN')
         # Ссылка с запросом q=Город appid=Токен
         query = f'https://api.openweathermap.org/data/2.5/weather?q={city}&lang=ru&units=metric&appid={weatherToken}'
         # Получаем инфу из запроса
-        result = requests.get(query)
+        result = get(query)
 
         if(result.status_code == 404):
-            raise commands.CommandInvokeError(f'Город {city} не найден')
+            raise CommandInvokeError(f'Город {city} не найден')
 
         # Загружаем запров в формат JSON
         jsonResult = json.loads(result.text)
@@ -97,7 +97,7 @@ class weather(commands.Cog):
                               "Южный", "Юго-Юго-Западный", "Юго-Западный", "Западно-Юго-Западный",
                               "Западный", "Западо-Северо-Западный", "Северо-Западный", "Северо-Северо-Западный"]
         # Направление меняется каждые 22.5 градуса (0.5 чтоб весело жилось)
-        value = int((directionInNumbers/22.5) + 0.5)
+        value = int((directionInNumbers / 22.5) + 0.5)
         # Возвращаем направление ветра в зависимости от градусов
         return possibleDirections[value % 16]
 

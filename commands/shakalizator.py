@@ -1,28 +1,28 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command
 from discord import File
 from PIL import Image
 from io import BytesIO
-from discord.ext.commands.errors import CommandInvokeError
 import requests
 
-name='shakalizator'
-description='ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку'
+name = 'shakalizator'
+description = 'ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку'
 
-class Shakalizator(commands.Cog):
+
+class Shakalizator(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send('Где фотка')
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, CommandOnCooldown):
             await ctx.send(error)
 
-    @commands.cooldown(rate=1, per=5)
-    @commands.command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
+    @cooldown(rate=1, per=5)
+    @command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, imageUrl=None):
         # Если нет прикрепленной фотки, то обрабатываем фото из ссылки
         if imageUrl != None:
@@ -33,14 +33,14 @@ class Shakalizator(commands.Cog):
             requestImage = requests.get(urlFromPhoto)
         else:
             # Не вызывается поч
-            raise commands.CommandInvokeError()
+            raise CommandInvokeError()
 
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
         img = Image.open(BytesIO(requestImage.content))
         img = img.convert('RGB')
 
         # Изменение фотки
-        img = img.resize((int(img.size[0]/2), int(img.size[1]/2)))
+        img = img.resize((int(img.size[0] / 2), int(img.size[1] / 2)))
 
         # Изменение фотки
 

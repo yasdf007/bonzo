@@ -132,3 +132,6 @@ dmypy.json
 .vscode/
 **/*.mp3
 .DS_store
+dbLite/database.sqlite
+commands/tox.ini
+dbLite/database.sqlite-journal

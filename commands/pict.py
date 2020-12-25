@@ -1,20 +1,20 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, command, CommandInvokeError
 from random import sample
 
 name = 'pict'
 description = 'Отправляет случайное изображение из prnt.sc :o'
 
 
-class pict(commands.Cog):
+class pict(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send('Нужно ввести количество ссылок (до 2)')
 
-    @commands.command(name=name, description=description)
+    @command(name=name, description=description)
     async def pict(self, ctx, num=None):
         # Если количество не указано
         if num is None:
@@ -27,7 +27,7 @@ class pict(commands.Cog):
 
             if num > 2:
                 # Если число больше максимума, отправляем ошибку
-                raise commands.CommandInvokeError()
+                raise CommandInvokeError()
             # Делаем num ссылок
             for _ in range(0, num):
                 url = await self.makePictUrl()

@@ -1,26 +1,26 @@
-from discord.ext import commands
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command
 from random import randint
 
 name = 'roll'
 description = 'Ролит как в доте или между двумя числами (Будет переписан)'
 
 
-class roll(commands.Cog):
+class roll(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandInvokeError):
+        if isinstance(error, CommandInvokeError):
             await ctx.send('Нужно ввести число до миллиона')
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, commands.CommandOnCooldown):
+        if isinstance(error, CommandOnCooldown):
             await ctx.send(error)
 
     # dota 2 roll
-    @commands.cooldown(rate=1, per=3)
-    @commands.command(name=name, description=description)
+    @cooldown(rate=1, per=3)
+    @command(name=name, description=description)
     async def roll(self, ctx, numberFrom=None, numberTo=None):
         # Если оба числа не указаны
         if numberFrom is None and numberTo is None:
@@ -35,7 +35,7 @@ class roll(commands.Cog):
                 await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, numberFrom)))
             else:
                 # Если число больше миллиона, отправляем ошибку
-                raise commands.CommandInvokeError()
+                raise CommandInvokeError()
         else:
             # Роляем по границам
             numberFrom, numberTo = int(numberFrom), int(numberTo)
