@@ -28,16 +28,6 @@ class Info(Cog):
 
         embed.add_field(name='ID:', value=member.id, inline=False)
 
-        if ctx.message.guild.id == 664485208745050112:
-
-            party = await self.getPartyRoleId((member.roles))
-
-            if party:
-                embed.add_field(name='Партия:', value=f'{party}')
-            else:
-                embed.add_field(
-                    name='Партия:', value='Беспартийный :negative_squared_cross_mark:')
-
         # получаем все роли юзера
         allRoles = ', '.join([i.name for i in member.roles[1::]])
 
@@ -59,7 +49,7 @@ class Info(Cog):
                     trackArtists = ', '.join(usrActivity.artists)
 
                     embed.set_field_at(index=4,
-                                       name='Статус:', value=f'`{usrActivity.type.name} {usrActivity}`', inline=False)
+                                       name='Статус:', value=f'`{usrActivity.type.name} {usrActivity.name}`', inline=False)
 
                     embed.add_field(
                         name='Автор:', value=f'`{trackArtists}`', inline=True)
@@ -84,11 +74,6 @@ class Info(Cog):
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)
 
         await ctx.send(embed=embed)
-
-    async def getPartyRoleId(self, listOfRoles):
-        for element in listOfRoles:
-            if element.name.endswith('(Партия)'):
-                return f'{element.name} :white_check_mark:'
 
 
 def setup(bot):
