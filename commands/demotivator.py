@@ -17,11 +17,9 @@ class Demotivator(Cog):
         if isinstance(error, CommandInvokeError):
             await ctx.send('Где фотка')
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
             await ctx.send(error)
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, BadArgument):
             await ctx.send('Максимум 25 символов')
 

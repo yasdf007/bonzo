@@ -14,15 +14,12 @@ class Clear(Cog):
         if isinstance(error, BadArgument):
             await ctx.send('Нужно ввести количество сообщений целым числом')
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRequiredArgument):
             await ctx.send('Нужно ввести количество сообщений целым числом')
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRole):
             await ctx.send('**слыш,** тебе нельзя такое исполнять')
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
             await ctx.send('**слыш,** введи число емое')
 
