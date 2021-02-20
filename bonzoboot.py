@@ -48,7 +48,7 @@ class Bot(bonzoBot):
         self.guild = self.get_guild(664485208745050112)
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        self.load_extension('commands.music')
+        # self.load_extension('commands.music')
         self.scheduler.start()
         await self.update_db()
 
