@@ -1,3 +1,4 @@
+from apscheduler.jobstores.base import JobLookupError
 from discord.ext.commands import Cog, command
 from database import db
 from random import randint
@@ -14,10 +15,11 @@ class AddXP(Cog):
         guild = self.bot.get_guild(664485208745050112)
 
         for channel in guild.voice_channels:
-            for voiceUser in self.bot.get_channel(channel.id).members:
-                if not voiceUser.bot:
-                    self.bot.scheduler.add_job(
-                        self.addVoiceXp, 'interval', seconds=30, id=f'{voiceUser.id}', args=[voiceUser])
+            if channel.name != 'AFK':
+                for voiceUser in self.bot.get_channel(channel.id).members:
+                    if not voiceUser.bot:
+                        self.bot.scheduler.add_job(
+                            self.addVoiceXp, 'interval', seconds=30, id=f'{voiceUser.id}', args=[voiceUser])
 
     @Cog.listener()
     async def on_message(self, message):
@@ -29,12 +31,15 @@ class AddXP(Cog):
     async def on_voice_state_update(self, member, before, after):
         if not member.bot:
 
-            if not before.channel:
+            if not before.channel or (before.channel.name == 'AFK' and after.channel is not None):
                 self.bot.scheduler.add_job(
                     self.addVoiceXp, 'interval', seconds=30, id=f'{member.id}', args=[member])
 
-            elif before.channel and not after.channel:
-                self.bot.scheduler.remove_job(f'{member.id}')
+            elif (before.channel and (not after.channel or after.channel.name == 'AFK')):
+                try:
+                    self.bot.scheduler.remove_job(f'{member.id}')
+                except JobLookupError:
+                    pass
 
         return
 
