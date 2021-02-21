@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS exp (
+    UserID BIGINT PRIMARY KEY,
+    XP BIGINT DEFAULT 0,
+    NextTextXpAt timestamp DEFAULT NOW()
+);

@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 load_dotenv()  # загружает файл env
 
+BUILD_SQL = './database/build.sql'
 
 connection_string = getenv('DATABASE_URL')
 
@@ -12,24 +13,14 @@ connection = psycopg2.connect(connection_string, sslmode='require')
 cursor = connection.cursor()
 
 
-def scriptexec():
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS exp (
-        username varchar,
-        UserID bigint PRIMARY KEY,
-        XP integer DEFAULT 0
-        )
-        ''')
-
-
-def execute(command, *values):
-    cursor.execute(command,
-                   tuple(values))
-
-
-async def commit():
+def commit():
     connection.commit()
 
 
 def autoSave(sched):
     sched.add_job(commit, CronTrigger(second=0))
+
+
+def createDB():
+    with open(BUILD_SQL, 'r') as query:
+        cursor.execute(query.read())

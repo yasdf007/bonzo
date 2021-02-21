@@ -21,7 +21,9 @@ class Bot(bonzoBot):
         self.startTime = None
         self.guild = None
 
+        db.createDB()
         db.autoSave(self.scheduler)
+
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
 
@@ -37,10 +39,10 @@ class Bot(bonzoBot):
         self.cogsLoad()
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
-    async def update_db(self):
+    def update_db(self):
         db.cursor.executemany(
-            "INSERT into exp (username, UserID) VALUES (%s, %s) ON CONFLICT (UserID) DO NOTHING;", ((member.name, member.id) for member in self.guild.members if not member.bot))
-        await db.commit()
+            "INSERT into exp (UserID) VALUES (%s) ON CONFLICT (UserID) DO NOTHING;", ([member.id] for member in self.guild.members if not member.bot))
+        db.commit()
 
     @Cog.listener()
     async def on_ready(self):
@@ -50,7 +52,8 @@ class Bot(bonzoBot):
         await self.change_presence(status=Status.online, activity=self.game)
         # self.load_extension('commands.music')
         self.scheduler.start()
-        await self.update_db()
+
+        self.update_db()
 
         endTime = time() - self.startTime
 
