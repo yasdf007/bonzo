@@ -10,11 +10,11 @@ class memberJoinRemove(Cog):
     @Cog.listener()
     async def on_member_join(self, member):
         db.execute(
-            f"INSERT into exp (username, UserID) VALUES ({member.name}, {member.id}) ON CONFLICT (UserID) DO NOTHING;",)
+            "INSERT into exp (UserID) VALUES %s ON CONFLICT (UserID) DO NOTHING;", (member.id,))
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        db.execute(f'DELETE FROM exp WHERE UserID = {member.id}')
+        db.execute('DELETE FROM exp WHERE UserID = %s', (member.id,))
 
 
 def setup(bot):
