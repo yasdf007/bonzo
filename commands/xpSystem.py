@@ -65,7 +65,7 @@ class AddXP(Cog):
 
         return
 
-    @ command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
+    @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
 
         self.cursor.execute(
@@ -76,7 +76,7 @@ class AddXP(Cog):
             await ctx.send('Значения не найдены')
 
         embed = Embed(
-            title=f'Топ 10 по опыту {ctx.guild.name}', color=ctx.author.color)
+            title='TOP 10 участников по опыту', color=ctx.author.color)
 
         embed.set_footer(
             text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)

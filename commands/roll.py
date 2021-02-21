@@ -34,7 +34,7 @@ class roll(Cog):
             raise CommandInvokeError(
                 f'{ctx.author.mention} больше мильёна роллить не буду')
         embed = Embed()
-        # Еслм два числа укащаны
+        # Еслм два числа указаны
         if numberFrom and numberTo:
             # Если первое число больше второго
             if numberFrom > numberTo:
