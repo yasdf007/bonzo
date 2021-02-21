@@ -10,9 +10,9 @@ class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, MemberNotFound):
-            await ctx.send(f'{error.argument} не найден')
+    # async def cog_command_error(self, ctx, error):
+    #     if isinstance(error, MemberNotFound):
+    #         await ctx.send(f'{error.argument} не найден')
 
     @command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member = None):
@@ -33,33 +33,28 @@ class Info(Cog):
 
         embed.add_field(
             name='Роли:', value=f'{allRoles}', inline=False)
-
         try:
             embed.add_field(
                 name='Статус:', value=f'`{member.activity.type.name} {member.activity}`', inline=False)
-        except:
+        except AttributeError:
             pass
 
-        try:
-            for usrActivity in member.activities:
-                if isinstance(usrActivity, Spotify):
-                    embed.set_thumbnail(url=usrActivity.album_cover_url)
-                    embed.color = usrActivity.color
+        for usrActivity in member.activities:
+            if isinstance(usrActivity, Spotify):
+                embed.set_thumbnail(url=usrActivity.album_cover_url)
+                embed.color = usrActivity.color
 
-                    trackArtists = ', '.join(usrActivity.artists)
+                trackArtists = ', '.join(usrActivity.artists)
 
-                    embed.set_field_at(index=4,
-                                       name='Статус:', value=f'`{usrActivity.type.name} {usrActivity}`', inline=False)
+                embed.set_field_at(index=3 or 4,
+                                   name='Статус:', value=f'`{usrActivity.type.name} {usrActivity.name}`', inline=False)
 
-                    embed.add_field(
-                        name='Автор:', value=f'`{trackArtists}`', inline=True)
-                    embed.add_field(
-                        name='Название:', value=f'`{usrActivity.title}`', inline=True)
-                    embed.add_field(
-                        name='Альбом:', value=f'`{usrActivity.album}`', inline=True)
-
-        except:
-            pass
+                embed.add_field(
+                    name='Автор:', value=f'`{trackArtists}`', inline=True)
+                embed.add_field(
+                    name='Название:', value=f'`{usrActivity.title}`', inline=True)
+                embed.add_field(
+                    name='Альбом:', value=f'`{usrActivity.album}`', inline=True)
 
         embed.add_field(
             name='Цвет ника:', value=f'HEX: {member.color} \n \
@@ -74,7 +69,7 @@ class Info(Cog):
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)
 
         await ctx.send(embed=embed)
-        
+
 
 def setup(bot):
     bot.add_cog(Info(bot))
