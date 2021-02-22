@@ -38,7 +38,7 @@ class Info(Cog):
             for usrActivity in member.activities:
 
                 if isinstance(usrActivity, Spotify):
-                    print(usrActivity.type)
+
                     embed.set_thumbnail(url=usrActivity.album_cover_url)
                     embed.color = usrActivity.color
 
