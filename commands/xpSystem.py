@@ -1,4 +1,4 @@
-from apscheduler.jobstores.base import JobLookupError
+from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from discord.ext.commands import Cog, command
 from database import db
 from random import randint
@@ -10,6 +10,8 @@ class AddXP(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.cursor = db.cursor
+        self.messageXP = 1
+        self.voiceXP = 10
 
     @Cog.listener()
     async def on_ready(self):
@@ -19,8 +21,7 @@ class AddXP(Cog):
             if channel.name != 'AFK':
                 for voiceUser in self.bot.get_channel(channel.id).members:
                     if not voiceUser.bot:
-                        self.bot.scheduler.add_job(
-                            self.addVoiceXp, 'interval', minutes=2, id=f'{voiceUser.id}', args=[voiceUser.id])
+                        self.addVoiceJob(voiceUser)
 
     @Cog.listener()
     async def on_message(self, message):
@@ -31,41 +32,47 @@ class AddXP(Cog):
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if not member.bot:
+            print(member.voice)
 
-            if not before.channel or (before.channel.name == 'AFK' and after.channel is not None):
-                self.bot.scheduler.add_job(
-                    self.addVoiceXp, 'interval', minutes=2, id=f'{member.id}', args=[member.id])
-
-            elif (before.channel and (not after.channel or after.channel.name == 'AFK')):
+            if member.voice and member.voice.channel.name != 'AFK' and member.voice.self_deaf == False:
+                try:
+                    self.addVoiceJob(member)
+                    print(self.bot.scheduler.get_jobs())
+                except ConflictingIdError:
+                    pass
+            else:
+                print(self.bot.scheduler.get_jobs())
                 try:
                     self.bot.scheduler.remove_job(f'{member.id}')
+                    print(self.bot.scheduler.get_jobs())
                 except JobLookupError:
                     pass
 
         return
 
-    async def addMessageXp(self, memberId: int):
+    def addVoiceJob(self, member: int):
+        self.bot.scheduler.add_job(
+            self.addVoiceXp, 'interval', minutes=1, id=f'{member.id}', args=[member.id])
 
+    async def addMessageXp(self, memberId: int):
         self.cursor.execute(
             'SELECT NextTextXpAt FROM exp WHERE UserId = %s', (memberId,))
 
         nextXpAdd = self.cursor.fetchone()[0]
 
         if datetime.utcnow() > nextXpAdd:
-            randEXP = randint(3, 7)
             self.cursor.execute(
-                'UPDATE exp set XP = XP + %s, NextTextXpAt = %s where UserID = %s', (randEXP, datetime.utcnow()+timedelta(seconds=60), memberId))
+                'UPDATE exp set XP = XP + %s, NextTextXpAt = %s where UserID = %s', (self.messageXP, datetime.utcnow()+timedelta(seconds=60), memberId))
 
         return
 
     async def addVoiceXp(self, memberId: int):
-        randEXP = randint(45, 60)
         self.cursor.execute(
-            'UPDATE exp set XP = XP + %s where UserID = %s', (randEXP, memberId))
+            'UPDATE exp set XP = XP + %s where UserID = %s', (self.voiceXP, memberId))
 
         return
 
-    @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
+    @ command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
 
         self.cursor.execute(
