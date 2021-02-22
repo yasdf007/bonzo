@@ -1,4 +1,4 @@
-from discord import Embed, Spotify
+from discord import Embed, Spotify, CustomActivity
 from discord.ext.commands import Cog, MemberNotFound, command
 from discord.member import Member
 
@@ -33,28 +33,30 @@ class Info(Cog):
 
         embed.add_field(
             name='Роли:', value=f'{allRoles}', inline=False)
-        try:
-            embed.add_field(
-                name='Статус:', value=f'`{member.activity.type.name} {member.activity}`', inline=False)
-        except AttributeError:
-            pass
 
-        for usrActivity in member.activities:
-            if isinstance(usrActivity, Spotify):
-                embed.set_thumbnail(url=usrActivity.album_cover_url)
-                embed.color = usrActivity.color
+        if member.activities:
+            for usrActivity in member.activities:
 
-                trackArtists = ', '.join(usrActivity.artists)
+                if isinstance(usrActivity, Spotify):
+                    print(usrActivity.type)
+                    embed.set_thumbnail(url=usrActivity.album_cover_url)
+                    embed.color = usrActivity.color
 
-                embed.set_field_at(index=3 or 4,
-                                   name='Статус:', value=f'`{usrActivity.type.name} {usrActivity.name}`', inline=False)
+                    trackArtists = ', '.join(usrActivity.artists)
 
-                embed.add_field(
-                    name='Автор:', value=f'`{trackArtists}`', inline=True)
-                embed.add_field(
-                    name='Название:', value=f'`{usrActivity.title}`', inline=True)
-                embed.add_field(
-                    name='Альбом:', value=f'`{usrActivity.album}`', inline=True)
+                    embed.set_field_at(index=3 or 4,
+                                       name='Статус:', value=f'`{usrActivity.type.name} {usrActivity.name}`', inline=False)
+
+                    embed.add_field(
+                        name='Автор:', value=f'`{trackArtists}`', inline=True)
+                    embed.add_field(
+                        name='Название:', value=f'`{usrActivity.title}`', inline=True)
+                    embed.add_field(
+                        name='Альбом:', value=f'`{usrActivity.album}`', inline=True)
+
+                elif isinstance(usrActivity, CustomActivity):
+                    embed.add_field(
+                        name='Статус:', value=f'`{usrActivity.type.name} {usrActivity.name}`', inline=False)
 
         embed.add_field(
             name='Цвет ника:', value=f'HEX: {member.color} \n \
