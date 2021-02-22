@@ -32,19 +32,24 @@ class AddXP(Cog):
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if not member.bot:
-            print(member.voice)
-
+            # Если чел зашел в войс и не в канале АФК, и не замучен
             if member.voice and member.voice.channel.name != 'AFK' and member.voice.self_deaf == False:
                 try:
+                    # Добавляем таск получения опыта
                     self.addVoiceJob(member)
-                    print(self.bot.scheduler.get_jobs())
+                # Если уже есть задача, то пофиг (если чел перемещается по каналам, то появляется ошибка,
+                # поэтому дропаем в блок исключения )
                 except ConflictingIdError:
                     pass
+
             else:
-                print(self.bot.scheduler.get_jobs())
                 try:
+                    # Удаляем задачу
                     self.bot.scheduler.remove_job(f'{member.id}')
-                    print(self.bot.scheduler.get_jobs())
+
+                # Если задачи нет, то пофиг (чел может быть в афк, т.е у него не будет задачи,
+                # если он выйдет из канала афк, то появится ошибка.
+                # Если зайдет в другой канал, все должно быть норм)
                 except JobLookupError:
                     pass
 
