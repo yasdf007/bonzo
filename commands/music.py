@@ -49,7 +49,7 @@ class Music(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send(error.original)
+            await ctx.message.reply(error.original)
             # The above handles errors thrown in this cog and shows them to the user.
             # This shouldn't be a problem as the only errors thrown in this cog are from `ensure_voice`
             # which contain a reason string, such as "Join a voicechannel" etc. You can modify the above
@@ -139,7 +139,7 @@ class Music(Cog):
         results = await player.node.get_tracks(query)
 
         if not results or not results['tracks']:
-            return await ctx.send('Nothing found!')
+            return await ctx.message.reply('Nothing found!')
 
         embed = discord.Embed(color=discord.Color.dark_theme())
 
@@ -203,7 +203,7 @@ class Music(Cog):
             embed = discord.Embed()
             embed.title = 'Выбери трек'
             embed.description = query_result
-            await ctx.send(embed=embed)
+            await ctx.message.reply(embed=embed)
 
             # Проверяем того, кто отправил запрос и кто ответил
             # Ждем того, кто запросил
@@ -235,7 +235,7 @@ class Music(Cog):
                 embed.title = 'Ты лох'
                 embed.description = 'Нужно выбрать цифру из списка, закажи заново'
 
-        await ctx.send(embed=embed)
+        await ctx.message.reply(embed=embed)
 
         # Если музыка уже играет, то не подрубаем
         # Иначе будет скип музыки
@@ -250,13 +250,13 @@ class Music(Cog):
 
         if not player.is_connected:
             # Не в войсе
-            return await ctx.send('Не подрублен в войс')
+            return await ctx.message.reply('Не подрублен в войс')
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
 
             # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
             # Из-за чего бот может не отрубиться
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.message.reply('You\'re not in my voicechannel!')
 
         # Удаляем старые треки, чтобы страрые треки не играли, когда кто-то ставит в очередь музыку
         player.queue.clear()
@@ -266,7 +266,7 @@ class Music(Cog):
 
         # Отрубаемся из войса
         await self.connect_to(ctx.guild.id, None)
-        await ctx.send('Disconnected.')
+        await ctx.message.reply('Disconnected.')
 
     @command(name='queue', description='Показывает очередь (до 10 треков)')
     async def queue(self, ctx):
@@ -274,11 +274,11 @@ class Music(Cog):
 
         if not player.is_connected:
             # Не в войсе
-            return await ctx.send('Не подрублен в войс')
+            return await ctx.message.reply('Не подрублен в войс')
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.message.reply('You\'re not in my voicechannel!')
 
         if len(player.queue) > 0:
             result = ''
@@ -291,31 +291,31 @@ class Music(Cog):
                 result += f'{id}) {track.title} \n'
 
             embed.description = result
-            await ctx.send(embed=embed)
+            await ctx.message.reply(embed=embed)
         else:
-            await ctx.send('Очередь пустая')
+            await ctx.message.reply('Очередь пустая')
         return
 
     @command(name='volume', description='Изменяет громкость (до 1000)')
     async def volume(self, ctx, vol: int):
         if vol > 1000:
-            await ctx.send(embed=Embed(title='Оглохнешь емое че творишь', color=discord.Color.dark_theme()))
+            await ctx.message.reply(embed=Embed(title='Оглохнешь емое че творишь', color=discord.Color.dark_theme()))
             return
         player = self.bot.lavalink.player_manager.get(ctx.guild.id)
 
         if not player.is_connected:
             # Не в войсе
-            return await ctx.send('Не подрублен в войс')
+            return await ctx.message.reply('Не подрублен в войс')
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.message.reply('You\'re not in my voicechannel!')
 
         try:
             await player.set_volume(vol)
             embed = discord.Embed(
                 title=f'Громоксть теперь {vol}', color=discord.Color.dark_theme())
-            await ctx.send(embed=embed)
+            await ctx.message.reply(embed=embed)
         except:
             raise CommandInvokeError('Ошибка при изменении громкости')
         return
@@ -326,11 +326,11 @@ class Music(Cog):
 
         if not player.is_connected:
             # Не в войсе
-            return await ctx.send('Не подрублен в войс')
+            return await ctx.message.reply('Не подрублен в войс')
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.message.reply('You\'re not in my voicechannel!')
 
         try:
             embed = discord.Embed(
@@ -338,7 +338,7 @@ class Music(Cog):
 
             await player.skip()
 
-            await ctx.send(embed=embed)
+            await ctx.message.reply(embed=embed)
         except:
             raise CommandInvokeError('Ошибка при скипе')
 
@@ -351,11 +351,11 @@ class Music(Cog):
 
         if not player.is_connected:
             # Не в войсе
-            return await ctx.send('Не подрублен в войс')
+            return await ctx.message.reply('Не подрублен в войс')
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.message.reply('You\'re not in my voicechannel!')
 
         try:
             if player.paused:
@@ -373,11 +373,11 @@ class Music(Cog):
 
         if not player.is_connected:
             # Не в войсе
-            return await ctx.send('Не подрублен в войс')
+            return await ctx.message.reply('Не подрублен в войс')
 
         if not ctx.author.voice or (player.is_connected and ctx.author.voice.channel.id != int(player.channel_id)):
             # Защита от абуза. Юзер не в войсе или в войсе, но в разных каналах с ботом
-            return await ctx.send('You\'re not in my voicechannel!')
+            return await ctx.message.reply('You\'re not in my voicechannel!')
 
         try:
             shuffle(player.queue)

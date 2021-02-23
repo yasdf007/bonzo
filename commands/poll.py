@@ -11,7 +11,7 @@ class Poll(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRole):
-            await ctx.send('**слыш,** тебе нельзя такое исполнять')
+            await ctx.message.reply('**слыш,** тебе нельзя такое исполнять')
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -29,7 +29,7 @@ class Poll(Cog):
     async def poll(self, ctx, seconds: int, question: str, *options):
         await ctx.message.delete()
         if len(options) > len(self.emojis):
-            await ctx.send(f'Максимум {len(self.emojis)} значений')
+            await ctx.message.reply(f'Максимум {len(self.emojis)} значений')
             return
 
         embed = Embed(title=question, color=0xff0000,
@@ -39,7 +39,7 @@ class Poll(Cog):
                         value='\n'.join(
                             [f'{self.emojis[index]} {option}' for index, option in enumerate(options)]))
 
-        message = await ctx.send(embed=embed)
+        message = await ctx.message.reply(embed=embed)
 
         for emoji in self.emojis[:len(options)]:
             await message.add_reaction(emoji)

@@ -15,10 +15,10 @@ class Shakalizator(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send('Где фотка')
+            await ctx.message.reply('Где фотка')
 
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
 
     @cooldown(rate=1, per=5)
     @command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
@@ -48,7 +48,7 @@ class Shakalizator(Cog):
             # Шакалим
             img.save(image_binary, "jpeg", quality=0)
             image_binary.seek(0)
-            await ctx.send(file=File(fp=image_binary, filename='now.jpeg'))
+            await ctx.message.reply(file=File(fp=image_binary, filename='now.jpeg'))
 
 
 def setup(bot):

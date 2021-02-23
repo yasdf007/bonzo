@@ -12,7 +12,7 @@ class ping(Cog):
     @command(name=name, description=description)
     async def ping(self, ctx):
         botLatency = round(self.bot.latency * 1000, 2)
-        await ctx.send('Pong! ' + str(botLatency) + 'ms ' + '(задержка)')
+        await ctx.message.reply('Pong! ' + str(botLatency) + 'ms ' + '(задержка)')
 
 
 def setup(bot):

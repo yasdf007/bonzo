@@ -18,7 +18,7 @@ class YoutubeRandom(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
 
     YOUTUBE_API_KEY = getenv('YOUTUBE_API_KEY')
     API_SERVICE_NAMCE = "youtube"
@@ -28,7 +28,7 @@ class YoutubeRandom(Cog):
 
     # async def cog_command_error(self, ctx, error):
     #     if isinstance(error, commands.CommandOnCooldown):
-    #         await ctx.send(error)
+    #         await ctx.message.reply(error)
 
     @cooldown(rate=1, per=5)
     @command(name=name, description=description, aliases=['randvid', 'video'])
@@ -59,7 +59,7 @@ class YoutubeRandom(Cog):
                 # Сохраняем ID видоса
                 youtubeVideoId = searchResult['id']['videoId']
 
-        await ctx.send(f'https://www.youtube.com/watch?v={youtubeVideoId}')
+        await ctx.message.reply(f'https://www.youtube.com/watch?v={youtubeVideoId}')
 
 
 def setup(bot):

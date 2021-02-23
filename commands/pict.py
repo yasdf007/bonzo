@@ -14,7 +14,7 @@ class pict(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send('Нужно ввести количество ссылок (до 2)')
+            await ctx.message.reply('Нужно ввести количество ссылок (до 2)')
 
     @command(name=name, description=description)
     async def pict(self, ctx, num: Optional[int]):
@@ -22,7 +22,7 @@ class pict(Cog):
         if num is None:
             # Делаем одну ссылку
             url = await self.makePictUrl()
-            await ctx.send(url)
+            await ctx.message.reply(url)
 
         # Если количество указано
         elif num > 2:
@@ -33,7 +33,7 @@ class pict(Cog):
             # Делаем num ссылок
             for _ in range(0, num):
                 url = await self.makePictUrl()
-                await ctx.send(url)
+                await ctx.message.reply(url)
 
     # Функция, генерирующая ссылку
     async def makePictUrl(self):

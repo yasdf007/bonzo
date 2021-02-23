@@ -14,9 +14,9 @@ class roll(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
         if isinstance(error, CommandInvokeError):
-            await ctx.send(error.original)
+            await ctx.message.reply(error.original)
 
     # dota 2 roll
     @cooldown(rate=1, per=3)
@@ -44,7 +44,7 @@ class roll(Cog):
             embed.title = f'Rolling from {numberFrom} to {numberTo}:'
             embed.add_field(name='Number Is',
                             value=f'{randint(numberFrom, numberTo)}', inline=False)
-            await ctx.send(embed=embed)
+            await ctx.message.reply(embed=embed)
             return
 
         # Если указано одно
@@ -52,7 +52,7 @@ class roll(Cog):
             embed.title = f'Rolling from 1 to {numberFrom}:'
             embed.add_field(name='Number Is',
                             value=f'{randint(1, numberFrom)}', inline=False)
-            await ctx.send(embed=embed)
+            await ctx.message.reply(embed=embed)
             return
 
 

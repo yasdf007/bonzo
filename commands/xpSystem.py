@@ -21,7 +21,7 @@ class AddXP(Cog):
             if channel.name != 'AFK':
                 for voiceUser in self.bot.get_channel(channel.id).members:
                     if not voiceUser.bot:
-                        self.addVoiceJob(voiceUser)
+                        self.addVoiceJob(voiceUser.id)
 
     @Cog.listener()
     async def on_message(self, message):
@@ -36,7 +36,7 @@ class AddXP(Cog):
             if member.voice and member.voice.channel.name != 'AFK' and member.voice.self_deaf == False:
                 try:
                     # Добавляем таск получения опыта
-                    self.addVoiceJob(member)
+                    self.addVoiceJob(member.id)
                 # Если уже есть задача, то пофиг (если чел перемещается по каналам, то появляется ошибка,
                 # поэтому дропаем в блок исключения )
                 except ConflictingIdError:
@@ -55,9 +55,9 @@ class AddXP(Cog):
 
         return
 
-    def addVoiceJob(self, member: int):
+    def addVoiceJob(self, memberId: int):
         self.bot.scheduler.add_job(
-            self.addVoiceXp, 'interval', minutes=1, id=f'{member.id}', args=[member.id])
+            self.addVoiceXp, 'interval', minutes=1, id=f'{memberId}', args=[memberId])
 
     async def addMessageXp(self, memberId: int):
         self.cursor.execute(
@@ -85,7 +85,7 @@ class AddXP(Cog):
         result = self.cursor.fetchmany(10)
 
         if result is None:
-            await ctx.send('Значения не найдены')
+            await ctx.message.reply('Значения не найдены')
 
         embed = Embed(
             title='TOP 10 участников по опыту', color=ctx.author.color)
@@ -98,7 +98,7 @@ class AddXP(Cog):
             member = self.bot.guild.get_member(id_)
             embed.add_field(
                 name=f'`{member.display_name}`', value=f'EXP: {exp}', inline=False)
-        await ctx.send(embed=embed)
+        await ctx.message.reply(embed=embed)
 
         return
 

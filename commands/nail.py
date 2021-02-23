@@ -12,7 +12,7 @@ class Nail(Cog):
     # Прикол ахахха
     @command(name=name, description=description)
     async def nail(self, ctx):
-        await ctx.send(file=File('./static/nail.jpg'))
+        await ctx.message.reply(file=File('./static/nail.jpg'))
 
 
 def setup(bot):

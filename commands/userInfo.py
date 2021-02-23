@@ -12,7 +12,7 @@ class Info(Cog):
 
     # async def cog_command_error(self, ctx, error):
     #     if isinstance(error, MemberNotFound):
-    #         await ctx.send(f'{error.argument} не найден')
+    #         await ctx.message.reply(f'{error.argument} не найден')
 
     @command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member = None):
@@ -70,7 +70,7 @@ class Info(Cog):
         embed.add_field(name='Появился на свет:',
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)
 
-        await ctx.send(embed=embed)
+        await ctx.message.reply(embed=embed)
 
 
 def setup(bot):

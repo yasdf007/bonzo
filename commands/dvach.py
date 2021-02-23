@@ -17,7 +17,7 @@ class Dvach(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
 
     @cooldown(rate=2, per=13)
     @command(name=name, description=description)
@@ -26,7 +26,7 @@ class Dvach(Cog):
                            params={'board': 'b'})
         resJson = json.loads(res.text)
         link = choice(resJson['response']['items'])['url']
-        await ctx.send(link)
+        await ctx.message.reply(link)
 
 
 def setup(bot):
