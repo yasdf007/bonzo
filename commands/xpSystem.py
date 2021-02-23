@@ -61,27 +61,42 @@ class AddXP(Cog):
 
     async def addMessageXp(self, memberId: int):
         self.cursor.execute(
-            'SELECT NextTextXpAt FROM exp WHERE UserId = %s', (memberId,))
+            'SELECT XP, NextTextXpAt FROM exp WHERE UserId = %s', (memberId,))
 
-        nextXpAdd = self.cursor.fetchone()[0]
+        xpInfo = self.cursor.fetchone()
+        xp, nextMessageXpAt = xpInfo
 
-        if datetime.utcnow() > nextXpAdd:
+        if datetime.now() > nextMessageXpAt:
+            newXp = xp + self.messageXP
+            newLvl = self.calculateLevel(newXp)
+
             self.cursor.execute(
-                'UPDATE exp set XP = XP + %s, NextTextXpAt = %s where UserID = %s', (self.messageXP, datetime.utcnow()+timedelta(seconds=60), memberId))
+                'UPDATE exp set XP = %s, LVL = %s,NextTextXpAt = %s where UserID = %s', (newXp, newLvl, datetime.now()+timedelta(seconds=60), memberId))
 
         return
 
     async def addVoiceXp(self, memberId: int):
         self.cursor.execute(
-            'UPDATE exp set XP = XP + %s where UserID = %s', (self.voiceXP, memberId))
+            'SELECT XP FROM exp WHERE UserId = %s', (memberId,))
+
+        xpInfo = self.cursor.fetchone()[0]
+
+        newXp = xpInfo + self.voiceXP
+        newLvl = self.calculateLevel(newXp)
+
+        self.cursor.execute(
+            'UPDATE exp set XP = %s, LVL = %s where UserID = %s', (newXp, newLvl, memberId))
 
         return
+
+    def calculateLevel(self, exp):
+        return int((exp//45) ** 0.6)
 
     @ command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
 
         self.cursor.execute(
-            'SELECT UserID, XP from exp where (XP > 0) order by xp desc')
+            'SELECT UserID, XP, LVL from exp where (XP > 0) order by xp desc')
         result = self.cursor.fetchmany(10)
 
         if result is None:
@@ -94,10 +109,10 @@ class AddXP(Cog):
             text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
         embed.set_thumbnail(url=ctx.guild.icon_url)
 
-        for id_, exp in result:
+        for id_, exp, lvl in result:
             member = self.bot.guild.get_member(id_)
             embed.add_field(
-                name=f'`{member.display_name}`', value=f'EXP: {exp}', inline=False)
+                name=f'`{member.display_name}`', value=f'LVL: {lvl}\nEXP: {exp}', inline=False)
         await ctx.message.reply(embed=embed)
 
         return
