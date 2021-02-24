@@ -15,15 +15,13 @@ class Demotivator(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send('Где фотка')
+            await ctx.message.reply('Где фотка')
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
 
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, BadArgument):
-            await ctx.send('Максимум 25 символов')
+            await ctx.message.reply('Максимум 25 символов')
 
     @cooldown(rate=1, per=5)
     @command(name=name, description=description)
@@ -52,7 +50,7 @@ class Demotivator(Cog):
         with BytesIO() as temp:
             template.save(temp, "jpeg", quality=100)
             temp.seek(0)
-            await ctx.send(file=File(fp=temp, filename='now.jpeg'))
+            await ctx.message.reply(file=File(fp=temp, filename='now.jpeg'))
 
 
 def setup(bot):

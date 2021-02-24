@@ -41,7 +41,7 @@ class Paginator:
             raise IndexError(f"Currently added {len(self.pages)} pages, but you"
                              f"tried to call controller with start_page = {start_page}")
 
-        self.controller = await self.ctx.send(embed=self.pages[start_page])
+        self.controller = await self.ctx.message.reply(embed=self.pages[start_page])
 
         for emoji in self.reactions:
             await self.controller.add_reaction(emoji)

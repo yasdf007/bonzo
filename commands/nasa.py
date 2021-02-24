@@ -22,7 +22,7 @@ class Nasa(Cog):
         embed.set_image(url=resJson['hdurl'])
         embed.set_footer(text=resJson['title'])
 
-        await ctx.send(embed=embed)
+        await ctx.message.reply(embed=embed)
 
 
 def setup(bot):

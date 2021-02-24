@@ -1,5 +1,7 @@
 from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command
 from random import randint
+from discord import Embed
+from typing import Optional
 
 name = 'roll'
 description = 'Ролит как в доте или между двумя числами (Будет переписан)'
@@ -11,38 +13,47 @@ class roll(Cog):
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.send('Нужно ввести число до миллиона')
-
-    async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
+        if isinstance(error, CommandInvokeError):
+            await ctx.message.reply(error.original)
 
     # dota 2 roll
     @cooldown(rate=1, per=3)
     @command(name=name, description=description)
-    async def roll(self, ctx, numberFrom=None, numberTo=None):
-        # Если оба числа не указаны
-        if numberFrom is None and numberTo is None:
-            # Ролим от 1 до 100
-            await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, 100)))
+    async def roll(self, ctx, numberFrom: Optional[int] = 100, *, numberTo: Optional[int]):
+        oneMillon = 10**6
 
-        # Если одна из границ не указана
-        elif numberTo is None:
-            # Ролим от 1 до того числа, который был указан
-            numberFrom = int(numberFrom)
-            if numberFrom <= 10**6:
-                await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(1, numberFrom)))
-            else:
-                # Если число больше миллиона, отправляем ошибку
-                raise CommandInvokeError()
-        else:
-            # Роляем по границам
-            numberFrom, numberTo = int(numberFrom), int(numberTo)
-            if numberTo <= 10**6:
-                await ctx.send('{0.author.mention}'.format(ctx) + ' Random Number is: ' + str(randint(numberFrom, numberTo)))
-            else:
-                await ctx.send('{0.author.mention}'.format(ctx) + ' больше мильёна роллить не буду')
+        try:
+            # Чекаем на значение, если больше ляма..
+            assert numberFrom <= oneMillon if numberFrom else 1
+            assert numberTo <= oneMillon if numberTo else 1
+
+        except AssertionError:
+            # То ошибка
+            raise CommandInvokeError(
+                f'{ctx.author.mention} больше мильёна роллить не буду')
+        embed = Embed()
+        # Еслм два числа указаны
+        if numberFrom and numberTo:
+            # Если первое число больше второго
+            if numberFrom > numberTo:
+                # Меняем местами
+                numberFrom, numberTo = numberTo, numberFrom
+
+            embed.title = f'Rolling from {numberFrom} to {numberTo}:'
+            embed.add_field(name='Number Is',
+                            value=f'{randint(numberFrom, numberTo)}', inline=False)
+            await ctx.message.reply(embed=embed)
+            return
+
+        # Если указано одно
+        if numberFrom and not numberTo:
+            embed.title = f'Rolling from 1 to {numberFrom}:'
+            embed.add_field(name='Number Is',
+                            value=f'{randint(1, numberFrom)}', inline=False)
+            await ctx.message.reply(embed=embed)
+            return
 
 
 def setup(bot):

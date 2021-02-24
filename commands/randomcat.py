@@ -12,7 +12,7 @@ class randomCat(Cog):
     # Обработа ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send('Нужно ввести количество ссылок (до 2)')
+            await ctx.message.reply('Нужно ввести количество ссылок (до 2)')
 
     @command(name=name, description=description)
     async def randomcat(self, ctx, num=None):
@@ -20,7 +20,7 @@ class randomCat(Cog):
         if num is None:
             # Отправляем одну ссылку
             cat = await self.makeCatUrl()
-            await ctx.send(cat)
+            await ctx.message.reply(cat)
 
         # Если указано
         else:
@@ -34,7 +34,7 @@ class randomCat(Cog):
                 # Делаем Num ссылок
                 for _ in range(0, num):
                     cat = await self.makeCatUrl()
-                    await ctx.send(cat)
+                    await ctx.message.reply(cat)
     # Функци создания картинки
 
     async def makeCatUrl(self):

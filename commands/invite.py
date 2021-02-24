@@ -19,7 +19,7 @@ class invite(Cog):
         embedd.add_field(
             name='кликните вот', value='[сюда](https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot)')
         embedd.set_footer(text="/by bonzo/ for @" + ctx.message.author.name)
-        await ctx.send(embed=embedd)
+        await ctx.message.reply(embed=embedd)
 
 
 def setup(bot):

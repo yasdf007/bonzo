@@ -49,7 +49,7 @@ class info(Cog):
         embed.set_footer(
             text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
 
-        await ctx.send(embed=embed)
+        await ctx.message.reply(embed=embed)
 
 
 def setup(bot):

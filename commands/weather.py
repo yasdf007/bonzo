@@ -17,7 +17,7 @@ class weather(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send(error.original)
+            await ctx.message.reply(error.original)
 
     @command(name=name, description=description, aliases=['погода'])
     async def getWeather(self, ctx, *city):
@@ -69,7 +69,7 @@ class weather(Cog):
                         value=f'{weatherHumidity} %', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
-        await ctx.send(embed=embed)
+        await ctx.message.reply(embed=embed)
 
     async def getWeatherMoji(self, weatherId, weatherIsDay):
         if weatherId.startswith('2'):

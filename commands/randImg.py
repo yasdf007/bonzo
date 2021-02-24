@@ -15,7 +15,7 @@ class randImg(Cog):
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.send(error)
+            await ctx.message.reply(error)
 
     @cooldown(rate=1, per=5)
     @command(name=name, description=description, aliases=['randimg'])
@@ -41,7 +41,7 @@ class randImg(Cog):
             await ctx.invoke(await self.randImg(ctx))
         else:
             # Картинка нашлась, отправляем ссылку на картинку
-            await ctx.send(iImgurUrl)
+            await ctx.message.reply(iImgurUrl)
 
 
 def setup(bot):

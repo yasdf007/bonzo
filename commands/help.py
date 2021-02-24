@@ -38,10 +38,10 @@ class helping(Cog):
 
                 embed.add_field(name='Описание', value=cmd.description)
 
-                await ctx.send(embed=embed)
+                await ctx.message.reply(embed=embed)
             # Команды нет
             else:
-                await ctx.send('Такой команды нет')
+                await ctx.message.reply('Такой команды нет')
 
     # Как используется команда
     async def commandUsage(self, cmd):

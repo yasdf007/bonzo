@@ -12,7 +12,7 @@ class obser(Cog):
     # Прикол ахахха
     @command(name=name, description=description)
     async def obser(self, ctx):
-        await ctx.send(content='https://www.youtube.com/watch?v=Nv9x7E5tnoA', file=File('./static/pictOBSER.jpg'))
+        await ctx.message.reply(content='https://www.youtube.com/watch?v=Nv9x7E5tnoA', file=File('./static/pictOBSER.jpg'))
 
 
 def setup(bot):
