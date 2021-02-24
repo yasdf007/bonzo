@@ -1,16 +1,8 @@
 discord.py==1.6.0
 python-dotenv==0.15.0
-<<<<<<< HEAD
 Pillow==8.1.0
 requests==2.25.1
 Lavalink==3.1.4
 google-api-python-client==1.12.8
 apscheduler==3.7.0
 psycopg2-binary==2.8.6
-=======
-beautifulsoup4==4.9.3
-Pillow==8.0.1
-requests==2.25.0
-Lavalink==3.1.2
-google-api-python-client==1.12.8
->>>>>>> master
