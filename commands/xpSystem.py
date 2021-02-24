@@ -1,8 +1,7 @@
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from discord.ext.commands import Cog, command
 from database import db
-from random import randint
-from discord import Member, Embed
+from discord import Embed
 from datetime import datetime, timedelta
 
 
@@ -90,7 +89,10 @@ class AddXP(Cog):
         return
 
     def calculateLevel(self, exp):
-        return int((exp//45) ** 0.6)
+        return int((exp/45) ** 0.6)
+
+    def calculateXp(self, lvl):
+        return int((45*lvl**(5/3)))+1
 
     @ command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
@@ -101,7 +103,7 @@ class AddXP(Cog):
 
         if result is None:
             await ctx.message.reply('Значения не найдены')
-
+            return
         embed = Embed(
             title='TOP 10 участников по опыту', color=ctx.author.color)
 
