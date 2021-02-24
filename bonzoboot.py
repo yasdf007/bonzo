@@ -3,6 +3,7 @@
 # осуществлять запуск только из этого файла.
 from discord import Intents, Game, Status
 from discord.ext.commands import Bot as bonzoBot, Cog
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from platform import platform
 from time import time
 from os import listdir, getenv
@@ -16,6 +17,7 @@ class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.all()
         self.game = Game("b/help | v1.0 RC2")
+        self.scheduler = AsyncIOScheduler()
         self.startTime = None
         self.guild = None
 
