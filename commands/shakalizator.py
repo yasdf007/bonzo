@@ -2,7 +2,7 @@ from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, coo
 from discord import File
 from PIL import Image
 from io import BytesIO
-import requests
+from aiohttp import ClientSession
 
 name = 'shakalizator'
 description = 'ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку'
@@ -23,19 +23,17 @@ class Shakalizator(Cog):
     @cooldown(rate=1, per=5)
     @command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, imageUrl=None):
-        # Если нет прикрепленной фотки, то обрабатываем фото из ссылки
-        if imageUrl != None:
-            requestImage = requests.get(imageUrl)
-        # Если нет ссылки, то берем прикладываемую
-        elif ctx.message.attachments:
-            urlFromPhoto = ctx.message.attachments[0].url
-            requestImage = requests.get(urlFromPhoto)
-        else:
-            # Не вызывается поч
+        imageUrl = imageUrl or ctx.message.attachments[0].url
+
+        if not imageUrl:
             raise CommandInvokeError()
 
+        async with ClientSession() as session:
+            async with session.get(imageUrl) as response:
+                requestImage = await response.read()
+
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-        img = Image.open(BytesIO(requestImage.content))
+        img = Image.open(BytesIO(requestImage))
         img = img.convert('RGB')
 
         # Изменение фотки

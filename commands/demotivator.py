@@ -2,8 +2,7 @@ from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, Bad
 from discord import File
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from requests import get
-
+from aiohttp import ClientSession
 name = 'demotivator'
 description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
 
@@ -31,9 +30,11 @@ class Demotivator(Cog):
             raise BadArgument()
 
         urlFromPhoto = ctx.message.attachments[0].url
-        requestImage = get(urlFromPhoto)
+        async with ClientSession() as session:
+            async with session.get(urlFromPhoto) as response:
+                requestImage = await response.read()
 
-        img = Image.open(BytesIO(requestImage.content))
+        img = Image.open(BytesIO(requestImage))
         img = img.convert('RGB')
         img = img.resize((666, 655))
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)

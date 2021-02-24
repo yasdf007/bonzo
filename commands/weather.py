@@ -2,7 +2,7 @@ from discord import Embed
 from discord.ext.commands import Cog, CommandInvokeError, command
 from os import getenv
 from dotenv import load_dotenv
-from requests import get
+from aiohttp import ClientSession
 import json
 load_dotenv()
 
@@ -29,13 +29,12 @@ class weather(Cog):
         # Ссылка с запросом q=Город appid=Токен
         query = f'https://api.openweathermap.org/data/2.5/weather?q={city}&lang=ru&units=metric&appid={weatherToken}'
         # Получаем инфу из запроса
-        result = get(query)
-
-        if(result.status_code == 404):
-            raise CommandInvokeError(f'Город {city} не найден')
-
-        # Загружаем запров в формат JSON
-        jsonResult = json.loads(result.text)
+        async with ClientSession() as session:
+            async with session.get(query) as response:
+                if(response.status == 404):
+                    raise CommandInvokeError(f'Город {city} не найден')
+                # Загружаем запрос в формат JSON
+                jsonResult = await response.json()
 
         # Получаем информацию из JSON, переменные говорят сами за себя
         weatherCountry = jsonResult['sys']['country'].lower()

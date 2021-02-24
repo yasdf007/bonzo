@@ -1,5 +1,5 @@
 from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
-import requests
+from aiohttp import ClientSession
 from random import choice
 import json
 name = '2ch'
@@ -14,6 +14,7 @@ class Dvach(Cog):
             'Content-Type': 'application/json',
         }
         self.URL = 'https://api.randomtube.xyz/video.get'
+        self.PARAMS = {'board': 'b'}
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
@@ -22,9 +23,11 @@ class Dvach(Cog):
     @cooldown(rate=2, per=13)
     @command(name=name, description=description)
     async def dvach(self, ctx):
-        res = requests.get(self.URL, headers=self.USERAGENT,
-                           params={'board': 'b'})
-        resJson = json.loads(res.text)
+        async with ClientSession(headers=self.USERAGENT) as session:
+            async with session.get(self.URL, params=self.PARAMS) as response:
+                res = await response.read()
+
+        resJson = json.loads(res)
         link = choice(resJson['response']['items'])['url']
         await ctx.message.reply(link)
 
