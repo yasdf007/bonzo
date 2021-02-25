@@ -11,12 +11,13 @@ class AddXP(Cog):
         self.cursor = db.cursor
         self.messageXP = 1
         self.voiceXP = 10
+        self.guild = None
 
     @Cog.listener()
     async def on_ready(self):
-        guild = self.bot.get_guild(664485208745050112)
+        self.guild = self.bot.get_guild(664485208745050112)
 
-        for channel in guild.voice_channels:
+        for channel in self.guild.voice_channels:
             if channel.name != 'AFK':
                 for voiceUser in self.bot.get_channel(channel.id).members:
                     if not voiceUser.bot:
@@ -24,13 +25,13 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if not message.author.bot:
+        if not message.author.bot and message.guild.id == self.guild.id:
             await self.addMessageXp(message.author.id)
         return
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if not member.bot:
+        if not member.bot and member.guild.id == self.guild.id:
             # Если чел зашел в войс и не в канале АФК, и не замучен
             if member.voice and member.voice.channel.name != 'AFK' and member.voice.self_deaf == False:
                 try:
