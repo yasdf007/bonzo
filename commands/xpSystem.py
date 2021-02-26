@@ -36,7 +36,7 @@ class AddXP(Cog):
             if member.voice and member.voice.channel.name != 'AFK' and member.voice.self_deaf == False:
                 try:
                     # Добавляем таск получения опыта
-                    self.addVoiceJob(member.id)
+                    self.addVoiceJob(member)
                 # Если уже есть задача, то пофиг (если чел перемещается по каналам, то появляется ошибка,
                 # поэтому дропаем в блок исключения )
                 except ConflictingIdError:
@@ -79,17 +79,21 @@ class AddXP(Cog):
 
         return
 
-    async def addVoiceXp(self, memberId: int):
+    async def addVoiceXp(self, member):
         self.cursor.execute(
-            'SELECT XP FROM exp WHERE UserId = %s', (memberId,))
+            'SELECT XP, NextTextXpAt FROM exp WHERE UserId = %s and serverId=%s', (member.id, member.guild.id))
 
         xpInfo = self.cursor.fetchone()[0]
 
+        if xpInfo is None:
+            self.cursor.execute(
+                'INSERT INTO exp (serverId, UserID) values (%s, %s)', (member.guild.id, member.id))
+            return
         newXp = xpInfo + self.voiceXP
         newLvl = self.calculateLevel(newXp)
 
         self.cursor.execute(
-            'UPDATE exp set XP = %s, LVL = %s where UserID = %s', (newXp, newLvl, memberId))
+            'UPDATE exp set XP = %s, LVL = %s where UserID = %s and serverId=%s', (newXp, newLvl, member.id, member.guild.id))
 
         return
 

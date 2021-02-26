@@ -39,11 +39,6 @@ class Bot(bonzoBot):
         self.cogsLoad()
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
-    def update_db(self):
-        db.cursor.executemany(
-            "INSERT into exp (UserID, serverId) VALUES (%s, %s);", ([member.id, self.guild.id] for member in self.guild.members if not member.bot))
-        db.commit()
-
     @Cog.listener()
     async def on_ready(self):
 
@@ -52,8 +47,6 @@ class Bot(bonzoBot):
         await self.change_presence(status=Status.online, activity=self.game)
         # self.load_extension('commands.music')
         self.scheduler.start()
-
-        self.update_db()
 
         endTime = time() - self.startTime
 
