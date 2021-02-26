@@ -25,8 +25,8 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if not message.author.bot and message.guild.id == self.guild.id:
-            await self.addMessageXp(message.author.id)
+        if not message.author.bot:
+            await self.addMessageXp(message.author)
         return
 
     @Cog.listener()
@@ -59,11 +59,15 @@ class AddXP(Cog):
         self.bot.scheduler.add_job(
             self.addVoiceXp, 'interval', minutes=1, id=f'{memberId}', args=[memberId])
 
-    async def addMessageXp(self, memberId: int):
+    async def addMessageXp(self, member):
         self.cursor.execute(
-            'SELECT XP, NextTextXpAt FROM exp WHERE UserId = %s', (memberId,))
+            'SELECT XP, NextTextXpAt FROM exp WHERE UserId = %s and serverId=%s', (member.id, member.guild.id))
 
         xpInfo = self.cursor.fetchone()
+        if xpInfo is None:
+            self.cursor.execute(
+                'INSERT INTO exp (serverId, UserID) values (%s, %s)', (member.guild.id, member.id))
+            return
         xp, nextMessageXpAt = xpInfo
 
         if datetime.now() > nextMessageXpAt:
@@ -71,7 +75,7 @@ class AddXP(Cog):
             newLvl = self.calculateLevel(newXp)
 
             self.cursor.execute(
-                'UPDATE exp set XP = %s, LVL = %s,NextTextXpAt = %s where UserID = %s', (newXp, newLvl, datetime.now()+timedelta(seconds=60), memberId))
+                'UPDATE exp set XP = %s, LVL = %s,NextTextXpAt = %s where UserID = %s and serverId=%s', (newXp, newLvl, datetime.now()+timedelta(seconds=60), member.id, member.guild.id))
 
         return
 
@@ -99,7 +103,7 @@ class AddXP(Cog):
     async def leaderboard(self, ctx):
 
         self.cursor.execute(
-            'SELECT UserID, XP, LVL from exp where (XP > 0) order by xp desc')
+            'SELECT UserID, XP, LVL from exp where (XP > 0) and serverId=%s order by xp desc', (str(ctx.guild.id),))
         result = self.cursor.fetchmany(10)
 
         if result is None:

@@ -41,7 +41,7 @@ class Bot(bonzoBot):
 
     def update_db(self):
         db.cursor.executemany(
-            "INSERT into exp (UserID) VALUES (%s) ON CONFLICT (UserID) DO NOTHING;", ([member.id] for member in self.guild.members if not member.bot))
+            "INSERT into exp (UserID, serverId) VALUES (%s, %s);", ([member.id, self.guild.id] for member in self.guild.members if not member.bot))
         db.commit()
 
     @Cog.listener()
