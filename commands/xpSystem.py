@@ -21,7 +21,7 @@ class AddXP(Cog):
             if channel.name != 'AFK':
                 for voiceUser in self.bot.get_channel(channel.id).members:
                     if not voiceUser.bot:
-                        self.addVoiceJob(voiceUser.id)
+                        self.addVoiceJob(voiceUser)
 
     @Cog.listener()
     async def on_message(self, message):
@@ -60,42 +60,60 @@ class AddXP(Cog):
             self.addVoiceXp, 'interval', minutes=1, id=f'{memberId}', args=[memberId])
 
     async def addMessageXp(self, member):
-        self.cursor.execute(
-            'SELECT XP, NextTextXpAt FROM exp WHERE UserId = %s and serverId=%s', (member.id, member.guild.id))
+        selectQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+                    select xp, nexttextxpat  from xpinfo where xpinfo.id = (select res.id from res);'
+
+        values = ((member.id, member.guild.id))
+
+        self.cursor.execute(selectQuery, values)
 
         xpInfo = self.cursor.fetchone()
+
         if xpInfo is None:
-            self.cursor.execute(
-                'INSERT INTO exp (serverId, UserID) values (%s, %s)', (member.guild.id, member.id))
+            insertQuery = 'with res as (insert into user_server (userid, serverid) values (%s, %s) returning id)\
+                        insert into xpinfo (id) select res.id from res;'
+
+            self.cursor.execute(insertQuery, values)
             return
+
         xp, nextMessageXpAt = xpInfo
 
         if datetime.now() > nextMessageXpAt:
             newXp = xp + self.messageXP
             newLvl = self.calculateLevel(newXp)
 
-            self.cursor.execute(
-                'UPDATE exp set XP = %s, LVL = %s,NextTextXpAt = %s where UserID = %s and serverId=%s', (newXp, newLvl, datetime.now()+timedelta(seconds=60), member.id, member.guild.id))
+            updateQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+                        update xpinfo set xp=%s, LVL=%s, NextTextXpAt = %s where xpinfo.id = (select res.id from res);'
+            values = ((member.id, member.guild.id, newXp, newLvl,
+                       datetime.now()+timedelta(seconds=60)))
 
-        return
+            self.cursor.execute(updateQuery, values)
 
     async def addVoiceXp(self, member):
-        self.cursor.execute(
-            'SELECT XP, NextTextXpAt FROM exp WHERE UserId = %s and serverId=%s', (member.id, member.guild.id))
+        selectQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+                    select xp from xpinfo where xpinfo.id = (select res.id from res);'
+
+        values = ((member.id, member.guild.id))
+
+        self.cursor.execute(selectQuery, values)
 
         xpInfo = self.cursor.fetchone()[0]
 
         if xpInfo is None:
-            self.cursor.execute(
-                'INSERT INTO exp (serverId, UserID) values (%s, %s)', (member.guild.id, member.id))
+            insertQuery = 'with res as (insert into user_server (userid, serverid) values (%s, %s) returning id)\
+                        insert into xpinfo (id) select res.id from res;'
+
+            self.cursor.execute(insertQuery, values)
             return
+
         newXp = xpInfo + self.voiceXP
         newLvl = self.calculateLevel(newXp)
 
-        self.cursor.execute(
-            'UPDATE exp set XP = %s, LVL = %s where UserID = %s and serverId=%s', (newXp, newLvl, member.id, member.guild.id))
+        updateQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+                        update xpinfo set xp=%s, LVL=%s  where xpinfo.id = (select res.id from res);'
+        values = ((member.id, member.guild.id, newXp, newLvl))
 
-        return
+        self.cursor.execute(updateQuery, values)
 
     def calculateLevel(self, exp):
         return int((exp/45) ** 0.6)
@@ -105,14 +123,16 @@ class AddXP(Cog):
 
     @ command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
+        selectQuery = 'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = %s and xp > 0 order by xp desc;'
+        values = ((str(ctx.guild.id),))
+        self.cursor.execute(selectQuery, values)
 
-        self.cursor.execute(
-            'SELECT UserID, XP, LVL from exp where (XP > 0) and serverId=%s order by xp desc', (str(ctx.guild.id),))
         result = self.cursor.fetchmany(10)
 
         if result is None:
             await ctx.message.reply('Значения не найдены')
             return
+
         embed = Embed(
             title='TOP 10 участников по опыту', color=ctx.author.color)
 
@@ -125,8 +145,6 @@ class AddXP(Cog):
             embed.add_field(
                 name=f'`{member.display_name}`', value=f'LVL: {lvl}\nEXP: {exp}', inline=False)
         await ctx.message.reply(embed=embed)
-
-        return
 
 
 def setup(bot):

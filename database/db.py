@@ -24,3 +24,4 @@ def autoSave(sched):
 def createDB():
     with open(BUILD_SQL, 'r') as query:
         cursor.execute(query.read())
+        commit()
