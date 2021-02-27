@@ -21,9 +21,6 @@ class Bot(bonzoBot):
         self.startTime = None
         self.guild = None
 
-        db.createDB()
-        db.autoSave(self.scheduler)
-
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
 
@@ -41,7 +38,7 @@ class Bot(bonzoBot):
 
     @Cog.listener()
     async def on_ready(self):
-
+        self.pool = await db.connectToDB()
         self.guild = self.get_guild(664485208745050112)
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)

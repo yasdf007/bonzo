@@ -10,7 +10,6 @@ from io import BytesIO
 class AddXP(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.cursor = db.cursor
         self.messageXP = 1
         self.voiceXP = 10
         self.guild = None
@@ -66,60 +65,52 @@ class AddXP(Cog):
             self.addVoiceXp, 'interval', minutes=1, id=f'{memberId}', args=[memberId])
 
     async def addMessageXp(self, member):
-        selectQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+        selectQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
                     select xp, nexttextxpat  from xpinfo where xpinfo.id = (select res.id from res);'
 
-        values = ((member.id, member.guild.id))
-
-        self.cursor.execute(selectQuery, values)
-
-        xpInfo = self.cursor.fetchone()
+        xpInfo = await self.bot.pool.fetchrow(selectQuery, member.id, member.guild.id)
 
         if xpInfo is None:
-            insertQuery = 'with res as (insert into user_server (userid, serverid) values (%s, %s) returning id)\
+            insertQuery = 'with res as (insert into user_server (userid, serverid) values ($1, $2) returning id)\
                         insert into xpinfo (id) select res.id from res;'
 
-            self.cursor.execute(insertQuery, values)
+            await self.bot.pool.execute(insertQuery, member.id, member.guild.id)
             return
 
-        xp, nextMessageXpAt = xpInfo
+        xp = xpInfo['xp']
+        nextMessageXpAt = xpInfo['nexttextxpat']
 
         if datetime.now() > nextMessageXpAt:
             newXp = xp + self.messageXP
             newLvl = self.calculateLevel(newXp)
 
-            updateQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
-                        update xpinfo set xp=%s, LVL=%s, NextTextXpAt = %s where xpinfo.id = (select res.id from res);'
-            values = ((member.id, member.guild.id, newXp, newLvl,
-                       datetime.now()+timedelta(seconds=60)))
+            updateQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
+                        update xpinfo set xp=$3, LVL=$4, NextTextXpAt = $5 where xpinfo.id = (select res.id from res);'
 
-            self.cursor.execute(updateQuery, values)
+            await self.bot.pool.execute(updateQuery, member.id, member.guild.id, newXp, newLvl,
+                                        datetime.now()+timedelta(seconds=60))
 
     async def addVoiceXp(self, member):
-        selectQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+        selectQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
                     select xp from xpinfo where xpinfo.id = (select res.id from res);'
 
-        values = ((member.id, member.guild.id))
-
-        self.cursor.execute(selectQuery, values)
-
-        xpInfo = self.cursor.fetchone()[0]
+        xpInfo = await self.bot.pool.fetchrow(selectQuery, member.id, member.guild.id)
 
         if xpInfo is None:
-            insertQuery = 'with res as (insert into user_server (userid, serverid) values (%s, %s) returning id)\
+            insertQuery = 'with res as (insert into user_server (userid, serverid) values ($1, $2) returning id)\
                         insert into xpinfo (id) select res.id from res;'
 
-            self.cursor.execute(insertQuery, values)
+            await self.bot.pool.execute(insertQuery, member.id, member.guild.id)
             return
 
-        newXp = xpInfo + self.voiceXP
+        newXp = xpInfo['xp'] + self.voiceXP
         newLvl = self.calculateLevel(newXp)
 
-        updateQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
-                        update xpinfo set xp=%s, LVL=%s  where xpinfo.id = (select res.id from res);'
-        values = ((member.id, member.guild.id, newXp, newLvl))
+        updateQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
+                        update xpinfo set xp=$3, LVL=$4  where xpinfo.id = (select res.id from res);'
 
-        self.cursor.execute(updateQuery, values)
+        await self.bot.pool.execute(updateQuery, member.id,
+                                    member.guild.id, newXp, newLvl)
 
     def calculateLevel(self, exp):
         return int((exp/45) ** 0.6)
@@ -134,12 +125,9 @@ class AddXP(Cog):
 
     @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
-        selectQuery = 'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = %s and xp > 0 order by xp desc;'
-        values = ((str(ctx.guild.id),))
+        selectQuery = 'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = $1 and xp > 0 order by xp desc;'
 
-        self.cursor.execute(selectQuery, values)
-
-        result = self.cursor.fetchmany(10)
+        result = await self.bot.pool.fetch(selectQuery, ctx.guild.id)
 
         if result is None:
             await ctx.message.reply('Значения не найдены')
@@ -161,19 +149,18 @@ class AddXP(Cog):
     @cooldown(rate=1, per=60, type=BucketType.user)
     @command(name='rank', description='Показывает карточку с опытом')
     async def rank(self, ctx):
-        selectQuery = 'with res as (select id from user_server where userid=(%s) and serverid=(%s)) \
+        selectQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
                     select xp, lvl from xpinfo where xpinfo.id = (select res.id from res);'
 
-        values = ((ctx.author.id, ctx.guild.id))
-        self.cursor.execute(selectQuery, values)
         try:
-            xp, lvl = self.cursor.fetchone()
+            xp, lvl = await self.bot.pool.fetchrow(
+                selectQuery, ctx.author.id, ctx.guild.id)
         except TypeError:
             await ctx.message.reply('Тебя нет в базе данных, добавляю...')
-            insertQuery = 'with res as (insert into user_server (userid, serverid) values (%s, %s) returning id)\
+            insertQuery = 'with res as (insert into user_server (userid, serverid) values ($1, $2) returning id)\
                         insert into xpinfo (id) select res.id from res;'
 
-            self.cursor.execute(insertQuery, values)
+            await self.bot.pool.execute(insertQuery, ctx.author.id, ctx.guild.id)
             return
 
         reqImage = await Asset.read(ctx.author.avatar_url)
