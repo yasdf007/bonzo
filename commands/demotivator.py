@@ -12,15 +12,15 @@ class Demotivator(Cog):
         self.bot = bot
 
     # Обработка ошибок
-    # async def cog_command_error(self, ctx, error):
-    #     if isinstance(error, CommandInvokeError):
-    #         await ctx.message.reply('Где фотка')
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, CommandInvokeError):
+            await ctx.message.reply('Где фотка')
 
-    #     if isinstance(error, CommandOnCooldown):
-    #         await ctx.message.reply(error)
+        if isinstance(error, CommandOnCooldown):
+            await ctx.message.reply(error)
 
-    #     if isinstance(error, BadArgument):
-    #         await ctx.message.reply('Максимум 25 символов')
+        if isinstance(error, BadArgument):
+            await ctx.message.reply('Максимум 25 символов')
 
     @cooldown(rate=1, per=5)
     @command(name=name, description=description)
