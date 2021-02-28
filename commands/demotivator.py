@@ -12,15 +12,15 @@ class Demotivator(Cog):
         self.bot = bot
 
     # Обработка ошибок
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply('Где фотка')
+    # async def cog_command_error(self, ctx, error):
+    #     if isinstance(error, CommandInvokeError):
+    #         await ctx.message.reply('Где фотка')
 
-        if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
+    #     if isinstance(error, CommandOnCooldown):
+    #         await ctx.message.reply(error)
 
-        if isinstance(error, BadArgument):
-            await ctx.message.reply('Максимум 25 символов')
+    #     if isinstance(error, BadArgument):
+    #         await ctx.message.reply('Максимум 25 символов')
 
     @cooldown(rate=1, per=5)
     @command(name=name, description=description)
@@ -38,8 +38,7 @@ class Demotivator(Cog):
         img = img.convert('RGB')
         img = img.resize((666, 655))
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-        template = Image.open('./static/demotivatorTemplate.jpg')
-        template.convert('RGB')
+        template = Image.open('./static/demotivatorTemplate.png')
 
         template.paste(img, (50, 50))
         draw = ImageDraw.Draw(template)
@@ -49,9 +48,10 @@ class Demotivator(Cog):
                   font=font, align='right')
 
         with BytesIO() as temp:
-            template.save(temp, "jpeg", quality=100)
+            template.save(temp, "png", quality=100)
             temp.seek(0)
-            await ctx.message.reply(file=File(fp=temp, filename='now.jpeg'))
+            await ctx.message.reply(file=File(fp=temp, filename='now.png'))
+        temp.close()
 
 
 def setup(bot):
