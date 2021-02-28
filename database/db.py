@@ -7,7 +7,7 @@ load_dotenv()  # загружает файл env
 
 BUILD_SQL = './database/build.sql'
 
-connection_string = getenv('CONNECTION_STRING')
+connection_string = getenv('DATABASE_URL')
 
 
 async def createDB(pool):

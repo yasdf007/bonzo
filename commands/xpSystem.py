@@ -1,6 +1,5 @@
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType
-from database import db
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
@@ -17,6 +16,32 @@ class AddXP(Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
+
+    def calculateLevel(self, exp):
+        return int((exp/45) ** 0.6)
+
+    def calculateXp(self, lvl):
+        return int((45*lvl**(5/3)))+1
+
+    def percentsToLvlUp(self, currentXp, currentLVL):
+        devinded = currentXp-self.calculateXp(currentLVL)
+        devider = self.calculateXp(currentLVL+1)-self.calculateXp(currentLVL)
+        return round(devinded/devider, 2)
+
+    async def executeQuery(self, query: str, type_: str):
+        async with self.bot.pool.acquire() as con:
+            if type_ == 'fetch':
+                result = await con.fetch(query)
+
+            if type_ == 'fetchrow':
+                result = await con.fetchrow(query)
+
+            if type_ == 'execute':
+                result = await con.execute(query)
+
+            await con.close()
+
+        return result
 
     @Cog.listener()
     async def on_ready(self):
@@ -65,17 +90,15 @@ class AddXP(Cog):
             self.addVoiceXp, 'interval', minutes=1, id=f'{memberId}', args=[memberId])
 
     async def addMessageXp(self, member):
-        selectQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
-                    select xp, nexttextxpat  from xpinfo where xpinfo.id = (select res.id from res);'
-        async with self.bot.pool.acquire() as con:
-            xpInfo = await con.fetchrow(selectQuery, member.id, member.guild.id)
+        selectQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                    select xp,nexttextxpat from xpinfo where xpinfo.id = (select res.id from res);'
 
-            if xpInfo is None:
-                insertQuery = 'with res as (insert into user_server (userid, serverid) values ($1, $2) returning id)\
-                            insert into xpinfo (id) select res.id from res;'
+        xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
 
-                await con.execute(insertQuery, member.id, member.guild.id)
-                return
+        if xpInfo is None:
+            insertQuery = f'with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id) \
+                        insert into xpinfo (id) select res.id from res;'
+            await self.executeQuery(insertQuery, 'execute')
 
             xp = xpInfo['xp']
             nextMessageXpAt = xpInfo['nexttextxpat']
@@ -84,53 +107,39 @@ class AddXP(Cog):
                 newXp = xp + self.messageXP
                 newLvl = self.calculateLevel(newXp)
 
-                updateQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
-                            update xpinfo set xp=$3, LVL=$4, NextTextXpAt = $5 where xpinfo.id = (select res.id from res);'
+                updateQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                            update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = {datetime.now()+timedelta(seconds=60)}\
+                            where xpinfo.id = (select res.id from res);'
 
-                await con.execute(updateQuery, member.id, member.guild.id, newXp, newLvl,
-                                  datetime.now()+timedelta(seconds=60))
-            await con.close()
+                await self.executeQuery(updateQuery, 'execute')
 
     async def addVoiceXp(self, member):
-        selectQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
+        selectQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
                     select xp from xpinfo where xpinfo.id = (select res.id from res);'
-        async with self.bot.pool.acquire() as con:
-            xpInfo = await con.fetchrow(selectQuery, member.id, member.guild.id)
 
-            if xpInfo is None:
-                insertQuery = 'with res as (insert into user_server (userid, serverid) values ($1, $2) returning id)\
-                            insert into xpinfo (id) select res.id from res;'
+        xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
 
-                await con.execute(insertQuery, member.id, member.guild.id)
-                return
+        if xpInfo is None:
+            insertQuery = f'with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id)\
+                        insert into xpinfo (id) select res.id from res;'
+            await self.executeQuery(insertQuery, 'execute')
+            return
 
-            newXp = xpInfo['xp'] + self.voiceXP
-            newLvl = self.calculateLevel(newXp)
+        newXp = xpInfo['xp'] + self.voiceXP
+        newLvl = self.calculateLevel(newXp)
 
-            updateQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
-                            update xpinfo set xp=$3, LVL=$4  where xpinfo.id = (select res.id from res);'
+        updateQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                        update xpinfo set xp={newXp}, LVL={newLvl}  where xpinfo.id = (select res.id from res);'
 
-            await con.execute(updateQuery, member.id,
-                              member.guild.id, newXp, newLvl)
-            await con.close()
-
-    def calculateLevel(self, exp):
-        return int((exp/45) ** 0.6)
-
-    def calculateXp(self, lvl):
-        return int((45*lvl**(5/3)))+1
-
-    def percentsToLvlUp(self, currentXp, currentLVL):
-        devinded = currentXp-self.calculateXp(currentLVL)
-        devider = self.calculateXp(currentLVL+1)-self.calculateXp(currentLVL)
-        return round(devinded/devider, 4)
+        await self.executeQuery(updateQuery, 'execute')
 
     @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
-        selectQuery = 'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = $1 and xp > 0 order by xp desc;'
-        async with self.bot.pool.acquire() as con:
-            result = await con.fetch(selectQuery, ctx.guild.id)
-            await con.close()
+        selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
+        where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc;'
+
+        result = await self.executeQuery(selectQuery, 'fetch')
+
         if result is None:
             await ctx.message.reply('Значения не найдены')
             return
@@ -151,20 +160,19 @@ class AddXP(Cog):
     @cooldown(rate=1, per=60, type=BucketType.user)
     @command(name='rank', description='Показывает карточку с опытом')
     async def rank(self, ctx):
-        selectQuery = 'with res as (select id from user_server where userid=($1) and serverid=($2)) \
+        selectQuery = f'with res as (select id from user_server where userid=({ctx.author.id}) and serverid=({ctx.guild.id})) \
                     select xp, lvl from xpinfo where xpinfo.id = (select res.id from res);'
-        async with self.bot.pool.acquire() as con:
-            try:
-                xp, lvl = await con.fetchrow(
-                    selectQuery, ctx.author.id, ctx.guild.id)
-            except TypeError:
-                await ctx.message.reply('Тебя нет в базе данных, добавляю...')
-                insertQuery = 'with res as (insert into user_server (userid, serverid) values ($1, $2) returning id)\
-                            insert into xpinfo (id) select res.id from res;'
+        try:
+            result = await self.executeQuery(selectQuery, 'fetchrow')
+            xp = result['xp']
+            lvl = result['lvl']
 
-                await con.execute(insertQuery, ctx.author.id, ctx.guild.id)
-                return
-            await con.close()
+        except TypeError:
+            await ctx.message.reply('Тебя нет в базе данных, добавляю...')
+            insertQuery = f'with res as (insert into user_server (userid, serverid) values ({ctx.author.id}, {ctx.guild.id}) returning id)\
+                        insert into xpinfo (id) select res.id from res;'
+
+            await self.executeQuery(insertQuery, 'execute')
 
         reqImage = await Asset.read(ctx.author.avatar_url)
 
@@ -200,6 +208,7 @@ class AddXP(Cog):
             template.save(temp, "png", quality=100)
             temp.seek(0)
             await ctx.message.reply(file=File(fp=temp, filename='now.jpeg'))
+        temp.close()
 
 
 def setup(bot):
