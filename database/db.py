@@ -16,6 +16,6 @@ async def createDB(pool):
 
 
 async def connectToDB():
-    pool = await asyncpg.create_pool(connection_string)
+    pool = await asyncpg.create_pool(dsn=connection_string, max_inactive_connection_lifetime=60)
     await createDB(pool)
     return pool
