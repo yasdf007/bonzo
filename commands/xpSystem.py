@@ -18,10 +18,10 @@ class AddXP(Cog):
             await ctx.message.reply(error)
 
     def calculateLevel(self, exp):
-        return int((exp/45) ** 0.6)
+        return int((exp/40) ** 0.5)
 
     def calculateXp(self, lvl):
-        return int((45*lvl**(5/3)))+1
+        return int(40*lvl**2)
 
     def percentsToLvlUp(self, currentXp, currentLVL):
         devinded = currentXp-self.calculateXp(currentLVL)
@@ -39,7 +39,7 @@ class AddXP(Cog):
             if type_ == 'execute':
                 result = await con.execute(query)
 
-            await con.close()
+        await self.bot.pool.release(con)
 
         return result
 
@@ -99,19 +99,20 @@ class AddXP(Cog):
             insertQuery = f'with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id) \
                         insert into xpinfo (id) select res.id from res;'
             await self.executeQuery(insertQuery, 'execute')
+            return
 
-            xp = xpInfo['xp']
-            nextMessageXpAt = xpInfo['nexttextxpat']
+        xp = xpInfo['xp']
+        nextMessageXpAt = xpInfo['nexttextxpat']
 
-            if datetime.now() > nextMessageXpAt:
-                newXp = xp + self.messageXP
-                newLvl = self.calculateLevel(newXp)
+        if datetime.now() > nextMessageXpAt:
+            newXp = xp + self.messageXP
+            newLvl = self.calculateLevel(newXp)
+            nextXpAt = datetime.now()+timedelta(seconds=60)
+            updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                            update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = '{datetime.now()+timedelta(seconds=60)}' \
+                            where xpinfo.id = (select res.id from res);"
 
-                updateQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                            update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = {datetime.now()+timedelta(seconds=60)}\
-                            where xpinfo.id = (select res.id from res);'
-
-                await self.executeQuery(updateQuery, 'execute')
+            await self.executeQuery(updateQuery, 'execute')
 
     async def addVoiceXp(self, member):
         selectQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
@@ -133,6 +134,7 @@ class AddXP(Cog):
 
         await self.executeQuery(updateQuery, 'execute')
 
+    @cooldown(rate=1, per=20, type=BucketType.user)
     @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
         selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
