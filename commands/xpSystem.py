@@ -18,15 +18,15 @@ class AddXP(Cog):
             await ctx.message.reply(error)
 
     def calculateLevel(self, exp):
-        return int((exp/40) ** 0.5)
+        return int((exp/60) ** 0.5)
 
     def calculateXp(self, lvl):
-        return int(40*lvl**2)
+        return int(60*lvl**2)
 
     def percentsToLvlUp(self, currentXp, currentLVL):
         devinded = currentXp-self.calculateXp(currentLVL)
         devider = self.calculateXp(currentLVL+1)-self.calculateXp(currentLVL)
-        return round(devinded/devider, 2)
+        return round(devinded/devider, 4)
 
     async def executeQuery(self, query: str, type_: str):
         async with self.bot.pool.acquire() as con:
@@ -162,12 +162,18 @@ class AddXP(Cog):
     @cooldown(rate=1, per=60, type=BucketType.user)
     @command(name='rank', description='Показывает карточку с опытом')
     async def rank(self, ctx):
-        selectQuery = f'with res as (select id from user_server where userid=({ctx.author.id}) and serverid=({ctx.guild.id})) \
-                    select xp, lvl from xpinfo where xpinfo.id = (select res.id from res);'
+        selectQuery = f'select xp,lvl,rnk from (select userId ,xp,lvl, rank() over(order by xp desc) rnk from user_server \
+        join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x where userid={ctx.author.id};'
+
+        countRankInTable = f'select count(*) as ranks from user_server join xpinfo  ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id};'
         try:
-            result = await self.executeQuery(selectQuery, 'fetchrow')
-            xp = result['xp']
-            lvl = result['lvl']
+            xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
+            maxRank = await self.executeQuery(countRankInTable, 'fetchrow')
+
+            xp = xpInfo['xp']
+            lvl = xpInfo['lvl']
+            rank = xpInfo['rnk']
+            maxRank = maxRank['ranks']
 
         except TypeError:
             await ctx.message.reply('Тебя нет в базе данных, добавляю...')
@@ -195,11 +201,14 @@ class AddXP(Cog):
         template.paste(rezised, (15, 15))
         template.paste(cropped, (100, 255), cropped)
 
-        draw.text((300, 270), f'{percents*100}%', (0, 0, 0),
-                  font=font, align='center')
+        percentsText = f'{percents*100}%'
+        textWidth = font.getsize(percentsText)[0]
+
+        draw.text(((650-textWidth)/2, 270), percentsText, (0, 0, 0),
+                  font=font, align='right')
         draw.text((130, 12), f'{ctx.author.name}#{ctx.author.discriminator}', (0, 0, 0),
                   font=font, align='center')
-        draw.text((130, 43), 'NO RANK FUNCTIONALITY IMPLEMENTED', (0, 0, 0),
+        draw.text((130, 43), f'RANK:{rank}/{maxRank}', (0, 0, 0),
                   font=font, align='center')
         draw.text((130, 73), f'EXP: {xp}', (0, 0, 0),
                   font=font, align='center')
