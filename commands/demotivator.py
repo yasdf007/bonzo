@@ -1,8 +1,8 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, BadArgument, cooldown, command
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, BadArgument, cooldown, command, BucketType
 from discord import File
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from aiohttp import ClientSession
+
 name = 'demotivator'
 description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
 
@@ -22,19 +22,19 @@ class Demotivator(Cog):
         if isinstance(error, BadArgument):
             await ctx.message.reply('Максимум 25 символов')
 
-    @cooldown(rate=1, per=5)
+    @cooldown(rate=1, per=5, type=BucketType.user)
     @command(name=name, description=description)
     async def demotivator(self, ctx, *text):
         underText = ' '.join(text)
+
         if len(underText) > 25:
             raise BadArgument()
 
-        urlFromPhoto = ctx.message.attachments[0].url
-        async with ClientSession() as session:
-            async with session.get(urlFromPhoto) as response:
-                requestImage = await response.read()
+        attachment = ctx.message.attachments[0]
 
-        img = Image.open(BytesIO(requestImage))
+        photo = await attachment.read()
+
+        img = Image.open(BytesIO(photo))
         img = img.convert('RGB')
         img = img.resize((666, 655))
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)

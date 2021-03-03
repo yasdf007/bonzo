@@ -3,7 +3,6 @@ from discord.ext.commands import Cog, CommandInvokeError, command
 from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
-import json
 load_dotenv()
 
 name = 'weather'

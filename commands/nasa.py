@@ -1,7 +1,6 @@
 from discord import Embed
 from discord.ext.commands import Cog, command
 from aiohttp import ClientSession
-import json
 
 name = 'nasapict'
 description = 'Картинка дня от NASA'
@@ -18,12 +17,10 @@ class Nasa(Cog):
         query = 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY'
         async with ClientSession() as session:
             async with session.get(query) as response:
-                res = await response.read()
+                res = await response.json()
 
-        resJson = json.loads(res)
-
-        embed.set_image(url=resJson['hdurl'])
-        embed.set_footer(text=resJson['title'])
+        embed.set_image(url=res['hdurl'])
+        embed.set_footer(text=res['title'])
 
         await ctx.message.reply(embed=embed)
 

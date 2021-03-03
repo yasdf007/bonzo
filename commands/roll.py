@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command, BucketType
 from random import randint
 from discord import Embed
 from typing import Optional
@@ -19,7 +19,7 @@ class roll(Cog):
             await ctx.message.reply(error.original)
 
     # dota 2 roll
-    @cooldown(rate=1, per=3)
+    @cooldown(rate=1, per=3, type=BucketType.user)
     @command(name=name, description=description)
     async def roll(self, ctx, numberFrom: Optional[int] = 100, *, numberTo: Optional[int]):
         oneMillon = 10**6

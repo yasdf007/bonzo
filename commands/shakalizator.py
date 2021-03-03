@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command, BucketType
 from discord import File
 from PIL import Image
 from io import BytesIO
@@ -20,7 +20,7 @@ class Shakalizator(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cooldown(rate=1, per=5)
+    @cooldown(rate=1, per=5, type=BucketType.user)
     @command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, imageUrl=None):
         imageUrl = imageUrl or ctx.message.attachments[0].url

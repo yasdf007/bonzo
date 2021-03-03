@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
+from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
 from random import sample
 from aiohttp import ClientSession
 from PIL import Image
@@ -17,7 +17,7 @@ class randImg(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cooldown(rate=1, per=5)
+    @cooldown(rate=1, per=5, type=BucketType.user)
     @command(name=name, description=description, aliases=['randimg'])
     async def randImg(self, ctx):
         url = 'https://i.imgur.com/'

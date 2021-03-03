@@ -1,7 +1,7 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
+from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
 from aiohttp import ClientSession
 from random import choice
-import json
+
 name = '2ch'
 description = 'Рандомное видео с двача'
 
@@ -20,15 +20,14 @@ class Dvach(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cooldown(rate=2, per=13)
+    @cooldown(rate=2, per=13, type=BucketType.user)
     @command(name=name, description=description)
     async def dvach(self, ctx):
         async with ClientSession(headers=self.USERAGENT) as session:
             async with session.get(self.URL, params=self.PARAMS) as response:
-                res = await response.read()
+                res = await response.json()
 
-        resJson = json.loads(res)
-        link = choice(resJson['response']['items'])['url']
+        link = choice(res['response']['items'])['url']
         await ctx.message.reply(link)
 
 

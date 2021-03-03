@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
+from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
 from googleapiclient.discovery import build
 from os import getenv
 from dotenv import load_dotenv
@@ -30,7 +30,7 @@ class YoutubeRandom(Cog):
     #     if isinstance(error, commands.CommandOnCooldown):
     #         await ctx.message.reply(error)
 
-    @cooldown(rate=1, per=5)
+    @cooldown(rate=1, per=5, type=BucketType.user)
     @command(name=name, description=description, aliases=['randvid', 'video'])
     async def randomVideo(self, ctx):
         # Делаем рандомное название запроса из 4 символов и цифр
