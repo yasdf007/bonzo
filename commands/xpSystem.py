@@ -48,7 +48,7 @@ class AddXP(Cog):
         self.guild = self.bot.get_guild(664485208745050112)
 
         for channel in self.guild.voice_channels:
-            if channel.name != 'AFK':
+            if channel.name != self.guild.afk_channel:
                 for voiceUser in self.bot.get_channel(channel.id).members:
                     if not voiceUser.bot:
                         self.addVoiceJob(voiceUser)
@@ -63,7 +63,7 @@ class AddXP(Cog):
     async def on_voice_state_update(self, member, before, after):
         if not member.bot and member.guild.id == self.guild.id:
             # Если чел зашел в войс и не в канале АФК, и не замучен
-            if member.voice and member.voice.channel.name != 'AFK' and member.voice.self_deaf == False:
+            if member.voice and member.voice.channel.name != self.guild.afk_channel and member.voice.self_deaf == False:
                 try:
                     # Добавляем таск получения опыта
                     self.addVoiceJob(member)
@@ -108,8 +108,9 @@ class AddXP(Cog):
             newXp = xp + self.messageXP
             newLvl = self.calculateLevel(newXp)
             nextXpAt = datetime.now()+timedelta(seconds=60)
+
             updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                            update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = '{datetime.now()+timedelta(seconds=60)}' \
+                            update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = '{nextXpAt}' \
                             where xpinfo.id = (select res.id from res);"
 
             await self.executeQuery(updateQuery, 'execute')
@@ -153,8 +154,10 @@ class AddXP(Cog):
             text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
         embed.set_thumbnail(url=ctx.guild.icon_url)
 
+        guild = self.bot.get_guild(ctx.guild.id)
+
         for id_, exp, lvl in result:
-            member = self.bot.guild.get_member(id_)
+            member = guild.get_member(id_)
             embed.add_field(
                 name=f'`{member.display_name}`', value=f'LVL: {lvl}\nEXP: {exp}', inline=False)
         await ctx.message.reply(embed=embed)

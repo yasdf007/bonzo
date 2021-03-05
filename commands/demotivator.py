@@ -51,7 +51,6 @@ class Demotivator(Cog):
             template.save(temp, "png", quality=100)
             temp.seek(0)
             await ctx.message.reply(file=File(fp=temp, filename='now.png'))
-        temp.close()
 
 
 def setup(bot):
