@@ -165,8 +165,6 @@ class AddXP(Cog):
         selectQuery = f'select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
                         join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \
                         join (select count(distinct id) as overall from user_server where serverid={ctx.guild.id}) as p on x.userid={ctx.author.id};'
-
-        countRankInTable = f'select count(*) as ranks from user_server join xpinfo  ON user_server.id = xpinfo.id where user_server.serverid = ;'
         try:
             xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
 
