@@ -10,7 +10,7 @@ class FreeGames(Cog):
         self.bot.scheduler.add_job(
             self.freeGames, CronTrigger(day_of_week='thu', hour=16, minute=3, jitter=120))
 
-    async def freeGames(self, ctx):
+    async def freeGames(self):
         channel = self.bot.get_channel(790625464083152916)
         async with ClientSession() as session:
             async with session.get(self.link) as response:

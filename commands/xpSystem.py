@@ -11,7 +11,6 @@ class AddXP(Cog):
         self.bot = bot
         self.messageXP = 1
         self.voiceXP = 10
-        self.guild = None
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
@@ -26,7 +25,7 @@ class AddXP(Cog):
     def percentsToLvlUp(self, currentXp, currentLVL):
         devinded = currentXp-self.calculateXp(currentLVL)
         devider = self.calculateXp(currentLVL+1)-self.calculateXp(currentLVL)
-        return round(devinded/devider, 4)
+        return round((devinded/devider)*100, 2)
 
     async def executeQuery(self, query: str, type_: str):
         async with self.bot.pool.acquire() as con:
@@ -39,19 +38,7 @@ class AddXP(Cog):
             if type_ == 'execute':
                 result = await con.execute(query)
 
-        await self.bot.pool.release(con)
-
         return result
-
-    @Cog.listener()
-    async def on_ready(self):
-        self.guild = self.bot.get_guild(664485208745050112)
-
-        for channel in self.guild.voice_channels:
-            if channel.name != self.guild.afk_channel:
-                for voiceUser in self.bot.get_channel(channel.id).members:
-                    if not voiceUser.bot:
-                        self.addVoiceJob(voiceUser)
 
     @Cog.listener()
     async def on_message(self, message):
@@ -61,22 +48,22 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if not member.bot and member.guild.id == self.guild.id:
+
+        if not member.bot:
             # Если чел зашел в войс и не в канале АФК, и не замучен
-            if member.voice and member.voice.channel.name != self.guild.afk_channel and member.voice.self_deaf == False:
+            if member.voice and member.voice.channel.name != member.guild.afk_channel and member.voice.self_deaf == False:
                 try:
                     # Добавляем таск получения опыта
                     self.addVoiceJob(member)
+
                 # Если уже есть задача, то пофиг (если чел перемещается по каналам, то появляется ошибка,
                 # поэтому дропаем в блок исключения )
                 except ConflictingIdError:
                     pass
-
             else:
                 try:
                     # Удаляем задачу
                     self.bot.scheduler.remove_job(f'{member.id}')
-
                 # Если задачи нет, то пофиг (чел может быть в афк, т.е у него не будет задачи,
                 # если он выйдет из канала афк, то появится ошибка.
                 # Если зайдет в другой канал, все должно быть норм)
@@ -85,9 +72,9 @@ class AddXP(Cog):
 
         return
 
-    def addVoiceJob(self, memberId: int):
+    def addVoiceJob(self, member):
         self.bot.scheduler.add_job(
-            self.addVoiceXp, 'interval', minutes=1, id=f'{memberId}', args=[memberId])
+            self.addVoiceXp, 'interval', minutes=1, id=f'{member.id}', args=[member])
 
     async def addMessageXp(self, member):
         selectQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
@@ -139,7 +126,7 @@ class AddXP(Cog):
     @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
         selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
-        where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc;'
+        where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;'
 
         result = await self.executeQuery(selectQuery, 'fetch')
 
@@ -197,12 +184,12 @@ class AddXP(Cog):
 
         percents = self.percentsToLvlUp(xp, lvl)
 
-        cropped = bar.crop((0, 0, w*percents, 45))
+        cropped = bar.crop((0, 0, w*(percents)/100, 45))
 
         template.paste(rezised, (15, 15))
         template.paste(cropped, (100, 255), cropped)
 
-        percentsText = f'{percents*100}%'
+        percentsText = f'{percents}%'
         textWidth = font.getsize(percentsText)[0]
 
         draw.text(((650-textWidth)/2, 270), percentsText, (0, 0, 0),
@@ -220,7 +207,6 @@ class AddXP(Cog):
             template.save(temp, "png", quality=100)
             temp.seek(0)
             await ctx.message.reply(file=File(fp=temp, filename='now.jpeg'))
-        temp.close()
 
 
 def setup(bot):
