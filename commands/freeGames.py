@@ -10,7 +10,7 @@ class FreeGames(Cog):
         self.bot.scheduler.add_job(
             self.freeGames, CronTrigger(day_of_week='thu', hour=16, minute=3, jitter=120))
 
-    async def freeGames(self):
+    async def freeGames(self, ctx):
         channel = self.bot.get_channel(790625464083152916)
         async with ClientSession() as session:
             async with session.get(self.link) as response:
@@ -28,7 +28,9 @@ class FreeGames(Cog):
 
                     game_price = game['price']['totalPrice']['fmtPrice']['originalPrice']
 
-                    gameNameInLink = game['customAttributes'][2]['value']
+                    for attr in game['customAttributes']:
+                        if attr['key'] == "com.epicgames.app.productSlug":
+                            gameNameInLink = attr['value']
 
                     link = 'https://www.epicgames.com/store/ru/p/' + gameNameInLink
 

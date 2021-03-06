@@ -47,7 +47,6 @@ class Shakalizator(Cog):
             img.save(image_binary, "jpeg", quality=0)
             image_binary.seek(0)
             await ctx.message.reply(file=File(fp=image_binary, filename='now.jpeg'))
-        image_binary.close()
 
 
 def setup(bot):
