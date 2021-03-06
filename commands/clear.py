@@ -28,11 +28,12 @@ class Clear(Cog):
     @command(name=name, description=description)
     async def clear(self, ctx, count: int):
         # удаляем запрошенное кол-во сообщений!
-        await TextChannel.purge(ctx.message.channel, limit=count + 1)
-        await ctx.send("очистил %s сообщений!" % count)  # отправляем отчёт
+        await TextChannel.purge(ctx.message.channel, limit=count + 1, bulk=True)
+        # отправляем отчёт
+        msg = await ctx.send(f'очистил {count} сообщений!')
         await sleep(2)  # ждём 2 секунды
         # удаляем отчёт
-        await TextChannel.purge(ctx.message.channel, limit=1)
+        await msg.delete()
 
 
 def setup(bot):

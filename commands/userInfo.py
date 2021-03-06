@@ -29,10 +29,11 @@ class Info(Cog):
         embed.add_field(name='ID:', value=member.id, inline=False)
 
         # получаем все роли юзера
-        allRoles = ', '.join([i.name for i in member.roles[1::]])
-
-        embed.add_field(
-            name='Роли:', value=f'{allRoles}', inline=False)
+        allRoles = ', '.join(
+            [i.name for i in member.roles[1::] if len(member.roles) > 1])
+        if allRoles:
+            embed.add_field(
+                name='Роли:', value=f'{allRoles}', inline=False)
 
         if member.activities:
             for usrActivity in member.activities:

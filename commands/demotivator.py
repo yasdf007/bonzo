@@ -1,8 +1,7 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, BadArgument, cooldown, command
+from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, BadArgument, cooldown, command, BucketType
 from discord import File
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from requests import get
 
 name = 'demotivator'
 description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
@@ -23,22 +22,23 @@ class Demotivator(Cog):
         if isinstance(error, BadArgument):
             await ctx.message.reply('Максимум 25 символов')
 
-    @cooldown(rate=1, per=5)
+    @cooldown(rate=1, per=5, type=BucketType.user)
     @command(name=name, description=description)
     async def demotivator(self, ctx, *text):
         underText = ' '.join(text)
+
         if len(underText) > 25:
             raise BadArgument()
 
-        urlFromPhoto = ctx.message.attachments[0].url
-        requestImage = get(urlFromPhoto)
+        attachment = ctx.message.attachments[0]
 
-        img = Image.open(BytesIO(requestImage.content))
+        photo = await attachment.read()
+
+        img = Image.open(BytesIO(photo))
         img = img.convert('RGB')
         img = img.resize((666, 655))
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-        template = Image.open('./static/demotivatorTemplate.jpg')
-        template.convert('RGB')
+        template = Image.open('./static/demotivatorTemplate.png')
 
         template.paste(img, (50, 50))
         draw = ImageDraw.Draw(template)
@@ -48,9 +48,9 @@ class Demotivator(Cog):
                   font=font, align='right')
 
         with BytesIO() as temp:
-            template.save(temp, "jpeg", quality=100)
+            template.save(temp, "png", quality=100)
             temp.seek(0)
-            await ctx.message.reply(file=File(fp=temp, filename='now.jpeg'))
+            await ctx.message.reply(file=File(fp=temp, filename='now.png'))
 
 
 def setup(bot):

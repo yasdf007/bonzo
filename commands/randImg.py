@@ -1,6 +1,6 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown
+from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
 from random import sample
-import requests
+from aiohttp import ClientSession
 from PIL import Image
 from io import BytesIO
 
@@ -17,7 +17,7 @@ class randImg(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cooldown(rate=1, per=5)
+    @cooldown(rate=1, per=5, type=BucketType.user)
     @command(name=name, description=description, aliases=['randimg'])
     async def randImg(self, ctx):
         url = 'https://i.imgur.com/'
@@ -30,10 +30,12 @@ class randImg(Cog):
         iImgurUrl = url + randSymbols + '.png'
 
         # Получаем инфу об картинке
-        req = requests.get(iImgurUrl, headers={'User-Agent': 'Mozilla/5.0'})
+        async with ClientSession() as session:
+            async with session.get(iImgurUrl) as response:
+                res = await response.read()
 
         # Открываем картинку
-        img = Image.open(BytesIO(req.content))
+        img = Image.open(BytesIO(res))
 
         # Если картинки нет, то она имеет размер 161х81
         if img.size[0] == 161 and img.size[1] == 81:

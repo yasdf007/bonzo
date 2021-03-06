@@ -19,11 +19,6 @@ class Bot(bonzoBot):
         self.game = Game("b/help | v1.0 RC2")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-        self.guild = None
-
-        db.createDB()
-        db.autoSave(self.scheduler)
-
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
 
@@ -39,21 +34,14 @@ class Bot(bonzoBot):
         self.cogsLoad()
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
-    def update_db(self):
-        db.cursor.executemany(
-            "INSERT into exp (UserID) VALUES (%s) ON CONFLICT (UserID) DO NOTHING;", ([member.id] for member in self.guild.members if not member.bot))
-        db.commit()
-
     @Cog.listener()
     async def on_ready(self):
+        self.pool = await db.connectToDB()
 
-        self.guild = self.get_guild(664485208745050112)
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
         # self.load_extension('commands.music')
         self.scheduler.start()
-
-        self.update_db()
 
         endTime = time() - self.startTime
 

@@ -1,5 +1,5 @@
 from discord import TextChannel
-from discord.ext.commands import Cog, CommandInvokeError, command
+from discord.ext.commands import Cog, CommandInvokeError, command, has_role
 name = 'evala'
 description = 'Исполняет код (только для разработчиков)'
 
@@ -15,18 +15,15 @@ class evala(Cog):
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)
+    @has_role('bonzodev')
     @command(name=name, description=description)
-    async def evala(self, ctx, evcode):
-        ownerids = [221246477630963722, 196314341572608000,
-                    393807398047055883]  # определяем овнеров
+    async def evala(self, ctx, evcode: str):
         if evcode:
-            if ctx.author.id in ownerids:  # проверяем, овнер ли запросил команду?
-                execute = eval(str(evcode))
-                # удаляем команду
-                await TextChannel.purge(ctx.message.channel, limit=1)
-                await execute
-            else:
-                await ctx.send("ты бесправное чмо " + '{0.author.mention}'.format(ctx))
+            execute = eval(evcode)
+            # удаляем команду
+            await ctx.message.delete()
+
+            await execute
         else:
             # Ошибка
             raise CommandInvokeError()
