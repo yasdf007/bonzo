@@ -1,4 +1,5 @@
 from discord.ext.commands import Cog
+from database import db
 
 
 class memberJoinRemove(Cog):
@@ -15,9 +16,10 @@ class memberJoinRemove(Cog):
 
     @Cog.listener()
     async def on_member_remove(self, member):
-        deleteQuery = f'delete from user_server WHERE userid = {member.id} and serverid = {member.guild.id};'
+        insertQuery = f'with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id)\
+                        delete from user_server WHERE id = (select res.id from res);'
 
-        await self.bot.pool.execute(deleteQuery)
+        await self.bot.pool.execute(insertQuery)
 
 
 def setup(bot):

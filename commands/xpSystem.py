@@ -1,7 +1,6 @@
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType
 from discord import Embed, File, Asset
-from discord.utils import find
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
@@ -16,14 +15,6 @@ class AddXP(Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
-
-    def canGainXp(self, member):
-        roleNoXpGain = find(lambda x: x.name ==
-                            'кружок дефективных', member.guild.roles)
-        if roleNoXpGain in member.roles:
-            return False
-
-        return True
 
     def calculateLevel(self, exp):
         return int((exp/60) ** 0.5)
@@ -51,14 +42,14 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if not message.author.bot and self.canGainXp(message.author):
+        if not message.author.bot:
             await self.addMessageXp(message.author)
         return
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
 
-        if not member.bot and self.canGainXp(member):
+        if not member.bot:
             # Если чел зашел в войс и не в канале АФК, и не замучен
             if member.voice and member.voice.channel.name != member.guild.afk_channel and member.voice.self_deaf == False:
                 try:
@@ -172,15 +163,12 @@ class AddXP(Cog):
             rank = xpInfo['rank']
             maxRank = xpInfo['overall']
 
-            xpToLVLUp = self.calculateXp(lvl+1)
-            currentLVLXp = self.calculateXp(lvl)
         except TypeError:
             await ctx.message.reply('Тебя нет в базе данных, добавляю...')
             insertQuery = f'with res as (insert into user_server (userid, serverid) values ({ctx.author.id}, {ctx.guild.id}) returning id)\
                         insert into xpinfo (id) select res.id from res;'
 
             await self.executeQuery(insertQuery, 'execute')
-            return
 
         reqImage = await Asset.read(ctx.author.avatar_url)
 
@@ -214,10 +202,7 @@ class AddXP(Cog):
                   font=font, align='center')
         draw.text((130, 102), f'LVL: {lvl}', (0, 0, 0),
                   font=font, align='center')
-        draw.text((530, 310), f'{xpToLVLUp}', (0, 0, 0),
-                  font=font, align='center')
-        draw.text((120, 310), f'{currentLVLXp}', (0, 0, 0),
-                  font=font, align='center')
+
         with BytesIO() as temp:
             template.save(temp, "png", quality=100)
             temp.seek(0)
