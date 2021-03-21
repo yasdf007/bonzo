@@ -163,12 +163,15 @@ class AddXP(Cog):
             rank = xpInfo['rank']
             maxRank = xpInfo['overall']
 
+            xpToLVLUp = self.calculateXp(lvl+1)
+            currentLVLXp = self.calculateXp(lvl)
         except TypeError:
             await ctx.message.reply('Тебя нет в базе данных, добавляю...')
             insertQuery = f'with res as (insert into user_server (userid, serverid) values ({ctx.author.id}, {ctx.guild.id}) returning id)\
                         insert into xpinfo (id) select res.id from res;'
 
             await self.executeQuery(insertQuery, 'execute')
+            return
 
         reqImage = await Asset.read(ctx.author.avatar_url)
 
@@ -202,7 +205,10 @@ class AddXP(Cog):
                   font=font, align='center')
         draw.text((130, 102), f'LVL: {lvl}', (0, 0, 0),
                   font=font, align='center')
-
+        draw.text((530, 310), f'{xpToLVLUp}', (0, 0, 0),
+                  font=font, align='center')
+        draw.text((120, 310), f'{currentLVLXp}', (0, 0, 0),
+                  font=font, align='center')
         with BytesIO() as temp:
             template.save(temp, "png", quality=100)
             temp.seek(0)
