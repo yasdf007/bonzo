@@ -1,6 +1,7 @@
 from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType
 from discord import Embed, File, Asset
+from discord.utils import find
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
@@ -15,6 +16,14 @@ class AddXP(Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
+
+    def canGainXp(self, member):
+        roleNoXpGain = find(lambda x: x.name ==
+                            'кружок дефективных', member.guild.roles)
+        if roleNoXpGain in member.roles:
+            return False
+
+        return True
 
     def calculateLevel(self, exp):
         return int((exp/60) ** 0.5)
@@ -42,14 +51,14 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if not message.author.bot:
+        if not message.author.bot and self.canGainXp(message.author):
             await self.addMessageXp(message.author)
         return
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
 
-        if not member.bot:
+        if not member.bot and self.canGainXp(member):
             # Если чел зашел в войс и не в канале АФК, и не замучен
             if member.voice and member.voice.channel.name != member.guild.afk_channel and member.voice.self_deaf == False:
                 try:
