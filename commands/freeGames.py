@@ -4,9 +4,10 @@ from apscheduler.triggers.cron import CronTrigger
 
 
 class FreeGames(Cog):
+    link = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'
+
     def __init__(self, bot):
         self.bot = bot
-        self.link = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'
         self.bot.scheduler.add_job(
             self.freeGames, CronTrigger(day_of_week='thu', hour=16, minute=3, jitter=120))
 

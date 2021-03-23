@@ -4,10 +4,11 @@ from datetime import datetime, timedelta
 
 
 class Poll(Cog):
+    emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣']
+    pollIds = []
+
     def __init__(self, bot):
         self.bot = bot
-        self.emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣']
-        self.pollIds = []
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingRole):
