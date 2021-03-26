@@ -1,6 +1,10 @@
 # Created by ムAloneStranger (c) 2020.
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
+
+import sys
+sys.dont_write_bytecode = True # убирает генерацию машинного кода python
+
 from discord import Intents, Game, Status
 from discord.ext.commands import Bot as bonzoBot, Cog
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
@@ -16,15 +20,16 @@ load_dotenv()  # загружает файл env
 
 class Bot(bonzoBot):
     def __init__(self):
+        sys.dont_write_bytecode = True
         intents = Intents.all()
-        self.game = Game("b/help | v1.0 RC3")
+        self.game = Game("b/help | v1.0 RC GM")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=getenv('PREFIX'),
                          help_command=None, intents=intents)
 
     def cogsLoad(self):
-        curr, total = 0, len(listdir('./commands')) - 4
+        curr, total = 0, len(listdir('./commands')) - 3
         for filename in listdir('./commands'):
             if filename.endswith('.py') and not filename.startswith('music'):
                 self.load_extension(f'commands.{filename[:-3]}')
