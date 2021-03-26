@@ -9,6 +9,7 @@ from time import time
 from os import listdir, getenv
 from database import db
 from dotenv import load_dotenv
+from colorama import Fore, Back, Style
 
 load_dotenv()  # загружает файл env
 
@@ -23,10 +24,13 @@ class Bot(bonzoBot):
                          help_command=None, intents=intents)
 
     def cogsLoad(self):
+        curr, total = 0, len(listdir('./commands')) - 4
         for filename in listdir('./commands'):
             if filename.endswith('.py') and not filename.startswith('music'):
                 self.load_extension(f'commands.{filename[:-3]}')
-                print(f'loaded {filename}')
+                curr += 1
+                print(f'loaded {filename}, {curr}/{total}')
+        print(Back.WHITE + Fore.BLACK + "MUSIC WAS TEMPORARILY REMOVED FROM BONZO DUE TO HOSTING ISSUES" + Style.RESET_ALL)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
@@ -46,8 +50,7 @@ class Bot(bonzoBot):
         endTime = time() - self.startTime
 
         print(
-            f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n /')
-
+            f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n / \n end.')
 
 bot = Bot()
 bot.run()
