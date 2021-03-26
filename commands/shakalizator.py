@@ -28,6 +28,10 @@ class Shakalizator(Cog):
         if not imageUrl:
             raise CommandInvokeError()
 
+        await (await self.bot.loop.run_in_executor(None, self.async_shakalizator, ctx, imageUrl))
+
+    async def asyncShakalizator(self, ctx, imageUrl):
+
         async with ClientSession() as session:
             async with session.get(imageUrl) as response:
                 requestImage = await response.read()
@@ -38,8 +42,6 @@ class Shakalizator(Cog):
 
         # Изменение фотки
         img = img.resize((int(img.size[0] / 2), int(img.size[1] / 2)))
-
-        # Изменение фотки
 
         # Создаем новую фотку
         with BytesIO() as image_binary:

@@ -32,18 +32,25 @@ class Demotivator(Cog):
 
         attachment = ctx.message.attachments[0]
 
+        # O_O - первый await создает coroutine, второй его ждет и все работает
+        await (await self.bot.loop.run_in_executor(None, self.async_demotivator, ctx, attachment, underText))
+
+    async def asyncDemotivator(self, ctx, attachment, underText):
+
         photo = await attachment.read()
 
         img = Image.open(BytesIO(photo))
-        img = img.convert('RGB')
-        img = img.resize((666, 655))
-        # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
         template = Image.open('./static/demotivatorTemplate.png')
 
-        template.paste(img, (50, 50))
         draw = ImageDraw.Draw(template)
         font = ImageFont.truetype('./static/arial.ttf', 54)
         textWidth = font.getsize(underText)[0]
+        # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
+        img = img.convert('RGB')
+        img = img.resize((666, 655))
+
+        template.paste(img, (50, 50))
+
         draw.text(((760 - textWidth) / 2, 720), underText, (255, 255, 255),
                   font=font, align='right')
 

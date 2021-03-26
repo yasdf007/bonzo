@@ -7,11 +7,13 @@ description = 'Отправляет случайное изображение и
 
 
 class pict(Cog):
+    url = 'https://prnt.sc/'
+
     def __init__(self, bot):
         self.bot = bot
-        self.url = 'https://prnt.sc/'
 
     # Обработка ошибок
+
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
             await ctx.message.reply('Нужно ввести количество ссылок (до 2)')

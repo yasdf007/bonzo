@@ -7,10 +7,11 @@ from io import BytesIO
 
 
 class AddXP(Cog):
+    messageXP = 1
+    voiceXP = 10
+
     def __init__(self, bot):
         self.bot = bot
-        self.messageXP = 1
-        self.voiceXP = 10
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
@@ -170,6 +171,9 @@ class AddXP(Cog):
 
             await self.executeQuery(insertQuery, 'execute')
 
+        await (await self.bot.loop.run_in_executor(None, self.asyncRankCard, ctx, xp, lvl, rank, maxRank))
+
+    async def asyncRankCard(self, ctx, xp, lvl, rank, maxRank):
         reqImage = await Asset.read(ctx.author.avatar_url)
 
         userProfilePhoto = Image.open(BytesIO(reqImage))

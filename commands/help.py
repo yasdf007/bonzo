@@ -10,11 +10,11 @@ description = 'Все команды бота [почти рабочий], ин�
 
 
 class helping(Cog):
+    embeds = None
+    author = None
+
     def __init__(self, bot):
         self.bot = bot
-        # Передаем значения из функции в self, чтобы можно было их юзать вне функции
-        self.embeds = None
-        self.author = None
 
     @command(name=name, description=description)
     async def help(self, ctx, cmd=None):

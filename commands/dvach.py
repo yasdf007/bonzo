@@ -7,14 +7,15 @@ description = 'Рандомное видео с двача'
 
 
 class Dvach(Cog):
+    USERAGENT = {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+    }
+    URL = 'https://api.randomtube.xyz/video.get'
+    PARAMS = {'board': 'b'}
+
     def __init__(self, bot):
         self.bot = bot
-        self.USERAGENT = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        }
-        self.URL = 'https://api.randomtube.xyz/video.get'
-        self.PARAMS = {'board': 'b'}
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
