@@ -28,7 +28,7 @@ class Shakalizator(Cog):
         if not imageUrl:
             raise CommandInvokeError()
 
-        await (await self.bot.loop.run_in_executor(None, self.async_shakalizator, ctx, imageUrl))
+        await (await self.bot.loop.run_in_executor(None, self.asyncShakalizator, ctx, imageUrl))
 
     async def asyncShakalizator(self, ctx, imageUrl):
 
