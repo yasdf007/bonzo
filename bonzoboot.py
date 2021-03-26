@@ -17,7 +17,7 @@ load_dotenv()  # загружает файл env
 class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.all()
-        self.game = Game("b/help | v1.0 RC2")
+        self.game = Game("b/help | v1.0 RC3")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=getenv('PREFIX'),
