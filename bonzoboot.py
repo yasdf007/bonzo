@@ -31,11 +31,12 @@ class Bot(bonzoBot):
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 3
         for filename in listdir('./commands'):
-            if filename.endswith('.py') and not filename.startswith('music'):
+            if filename.endswith('.py') and not filename.startswith('music') and not filename.startswith('evala'):
                 self.load_extension(f'commands.{filename[:-3]}')
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
         print(Back.WHITE + Fore.BLACK + "MUSIC WAS TEMPORARILY REMOVED FROM BONZO DUE TO HOSTING ISSUES" + Style.RESET_ALL)
+        print(Fore.RED + "EVALA WAS TEMPORARILY DISABLED DUE TO HUGE SECURITY WEAKNESSES AND BREACHES IN CODE" + Style.RESET_ALL)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
