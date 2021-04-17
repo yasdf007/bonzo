@@ -33,7 +33,7 @@ class Demotivator(Cog):
         attachment = ctx.message.attachments[0]
 
         # O_O - первый await создает coroutine, второй его ждет и все работает
-        await (await self.bot.loop.run_in_executor(None, self.async_demotivator, ctx, attachment, underText))
+        await (await self.bot.loop.run_in_executor(None, self.asyncDemotivator, ctx, attachment, underText))
 
     async def asyncDemotivator(self, ctx, attachment, underText):
 

@@ -21,8 +21,9 @@ OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
 
 class Bot(bonzoBot):
     def __init__(self):
+        sys.dont_write_bytecode = True
         intents = Intents.all()
-        self.game = Game("b/help | v1.0 RC2")
+        self.game = Game("b/help | v1.0 RC GM")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=getenv('PREFIX'),
@@ -31,7 +32,7 @@ class Bot(bonzoBot):
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 3
         for filename in listdir('./commands'):
-            if filename.endswith('.py') and not filename.startswith('music'):
+            if filename.endswith('.py') and not filename.startswith('music') and not filename.startswith('evala'):
                 self.load_extension(f'commands.{filename[:-3]}')
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
@@ -57,7 +58,7 @@ class Bot(bonzoBot):
         endTime = time() - self.startTime
 
         print(
-            f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n /')
+            f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n / \n end.')
 
 
 bot = Bot()

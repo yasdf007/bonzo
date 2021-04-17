@@ -1,21 +1,23 @@
 from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command, BucketType
 from discord import File
-from PIL import Image
+from PIL import Image, ImageSequence
 from io import BytesIO
 from aiohttp import ClientSession
-
+from re import compile
 name = 'shakalizator'
-description = 'ОПЯТЬ СЖИМАЕШЬ ШАКАЛ. Надо прикрепить фотку или ссылку'
+description = 'Надо прикрепить фотку или гиф.'
 
 
 class Shakalizator(Cog):
+    urlValid = compile(r'https?://(?:www\.)?.+')
+
     def __init__(self, bot):
         self.bot = bot
 
     # Обработка ошибок
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.message.reply('Где фотка')
+            await ctx.message.reply(error.original)
 
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
@@ -25,16 +27,58 @@ class Shakalizator(Cog):
     async def shakalizator(self, ctx, imageUrl=None):
         imageUrl = imageUrl or ctx.message.attachments[0].url
 
-        if not imageUrl:
-            raise CommandInvokeError()
+        if not self.urlValid.match(imageUrl):
+            raise CommandInvokeError('Ссылка не найдена')
 
-        await (await self.bot.loop.run_in_executor(None, self.async_shakalizator, ctx, imageUrl))
+        extension = imageUrl.split('/')[-1]
 
-    async def asyncShakalizator(self, ctx, imageUrl):
+        if 'gif' in extension:
+            await (await self.bot.loop.run_in_executor(None, self.asyncGifShakalizator, ctx, imageUrl))
 
+        # Один из форматов
+        elif any(ext in extension for ext in ('png', 'jpeg', 'jpg')):
+            await (await self.bot.loop.run_in_executor(None, self.asyncPhotoShakalizator, ctx, imageUrl))
+        else:
+            raise CommandInvokeError(
+                'Поддерживаемые форматы: png, jpeg, jpg, gif')
+
+    async def asyncGifShakalizator(self, ctx, url):
+        async with ClientSession() as session:
+            async with session.get(url) as response:
+                try:
+                    requestImage = await response.read()
+                except:
+                    raise CommandInvokeError('Не удалось открыть файл')
+
+        bytes = BytesIO(requestImage)
+        bytes.seek(0, 2)
+
+        if bytes.tell() >= 5242880:
+            raise CommandInvokeError('Максимальный размер гифки 5 мегабайт')
+
+        img = Image.open(bytes)
+
+        frames = [frame.resize((int(img.size[0] / 8), int(img.size[1] / 8)))
+                  for frame in ImageSequence.Iterator(img)]
+
+        frames = [frame.resize((300, 300))
+                  for frame in frames]
+
+        with BytesIO() as image_binary:
+            frames[0].save(image_binary, format='GIF', save_all=True,
+                           append_images=frames[1:], optimize=False, duration=100, loop=0)
+
+            image_binary.seek(0)
+
+            await ctx.message.reply(file=File(fp=image_binary, filename='now.gif'))
+
+    async def asyncPhotoShakalizator(self, ctx, imageUrl):
         async with ClientSession() as session:
             async with session.get(imageUrl) as response:
-                requestImage = await response.read()
+                try:
+                    requestImage = await response.read()
+                except:
+                    raise CommandInvokeError('Не удалось открыть файл')
 
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
         img = Image.open(BytesIO(requestImage))

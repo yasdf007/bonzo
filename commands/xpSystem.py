@@ -47,31 +47,67 @@ class AddXP(Cog):
             await self.addMessageXp(message.author)
         return
 
-    @Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
+    def checkAfter(self, channel):
+        # Массив из людей в войсе без ботов
+        membersInVoice = list(
+            filter(lambda x: x.bot == False, channel.members)
+        )
 
-        if not member.bot:
-            # Если чел зашел в войс и не в канале АФК, и не замучен
-            if member.voice and member.voice.channel.name != member.guild.afk_channel and member.voice.self_deaf == False:
-                try:
-                    # Добавляем таск получения опыта
+        # Если больше одного, то для каждого генерим опыт,
+        # если уже нет таска для опыта
+        if len(membersInVoice) >= 2:
+
+            for member in membersInVoice:
+                if self.bot.scheduler.get_job(f'{member.id}') is None:
                     self.addVoiceJob(member)
 
-                # Если уже есть задача, то пофиг (если чел перемещается по каналам, то появляется ошибка,
-                # поэтому дропаем в блок исключения )
-                except ConflictingIdError:
-                    pass
-            else:
-                try:
-                    # Удаляем задачу
-                    self.bot.scheduler.remove_job(f'{member.id}')
-                # Если задачи нет, то пофиг (чел может быть в афк, т.е у него не будет задачи,
-                # если он выйдет из канала афк, то появится ошибка.
-                # Если зайдет в другой канал, все должно быть норм)
-                except JobLookupError:
-                    pass
+    def checkBefore(self, channel):
+        membersInVoice = list(
+            filter(lambda x: x.bot == False, channel.members)
+        )
 
-        return
+        if len(membersInVoice) == 1:
+            for member in membersInVoice:
+                self.bot.scheduler.remove_job(f'{member.id}')
+
+    def checkBeforeAndAfter(self, before, after):
+        self.checkBefore(before)
+        self.checkAfter(after)
+
+    def checkAfkOrDeaf(self, member):
+        job = self.bot.scheduler.get_job(f'{member.id}')
+
+        if job:
+            if (member.voice.channel.name == member.guild.afk_channel) or member.voice.self_deaf == True:
+                self.bot.scheduler.pause_job(f'{member.id}')
+            else:
+                self.bot.scheduler.resume_job(f'{member.id}')
+
+    @Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if member.bot:
+            return
+
+        # Заход
+        if after.channel and not before.channel:
+            self.checkAfter(after.channel)
+
+        # Выход
+        if before.channel and not after.channel:
+            if self.bot.scheduler.get_job(f'{member.id}'):
+                self.bot.scheduler.remove_job(f'{member.id}')
+
+            self.checkBefore(before.channel)
+
+        # Перемещение по каналам
+        if before.channel and after.channel:
+            if before.channel != after.channel:
+                if self.bot.scheduler.get_job(f'{member.id}'):
+                    self.bot.scheduler.remove_job(f'{member.id}')
+
+                self.checkBeforeAndAfter(before.channel, after.channel)
+
+        self.checkAfkOrDeaf(member)
 
     def addVoiceJob(self, member):
         self.bot.scheduler.add_job(
