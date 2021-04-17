@@ -11,12 +11,12 @@ class Poll(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # async def cog_command_error(self, ctx, error):
-    #     if isinstance(error, MissingPermissions):
-    #         await ctx.send('**слыш,** тебе нельзя такое исполнять')
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MissingPermissions):
+            await ctx.send('**слыш,** тебе нельзя такое исполнять')
 
-    #     if isinstance(error, BotMissingPermissions):
-    #         await ctx.send(f'Не могу управлять сообщениями')
+        if isinstance(error, BotMissingPermissions):
+            await ctx.send(f'Не могу управлять сообщениями')
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -30,8 +30,8 @@ class Poll(Cog):
                     await message.remove_reaction(reaction.emoji, payload.member)
 
     @command(name='poll', description='Выборы')
-    # @has_permissions(manage_messages=True)
-    # @bot_has_permissions(manage_messages=True)
+    @has_permissions(manage_messages=True)
+    @bot_has_permissions(manage_messages=True)
     async def poll(self, ctx, seconds: int, question: str, *options):
         await ctx.message.delete()
         if len(options) > len(self.emojis):
