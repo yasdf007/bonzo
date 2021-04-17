@@ -1,16 +1,22 @@
 # Created by ムAloneStranger (c) 2020.
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
-from discord import Intents, Game, Status
-from discord.ext.commands import Bot as bonzoBot, Cog
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from platform import platform
-from time import time
-from os import listdir, getenv
-from database import db
+
+from colorama import Fore, Back, Style
 from dotenv import load_dotenv
+from database import db
+from os import listdir, getenv
+from time import time
+from platform import platform
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from discord.ext.commands import Bot as bonzoBot, Cog
+from discord import Intents, Game, Status
+import sys
+sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
+
 
 load_dotenv()  # загружает файл env
+OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
 
 
 class Bot(bonzoBot):
@@ -20,13 +26,18 @@ class Bot(bonzoBot):
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=getenv('PREFIX'),
-                         help_command=None, intents=intents)
+                         help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
+        curr, total = 0, len(listdir('./commands')) - 3
         for filename in listdir('./commands'):
             if filename.endswith('.py') and not filename.startswith('music'):
                 self.load_extension(f'commands.{filename[:-3]}')
-                print(f'loaded {filename}')
+                curr += 1
+                print(f'loaded {filename}, {curr}/{total}')
+        print(Back.WHITE + Fore.BLACK +
+              "MUSIC WAS TEMPORARILY REMOVED FROM BONZO DUE TO HOSTING ISSUES" + Style.RESET_ALL)
+        print(Fore.RED + "EVALA WAS TEMPORARILY DISABLED DUE TO HUGE SECURITY WEAKNESSES AND BREACHES IN CODE" + Style.RESET_ALL)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан

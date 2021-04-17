@@ -1,5 +1,6 @@
 from discord import TextChannel
-from discord.ext.commands import Cog, CommandInvokeError, command, has_role
+from discord.ext.commands import Cog, command, is_owner
+from discord.ext.commands.errors import CommandInvokeError, NotOwner
 name = 'evala'
 description = 'Исполняет код (только для разработчиков)'
 
@@ -13,20 +14,22 @@ class evala(Cog):
         if isinstance(error, CommandInvokeError):
             await ctx.send('Ошибка при выполении запроса')
 
+        if isinstance(error, NotOwner):
+            await ctx.send('Только для разработчиков бота')
+
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)
-    @has_role('bonzodev')
+    @is_owner()
     @command(name=name, description=description)
     async def evala(self, ctx, evcode: str):
-        if evcode:
-            execute = eval(evcode)
-            # удаляем команду
-            await ctx.message.delete()
-
-            await execute
-        else:
-            # Ошибка
+        if not evcode:
             raise CommandInvokeError()
+
+        execute = eval(evcode)
+
+        await ctx.message.delete()
+
+        await execute
 
 
 def setup(bot):

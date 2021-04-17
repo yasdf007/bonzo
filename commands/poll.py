@@ -1,5 +1,6 @@
 from discord import Embed
-from discord.ext.commands import Cog, MissingRole, has_any_role, command
+from discord.ext.commands import Cog, command, has_permissions, bot_has_permissions
+from discord.ext.commands.errors import MissingPermissions, BotMissingPermissions
 from datetime import datetime, timedelta
 
 
@@ -10,9 +11,12 @@ class Poll(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, MissingRole):
-            await ctx.message.reply('**слыш,** тебе нельзя такое исполнять')
+    # async def cog_command_error(self, ctx, error):
+    #     if isinstance(error, MissingPermissions):
+    #         await ctx.send('**слыш,** тебе нельзя такое исполнять')
+
+    #     if isinstance(error, BotMissingPermissions):
+    #         await ctx.send(f'Не могу управлять сообщениями')
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):
@@ -25,8 +29,9 @@ class Poll(Cog):
                         and reaction.emoji != payload.emoji.name):
                     await message.remove_reaction(reaction.emoji, payload.member)
 
-    @command(name='poll', description='Выборы (только для разрабов, персоны клуба)')
-    @has_any_role('bonzodev', 'Персона Клуба')
+    @command(name='poll', description='Выборы')
+    # @has_permissions(manage_messages=True)
+    # @bot_has_permissions(manage_messages=True)
     async def poll(self, ctx, seconds: int, question: str, *options):
         await ctx.message.delete()
         if len(options) > len(self.emojis):
@@ -36,19 +41,18 @@ class Poll(Cog):
         embed = Embed(title=question, color=0xff0000,
                       timestamp=datetime.utcnow())
 
-        embed.add_field(name='Варинаты',
+        embed.add_field(name='Варианты',
                         value='\n'.join(
                             [f'{self.emojis[index]} {option}' for index, option in enumerate(options)]))
 
-        message = await ctx.message.reply(embed=embed)
-
+        msg = await ctx.channel.send(embed=embed)
         for emoji in self.emojis[:len(options)]:
-            await message.add_reaction(emoji)
+            await msg.add_reaction(emoji)
 
-        self.pollIds.append((message.channel.id, message.id))
+        self.pollIds.append((msg.channel.id, msg.id))
 
         self.bot.scheduler.add_job(self.pollComplete, "date", run_date=datetime.now(
-        ) + timedelta(seconds=seconds), args=[message.channel.id, message.id])
+        ) + timedelta(seconds=seconds), args=[msg.channel.id, msg.id])
 
     async def pollComplete(self, channel_id, message_id):
         embed = Embed(title='Выборы окончены',
