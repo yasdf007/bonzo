@@ -14,7 +14,6 @@ from discord import Intents, Game, Status
 import sys
 sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
 
-
 load_dotenv()  # загружает файл env
 OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
 
