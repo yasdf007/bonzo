@@ -5,47 +5,45 @@ from .resources.blackjack.Blackjack import Blackjack
 
 
 class gameBlackjack(Cog):
-    gameStart = False
+    games = {}
 
     def __init__(self, bot):
         self.bot = bot
-        self.players = []
 
     @group(name='blackjack', description='игра blackjack (21)')
     async def gameBlackjack(self, ctx):
         if ctx.invoked_subcommand:
             return
 
-        if self.gameStart == True:
+        if str(ctx.guild.id) in self.games:
             await ctx.send('Игра идет')
             return
 
-        self.players = []
-
-        self.gameStart = True
+        self.games[str(ctx.guild.id)] = []
 
         await ctx.send('Ждем игроков 15 секунд, bd/blackjack join для входа в игру')
 
         await asyncio.sleep(15)
 
-        if len(self.players) == 0:
-            self.gameStart = False
+        if len(self.games[str(ctx.guild.id)]) == 0:
+            self.games.pop(str(ctx.guild.id))
             return
 
-        print(self.players)
-
-        blackjack = Blackjack(ctx, players=self.players)
+        blackjack = Blackjack(ctx, players=self.games[str(ctx.guild.id)])
         await blackjack.play()
-
-        self.gameStart = False
+        self.games.pop(str(ctx.guild.id))
+        print(self.games)
 
     @gameBlackjack.command(name='join', desciption='Присоедениться к игре blackjack')
     async def join(self, ctx):
-        if self.gameStart == False:
+        if not str(ctx.guild.id) in self.games:
             return
-        if not str(ctx.author.id) in self.players and not ctx.message.author.bot:
-            self.players.append(str(ctx.message.author.id))
+
+        if not str(ctx.message.author.id) in self.games[str(ctx.guild.id)] and not ctx.message.author.bot:
+            self.games[str(ctx.guild.id)].append(str(ctx.message.author.id))
             await ctx.reply(f'Добавил {ctx.message.author}')
+
+        print(self.games)
 
 
 def setup(bot):
