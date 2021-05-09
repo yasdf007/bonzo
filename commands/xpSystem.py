@@ -1,4 +1,3 @@
-from apscheduler.jobstores.base import JobLookupError, ConflictingIdError
 from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
@@ -17,15 +16,19 @@ class AddXP(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    def calculateLevel(self, exp):
+    async def calculateLevel(self, exp):
         return int((exp/60) ** 0.5)
 
-    def calculateXp(self, lvl):
+    async def calculateXp(self, lvl):
         return int(60*lvl**2)
 
-    def percentsToLvlUp(self, currentXp, currentLVL):
-        devinded = currentXp-self.calculateXp(currentLVL)
-        devider = self.calculateXp(currentLVL+1)-self.calculateXp(currentLVL)
+    async def percentsToLvlUp(self, currentXp, currentLVL):
+        xpToGetCurrentLVL = await self.calculateXp(currentLVL)
+        xpToGetNextLVL = await self.calculateXp(currentLVL+1)
+
+        devinded = currentXp - xpToGetCurrentLVL
+        devider = xpToGetNextLVL - xpToGetCurrentLVL
+
         return round((devinded/devider)*100, 2)
 
     async def executeQuery(self, query: str, type_: str):
@@ -43,11 +46,12 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
-        if not message.author.bot:
-            await self.addMessageXp(message.author)
-        return
+        if message.author.bot:
+            return
 
-    def checkAfter(self, channel):
+        await self.addMessageXp(message.author)
+
+    async def checkAfter(self, channel):
         # Массив из людей в войсе без ботов
         membersInVoice = list(
             filter(lambda x: x.bot == False, channel.members)
@@ -59,9 +63,9 @@ class AddXP(Cog):
 
             for member in membersInVoice:
                 if self.bot.scheduler.get_job(f'{member.id}') is None:
-                    self.addVoiceJob(member)
+                    await self.addVoiceJob(member)
 
-    def checkBefore(self, channel):
+    async def checkBefore(self, channel):
         membersInVoice = list(
             filter(lambda x: x.bot == False, channel.members)
         )
@@ -70,11 +74,11 @@ class AddXP(Cog):
             for member in membersInVoice:
                 self.bot.scheduler.remove_job(f'{member.id}')
 
-    def checkBeforeAndAfter(self, before, after):
-        self.checkBefore(before)
-        self.checkAfter(after)
+    async def checkBeforeAndAfter(self, before, after):
+        await self.checkBefore(before)
+        await self.checkAfter(after)
 
-    def checkAfkOrDeaf(self, member):
+    async def checkAfkOrDeaf(self, member):
         job = self.bot.scheduler.get_job(f'{member.id}')
 
         if job:
@@ -90,14 +94,14 @@ class AddXP(Cog):
 
         # Заход
         if after.channel and not before.channel:
-            self.checkAfter(after.channel)
+            await self.checkAfter(after.channel)
 
         # Выход
         if before.channel and not after.channel:
             if self.bot.scheduler.get_job(f'{member.id}'):
                 self.bot.scheduler.remove_job(f'{member.id}')
 
-            self.checkBefore(before.channel)
+            await self.checkBefore(before.channel)
 
         # Перемещение по каналам
         if before.channel and after.channel:
@@ -105,11 +109,11 @@ class AddXP(Cog):
                 if self.bot.scheduler.get_job(f'{member.id}'):
                     self.bot.scheduler.remove_job(f'{member.id}')
 
-                self.checkBeforeAndAfter(before.channel, after.channel)
+                await self.checkBeforeAndAfter(before.channel, after.channel)
 
-        self.checkAfkOrDeaf(member)
+        await self.checkAfkOrDeaf(member)
 
-    def addVoiceJob(self, member):
+    async def addVoiceJob(self, member):
         self.bot.scheduler.add_job(
             self.addVoiceXp, 'interval', minutes=1, id=f'{member.id}', args=[member])
 
@@ -130,7 +134,7 @@ class AddXP(Cog):
 
         if datetime.now() > nextMessageXpAt:
             newXp = xp + self.messageXP
-            newLvl = self.calculateLevel(newXp)
+            newLvl = await self.calculateLevel(newXp)
             nextXpAt = datetime.now()+timedelta(seconds=60)
 
             updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
@@ -152,7 +156,7 @@ class AddXP(Cog):
             return
 
         newXp = xpInfo['xp'] + self.voiceXP
-        newLvl = self.calculateLevel(newXp)
+        newLvl = await self.calculateLevel(newXp)
 
         updateQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
                         update xpinfo set xp={newXp}, LVL={newLvl}  where xpinfo.id = (select res.id from res);'
@@ -222,7 +226,7 @@ class AddXP(Cog):
         rezised = userProfilePhoto.resize((100, 100))
         w, _ = bar.size
 
-        percents = self.percentsToLvlUp(xp, lvl)
+        percents = await self.percentsToLvlUp(xp, lvl)
 
         cropped = bar.crop((0, 0, w*(percents)/100, 45))
 
