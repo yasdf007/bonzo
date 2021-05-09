@@ -32,7 +32,6 @@ class gameBlackjack(Cog):
         blackjack = Blackjack(ctx, players=self.games[str(ctx.guild.id)])
         await blackjack.play()
         self.games.pop(str(ctx.guild.id))
-        print(self.games)
 
     @gameBlackjack.command(name='join', desciption='Присоедениться к игре blackjack')
     async def join(self, ctx):
@@ -42,8 +41,6 @@ class gameBlackjack(Cog):
         if not str(ctx.message.author.id) in self.games[str(ctx.guild.id)] and not ctx.message.author.bot:
             self.games[str(ctx.guild.id)].append(str(ctx.message.author.id))
             await ctx.reply(f'Добавил {ctx.message.author}')
-
-        print(self.games)
 
 
 def setup(bot):
