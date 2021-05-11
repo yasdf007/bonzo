@@ -227,6 +227,7 @@ class AddXP(Cog):
         w, _ = bar.size
 
         percents = await self.percentsToLvlUp(xp, lvl)
+        xpToNextLVL = await self.calculateXp(lvl+1)
 
         cropped = bar.crop((0, 0, w*(percents)/100, 45))
 
@@ -238,12 +239,16 @@ class AddXP(Cog):
 
         draw.text(((650-textWidth)/2, 270), percentsText, (0, 0, 0),
                   font=font, align='right')
+
         draw.text((130, 12), f'{ctx.author.name}#{ctx.author.discriminator}', (0, 0, 0),
                   font=font, align='center')
+
         draw.text((130, 43), f'RANK:{rank}/{maxRank}', (0, 0, 0),
                   font=font, align='center')
-        draw.text((130, 73), f'EXP: {xp}', (0, 0, 0),
+
+        draw.text((130, 73), f'EXP: {xp}/{xpToNextLVL}', (0, 0, 0),
                   font=font, align='center')
+
         draw.text((130, 102), f'LVL: {lvl}', (0, 0, 0),
                   font=font, align='center')
 

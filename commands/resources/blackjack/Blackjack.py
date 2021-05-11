@@ -46,11 +46,11 @@ class Blackjack:
     async def printGame(self, forceShow=False):
         fields = []
         fields.append({'inline': False, 'name': 'DEALER',
-                       'value': await self.dealer.showHand() if forceShow == False else await self.dealer.getHandAndScore(forceShow)})
+                       'value': f'`{await self.dealer.showHand() if forceShow == False else await self.dealer.getHandAndScore(forceShow)}`'})
 
         for player in self.players:
             fields.append({'inline': True, 'name': self.ctx.guild.get_member(int(player)).display_name,
-                           'value': await self.game[player][0].getHandAndScore()})
+                           'value': f'`{await self.game[player][0].getHandAndScore()}`'})
 
         myDict = {'fields': fields, 'type': 'rich',
                   'title': 'Blackjack'}
@@ -73,6 +73,9 @@ class Blackjack:
     async def play(self):
         await self.initGame()
         await self.dealToEveryone()
+
+        # self.game[player][0] - инстанс класса Hand
+        # self.game[player][1] - словарь из статусов игрока
 
         for player in self.players:
             score = await self.game[player][0].getScore()
