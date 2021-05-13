@@ -214,7 +214,7 @@ class AddXP(Cog):
         await (await self.bot.loop.run_in_executor(None, self.asyncRankCard, ctx, xp, lvl, rank, maxRank))
 
     async def asyncRankCard(self, ctx, xp, lvl, rank, maxRank):
-        reqImage = await Asset.read(ctx.author.avatar_url)
+        reqImage = await Asset.read(ctx.author.avatar_url_as(static_format='png'))
 
         userProfilePhoto = Image.open(BytesIO(reqImage))
         template = Image.open('./static/rankTemplate.png')
@@ -223,15 +223,22 @@ class AddXP(Cog):
         draw = ImageDraw.Draw(template)
         font = ImageFont.truetype('./static/arial.ttf', 14)
 
-        rezised = userProfilePhoto.resize((100, 100))
         w, _ = bar.size
+
+        mask = Image.new('L', userProfilePhoto.size, 0)
+        drawMask = ImageDraw.Draw(mask)
+        drawMask.ellipse(
+            (0, 0) + userProfilePhoto.size, fill=255)
+
+        rezised = userProfilePhoto.resize((100, 100))
+        mask = mask.resize((100, 100))
 
         percents = await self.percentsToLvlUp(xp, lvl)
         xpToNextLVL = await self.calculateXp(lvl+1)
 
         cropped = bar.crop((0, 0, w*(percents)/100, 45))
 
-        template.paste(rezised, (15, 15))
+        template.paste(rezised, (15, 15), mask)
         template.paste(cropped, (100, 255), cropped)
 
         percentsText = f'{percents}%'
@@ -240,7 +247,7 @@ class AddXP(Cog):
         draw.text(((650-textWidth)/2, 270), percentsText, (0, 0, 0),
                   font=font, align='right')
 
-        draw.text((130, 12), f'{ctx.author.name}#{ctx.author.discriminator}', (0, 0, 0),
+        draw.text((130, 12), f'{ctx.author}', (0, 0, 0),
                   font=font, align='center')
 
         draw.text((130, 43), f'RANK:{rank}/{maxRank}', (0, 0, 0),
@@ -253,9 +260,9 @@ class AddXP(Cog):
                   font=font, align='center')
 
         with BytesIO() as temp:
-            template.save(temp, "png", quality=100)
+            template.save(temp, "png", quality=0)
             temp.seek(0)
-            await ctx.message.reply(file=File(fp=temp, filename='now.jpeg'))
+            await ctx.message.reply(file=File(fp=temp, filename='now.png'))
 
 
 def setup(bot):
