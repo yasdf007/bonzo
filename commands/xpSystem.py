@@ -12,9 +12,9 @@ class AddXP(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
+    # async def cog_command_error(self, ctx, error):
+    #     if isinstance(error, CommandOnCooldown):
+    #         await ctx.message.reply(error)
 
     async def calculateLevel(self, exp):
         return int((exp/60) ** 0.5)
@@ -213,56 +213,62 @@ class AddXP(Cog):
 
         await (await self.bot.loop.run_in_executor(None, self.asyncRankCard, ctx, xp, lvl, rank, maxRank))
 
+    async def createMask(self, photo):
+        with Image.new('L', photo.size, 0) as mask:
+            drawMask = ImageDraw.Draw(mask)
+            drawMask.ellipse(
+                (0, 0) + photo.size, fill=255)
+
+            return mask
+
     async def asyncRankCard(self, ctx, xp, lvl, rank, maxRank):
+        fullBlack = (0, 0, 0)
         reqImage = await Asset.read(ctx.author.avatar_url_as(static_format='png'))
 
-        userProfilePhoto = Image.open(BytesIO(reqImage))
-        template = Image.open('./static/rankTemplate.png')
-        bar = Image.open('./static/progressBar.png')
+        with Image.open(BytesIO(reqImage)) as userProfilePhoto:
+            with Image.open('./static/rankTemplate.png') as template:
+                with Image.open('./static/progressBar.png') as bar:
+                    draw = ImageDraw.Draw(template)
+                    font = ImageFont.truetype('./static/arial.ttf', 14)
 
-        draw = ImageDraw.Draw(template)
-        font = ImageFont.truetype('./static/arial.ttf', 14)
+                    mask = await self.createMask(userProfilePhoto)
 
-        w, _ = bar.size
+                    avatarSize = (100, 100)
 
-        mask = Image.new('L', userProfilePhoto.size, 0)
-        drawMask = ImageDraw.Draw(mask)
-        drawMask.ellipse(
-            (0, 0) + userProfilePhoto.size, fill=255)
+                    rezised = userProfilePhoto.resize(avatarSize)
+                    mask = mask.resize(avatarSize)
 
-        rezised = userProfilePhoto.resize((100, 100))
-        mask = mask.resize((100, 100))
+                    percents = await self.percentsToLvlUp(xp, lvl)
+                    xpToNextLVL = await self.calculateXp(lvl+1)
 
-        percents = await self.percentsToLvlUp(xp, lvl)
-        xpToNextLVL = await self.calculateXp(lvl+1)
+                    barWidth = bar.size[0]
+                    croppedBar = bar.crop((0, 0, barWidth*(percents)/100, 45))
 
-        cropped = bar.crop((0, 0, w*(percents)/100, 45))
+                    template.paste(rezised, (15, 15), mask)
+                    template.paste(croppedBar, (100, 255), croppedBar)
 
-        template.paste(rezised, (15, 15), mask)
-        template.paste(cropped, (100, 255), cropped)
+                    percentsText = f'{percents}%'
+                    textWidth = font.getsize(percentsText)[0]
 
-        percentsText = f'{percents}%'
-        textWidth = font.getsize(percentsText)[0]
+                    draw.text(((650-textWidth)/2, 270), percentsText, fullBlack,
+                              font=font, align='right')
 
-        draw.text(((650-textWidth)/2, 270), percentsText, (0, 0, 0),
-                  font=font, align='right')
+                    draw.text((130, 12), f'{ctx.author}', fullBlack,
+                              font=font, align='center')
 
-        draw.text((130, 12), f'{ctx.author}', (0, 0, 0),
-                  font=font, align='center')
+                    draw.text((130, 43), f'RANK:{rank}/{maxRank}', fullBlack,
+                              font=font, align='center')
 
-        draw.text((130, 43), f'RANK:{rank}/{maxRank}', (0, 0, 0),
-                  font=font, align='center')
+                    draw.text((130, 73), f'EXP: {xp}/{xpToNextLVL}', fullBlack,
+                              font=font, align='center')
 
-        draw.text((130, 73), f'EXP: {xp}/{xpToNextLVL}', (0, 0, 0),
-                  font=font, align='center')
+                    draw.text((130, 102), f'LVL: {lvl}', fullBlack,
+                              font=font, align='center')
 
-        draw.text((130, 102), f'LVL: {lvl}', (0, 0, 0),
-                  font=font, align='center')
-
-        with BytesIO() as temp:
-            template.save(temp, "png", quality=0)
-            temp.seek(0)
-            await ctx.message.reply(file=File(fp=temp, filename='now.png'))
+                    with BytesIO() as temp:
+                        template.save(temp, 'png')
+                        temp.seek(0)
+                        await ctx.message.reply(file=File(fp=temp, filename='now.png'))
 
 
 def setup(bot):
