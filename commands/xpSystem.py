@@ -12,9 +12,9 @@ class AddXP(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # async def cog_command_error(self, ctx, error):
-    #     if isinstance(error, CommandOnCooldown):
-    #         await ctx.message.reply(error)
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, CommandOnCooldown):
+            await ctx.message.reply(error)
 
     async def calculateLevel(self, exp):
         return int((exp/60) ** 0.5)
