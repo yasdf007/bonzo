@@ -30,17 +30,19 @@ class Shakalizator(Cog):
         if not self.urlValid.match(imageUrl):
             raise CommandInvokeError('Ссылка не найдена')
 
-        extension = imageUrl.split('/')[-1]
+        async with ClientSession() as session:
+            async with session.head(imageUrl) as response:
+                fileType = response.content_type.split('/')[-1]
 
-        if 'gif' in extension:
+        if 'gif' in fileType:
             await (await self.bot.loop.run_in_executor(None, self.asyncGifShakalizator, ctx, imageUrl))
 
         # Один из форматов
-        elif any(ext in extension for ext in ('png', 'jpeg', 'jpg')):
+        elif any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
             await (await self.bot.loop.run_in_executor(None, self.asyncPhotoShakalizator, ctx, imageUrl))
         else:
             raise CommandInvokeError(
-                'Поддерживаемые форматы: png, jpeg, jpg, gif')
+                f'Поддерживаемые форматы: png, jpeg, jpg, gif. У тебя {fileType}')
 
     async def asyncGifShakalizator(self, ctx, url):
         async with ClientSession() as session:
