@@ -82,7 +82,7 @@ class Shakalizator(Cog):
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
         with Image.open(BytesIO(requestImage)) as img:
             img = img.convert('RGB')
-
+            img.thumbnail((750, 750))
             # Изменение фотки
             img = img.resize((int(img.size[0] / 2), int(img.size[1] / 2)))
 
