@@ -58,21 +58,18 @@ class Shakalizator(Cog):
         if bytes.tell() >= 5242880:
             raise CommandInvokeError('Максимальный размер гифки 5 мегабайт')
 
-        img = Image.open(bytes)
+        with Image.open(bytes) as img:
 
-        frames = [frame.resize((int(img.size[0] / 8), int(img.size[1] / 8)))
-                  for frame in ImageSequence.Iterator(img)]
+            frames = [frame.resize((int(img.size[0] // 8), int(img.size[1] // 8))).resize((300, 300))
+                      for frame in ImageSequence.Iterator(img)]
 
-        frames = [frame.resize((300, 300))
-                  for frame in frames]
+            with BytesIO() as image_binary:
+                frames[0].save(image_binary, format='GIF', save_all=True,
+                               append_images=frames[1:], optimize=False, duration=100, loop=0)
 
-        with BytesIO() as image_binary:
-            frames[0].save(image_binary, format='GIF', save_all=True,
-                           append_images=frames[1:], optimize=False, duration=100, loop=0)
+                image_binary.seek(0)
 
-            image_binary.seek(0)
-
-            await ctx.message.reply(file=File(fp=image_binary, filename='now.gif'))
+                await ctx.message.reply(file=File(fp=image_binary, filename='now.gif'))
 
     async def asyncPhotoShakalizator(self, ctx, imageUrl):
         async with ClientSession() as session:
@@ -83,18 +80,18 @@ class Shakalizator(Cog):
                     raise CommandInvokeError('Не удалось открыть файл')
 
         # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-        img = Image.open(BytesIO(requestImage))
-        img = img.convert('RGB')
+        with Image.open(BytesIO(requestImage)) as img:
+            img = img.convert('RGB')
 
-        # Изменение фотки
-        img = img.resize((int(img.size[0] / 2), int(img.size[1] / 2)))
+            # Изменение фотки
+            img = img.resize((int(img.size[0] / 2), int(img.size[1] / 2)))
 
-        # Создаем новую фотку
-        with BytesIO() as image_binary:
-            # Шакалим
-            img.save(image_binary, "jpeg", quality=0)
-            image_binary.seek(0)
-            await ctx.message.reply(file=File(fp=image_binary, filename='now.jpeg'))
+            # Создаем новую фотку
+            with BytesIO() as image_binary:
+                # Шакалим
+                img.save(image_binary, "jpeg", quality=0)
+                image_binary.seek(0)
+                await ctx.message.reply(file=File(fp=image_binary, filename='now.jpeg'))
 
 
 def setup(bot):
