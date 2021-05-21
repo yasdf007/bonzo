@@ -1,6 +1,10 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, guild_only, has_permissions, group
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
+from asyncio import sleep
+
+
+from discord.ext.commands.errors import MissingPermissions, NoPrivateMessage
 
 
 class FreeGames(Cog):
@@ -11,8 +15,69 @@ class FreeGames(Cog):
         self.bot.scheduler.add_job(
             self.freeGames, CronTrigger(day_of_week='thu', hour=16, minute=3, jitter=120))
 
-    async def freeGames(self):
-        channel = self.bot.get_channel(790625464083152916)
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MissingPermissions):
+            await ctx.message.reply('Только администратор может использовать эту команду')
+        if isinstance(error, NoPrivateMessage):
+            await ctx.send('Только на серверах')
+
+    @guild_only()
+    @has_permissions(administrator=True)
+    @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `bd/freegames delete` для удаления канала', aliases=['free', 'freeGames'])
+    async def initFreeGames(self, ctx):
+        await ctx.message.delete()
+        if ctx.invoked_subcommand:
+            return
+
+        try:
+            async with self.bot.pool.acquire() as con:
+                selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
+                res = await con.fetchrow(selectQuery)
+                if res:
+                    msg = await ctx.send('На этом сервере уже указан канал для бесплатных игр (удаление через 3с)')
+                    await sleep(3)
+                    await msg.delete()
+                    return
+
+                insertQuery = f'insert into free_games_channel(server_id,channel_id) values({ctx.message.guild.id},{ctx.message.channel.id});'
+                await con.execute(insertQuery)
+
+                msg = await ctx.send('Этот канал будет использоваться для рассылки бесплатных игр (удаление через 3с)')
+                await sleep(3)
+        except:
+            msg = await ctx.send('Ошибка при инициализации канала (удаление через 3с)')
+            await sleep(3)
+
+        await msg.delete()
+
+    @guild_only()
+    @initFreeGames.command(name='delete', desciption='Удаляет рассылку бесплатных игр')
+    async def removeFromFreeGames(self, ctx):
+        async with self.bot.pool.acquire() as con:
+            selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
+            res = await con.fetchrow(selectQuery)
+
+            if not res:
+                msg = await ctx.send('На этом сервере не был указан канал для бесплатных игр (удаление через 3с)')
+                await sleep(3)
+                await msg.delete()
+                return
+
+            deleteQuery = f'delete from free_games_channel where server_id={ctx.message.guild.id}'
+            await con.execute(deleteQuery)
+
+            msg = await ctx.send('Рассылки игр больше не будет (удаление через 3с)')
+            await sleep(3)
+            await msg.delete()
+
+    async def getChannels(self):
+        selectQuery = f'select channel_id from free_games_channel'
+        async with self.bot.pool.acquire() as con:
+            res = await con.fetch(selectQuery)
+
+        return res
+
+    async def getGameUrl(self):
         async with ClientSession() as session:
             async with session.get(self.link) as response:
                 resultJson = await response.json()
@@ -31,13 +96,20 @@ class FreeGames(Cog):
 
                     for attr in game['customAttributes']:
                         if attr['key'] == "com.epicgames.app.productSlug":
-                            gameNameInLink = attr['value']
+                            slug = attr['value']
 
-                    link = 'https://www.epicgames.com/store/ru/p/' + gameNameInLink
+                    link = 'https://www.epicgames.com/store/ru/p/' + slug
 
                     msg = f'Прямо сейчас бесплатна {game_name}\nСтоимость игры {game_price}\nСсылка {link}'
+        return msg
 
-                    await channel.send(msg)
+    async def freeGames(self):
+        channels = await self.getChannels()
+        msg = await self.getGameUrl()
+        for channel in channels:
+            channel = self.bot.get_channel(channel['channel_id'])
+            await channel.send(msg)
+            await sleep(1)
 
 
 def setup(bot):

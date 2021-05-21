@@ -10,3 +10,10 @@ create table IF NOT EXISTS xpInfo(
     LVL INT DEFAULT 0,
     NextTextXpAt TIMESTAMP DEFAULT NOW()
 );
+create table IF NOT EXISTS free_games_channel(
+    id bigserial,
+    server_id bigint NOT NULL,
+    channel_id bigint NOT NULL,
+    UNIQUE (server_id, channel_id)
+);
+
