@@ -1,5 +1,6 @@
 from discord import Embed
 from discord.ext.commands import Cog, command
+from discord.ext.commands.core import guild_only
 
 
 name = 'serverinfo'
@@ -11,6 +12,7 @@ class info(Cog):
         self.bot = bot
 
     # функция, отправляющая информацию о сервере
+    @guild_only()
     @command(name=name, description=description)
     async def serverinfo(self, ctx):
         server = ctx.message.guild

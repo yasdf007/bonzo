@@ -1,4 +1,5 @@
-from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType
+from discord.channel import DMChannel
+from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType, guild_only
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
@@ -46,6 +47,8 @@ class AddXP(Cog):
 
     @Cog.listener()
     async def on_message(self, message):
+        if isinstance(message.channel, DMChannel):
+            return
         if message.author.bot:
             return
 
@@ -163,6 +166,7 @@ class AddXP(Cog):
 
         await self.executeQuery(updateQuery, 'execute')
 
+    @guild_only()
     @cooldown(rate=1, per=20, type=BucketType.user)
     @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
     async def leaderboard(self, ctx):
@@ -190,6 +194,7 @@ class AddXP(Cog):
                 name=f'`{member.display_name}`', value=f'LVL: {lvl}\nEXP: {exp}', inline=False)
         await ctx.message.reply(embed=embed)
 
+    @guild_only()
     @cooldown(rate=1, per=60, type=BucketType.user)
     @command(name='rank', description='Показывает карточку с опытом')
     async def rank(self, ctx):

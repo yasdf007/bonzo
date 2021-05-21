@@ -1,5 +1,5 @@
 from discord import Embed
-from discord.ext.commands import Cog, command, has_permissions, bot_has_permissions
+from discord.ext.commands import Cog, command, has_permissions, bot_has_permissions, guild_only
 from discord.ext.commands.errors import MissingPermissions, BotMissingPermissions
 from datetime import datetime, timedelta
 
@@ -29,6 +29,7 @@ class Poll(Cog):
                         and reaction.emoji != payload.emoji.name):
                     await message.remove_reaction(reaction.emoji, payload.member)
 
+    @guild_only()
     @command(name='poll', description='Выборы')
     @has_permissions(manage_messages=True)
     @bot_has_permissions(manage_messages=True)

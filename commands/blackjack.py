@@ -1,6 +1,6 @@
-from discord.ext.commands import Cog, command, group
-from discord import Embed
+from discord.ext.commands import Cog, group, guild_only
 import asyncio
+from discord.ext.commands.errors import NoPrivateMessage
 from .resources.blackjack.Blackjack import Blackjack
 
 
@@ -10,6 +10,11 @@ class gameBlackjack(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            await ctx.send('Игра только на серверах')
+
+    @guild_only()
     @group(name='blackjack', description='игра blackjack (21)')
     async def gameBlackjack(self, ctx):
         if ctx.invoked_subcommand:
@@ -33,6 +38,7 @@ class gameBlackjack(Cog):
         await blackjack.play()
         self.games.pop(str(ctx.guild.id))
 
+    @guild_only()
     @gameBlackjack.command(name='join', desciption='Присоедениться к игре blackjack')
     async def join(self, ctx):
         if not str(ctx.guild.id) in self.games:

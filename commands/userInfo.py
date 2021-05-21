@@ -1,5 +1,6 @@
 from discord import Embed, Spotify, CustomActivity
 from discord.ext.commands import Cog, MemberNotFound, command
+from discord.ext.commands.core import guild_only
 from discord.member import Member
 
 name = 'info'
@@ -10,10 +11,11 @@ class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # async def cog_command_error(self, ctx, error):
-    #     if isinstance(error, MemberNotFound):
-    #         await ctx.message.reply(f'{error.argument} не найден')
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MemberNotFound):
+            await ctx.message.reply(f'{error.argument} не найден')
 
+    @guild_only()
     @command(name=name, description=description, aliases=['userinfo'])
     async def info(self, ctx, member: Member = None):
 
