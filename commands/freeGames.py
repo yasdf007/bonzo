@@ -34,7 +34,7 @@ class FreeGames(Cog):
                 selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
                 res = await con.fetchrow(selectQuery)
                 if res:
-                    msg = await ctx.send('На этом сервере уже указан канал для бесплатных игр (удаление через 3с)')
+                    msg = await ctx.send(f'На этом сервере уже указан канал для бесплатных игр {ctx.channel.mention}(удаление через 3с)')
                     await sleep(3)
                     await msg.delete()
                     return
