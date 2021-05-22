@@ -23,11 +23,9 @@ class FreeGames(Cog):
 
     @guild_only()
     @has_permissions(administrator=True)
-    @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `bd/freegames delete` для удаления канала', aliases=['free', 'freeGames'])
+    @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `bd/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
         await ctx.message.delete()
-        if ctx.invoked_subcommand:
-            return
 
         try:
             async with self.bot.pool.acquire() as con:
@@ -53,6 +51,7 @@ class FreeGames(Cog):
     @guild_only()
     @initFreeGames.command(name='delete', desciption='Удаляет рассылку бесплатных игр')
     async def removeFromFreeGames(self, ctx):
+        await ctx.message.delete()
         async with self.bot.pool.acquire() as con:
             selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
             res = await con.fetchrow(selectQuery)

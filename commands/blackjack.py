@@ -15,11 +15,8 @@ class gameBlackjack(Cog):
             await ctx.send('Игра только на серверах')
 
     @guild_only()
-    @group(name='blackjack', description='игра blackjack (21)')
+    @group(name='blackjack', description='игра blackjack (21)', invoke_without_command=True)
     async def gameBlackjack(self, ctx):
-        if ctx.invoked_subcommand:
-            return
-
         if str(ctx.guild.id) in self.games:
             await ctx.send('Игра идет')
             return
