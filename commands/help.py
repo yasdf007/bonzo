@@ -1,17 +1,14 @@
-from discord import Embed, File
-from discord.utils import get
+from discord import Embed
 from discord.ext.commands import Cog, command
 from random import randint
 from math import ceil
 from commands.resources.paginator import Paginator
 
 name = 'help'
-description = 'Все команды бота [почти рабочий], инфа о команде help <cmd>'
+description = 'Все команды бота, инфа о команде help <cmd>'
 
 
 class helping(Cog):
-    embeds = None
-    author = None
 
     def __init__(self, bot):
         self.bot = bot
@@ -19,29 +16,40 @@ class helping(Cog):
     @command(name=name, description=description)
     async def help(self, ctx, cmd=None):
         if cmd is None:
-            self.author = ctx.author
-            await self.generateEmbed()
-            # получаем автора сообщения
-
             p = Paginator(ctx)
-            embeds = self.embeds
+            embeds = await self.generateEmbed(ctx.author)
             for x in embeds:
                 p.add_page(x)
             await p.call_controller()
 
-        else:
-            # проверяем есть ли команда -> получаем инфу о комнде
-            if (cmd := get(self.bot.commands, name=cmd)):
+            return
 
-                embed = Embed(title=f'`{cmd}`',
-                              description=await self.commandUsage(cmd), color=randint(0, 0xFFFFFF))
+        # проверяем есть ли команда -> получаем инфу о комнде
+        cmd = self.bot.get_command(cmd)
 
-                embed.add_field(name='Описание', value=cmd.description)
+        if cmd:
+            embed = await self.getCmdEmbed(cmd)
 
-                await ctx.message.reply(embed=embed)
-            # Команды нет
-            else:
-                await ctx.message.reply('Такой команды нет')
+            await ctx.message.reply(embed=embed)
+
+            return
+
+        await ctx.message.reply('Такой команды нет')
+
+    async def getCmdEmbed(self, cmd):
+        embed = Embed(title=f'`{cmd}`',
+                      description=await self.commandUsage(cmd), color=randint(0, 0xFFFFFF))
+
+        embed.add_field(name='Описание', value=cmd.description, inline=False)
+
+        try:
+            subcommands = cmd.commands
+            embed.add_field(name='Подкомманды',
+                            value=f'`{str(*subcommands)}`')
+        except:
+            pass
+
+        return embed
 
     # Как используется команда
     async def commandUsage(self, cmd):
@@ -59,10 +67,13 @@ class helping(Cog):
                     # В функциях указывали None есть переменная необязательна
                     f'[{key}]' if 'None' in str(value) else f'<{key}>')
 
-        parameters = ' '.join(parameters)
-        return f'`{commandAndAliases} {parameters}`'
+        if len(parameters) > 0:
+            parameters = ' '.join(parameters)
+            return f'`{commandAndAliases} {parameters}`'
 
-    async def generateEmbed(self):
+        return f'`{commandAndAliases}`'
+
+    async def generateEmbed(self, author):
         embeds = []
         allCommands = sorted(list(self.bot.commands), key=lambda x: x.name)
         # ceil - округляем в большую стороню
@@ -79,34 +90,20 @@ class helping(Cog):
             # i // 10 + 1:
             # 0/10 + 1 = 0 + 1 = 1 page
             # 10/10 +1 = 1 + 1 = 2 page и тд
-            embed.set_footer(text=f"/by bonzo/ for {self.author}  / Page {1 + (i // 10)}/{pages} /",
-                             icon_url=self.author.avatar_url)
+            embed.set_footer(text=f"/by bonzo/ for {author}  / Page {1 + (i // 10)}/{pages} /",
+                             icon_url=author.avatar_url)
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
 
             slicedCommands = allCommands[i:i + 10]
 
             for command in slicedCommands:
-                # Если есть название и описание команды
-                if command.name and command.description:
-
-                    # Если есть другие названия команды
-                    if command.aliases:
-                        helpAliases = f'{"/".join(command.aliases)}'
-
-                        # Отправляем название команд в ембед
-                        embed.add_field(
-                            name=f'`{command.name}/{helpAliases}`', value=f'{command.description}', inline=False)
-
-                    # Если нет других названий команды
-                    else:
-                        # Отправляем название команды в ембед
-                        embed.add_field(
-                            name=f'`{command.name}`', value=f'{command.description}', inline=False)
+                embed.add_field(
+                    name=f'`{ "/".join([command.name, *command.aliases])}`', value=f'{command.description}', inline=False)
 
             embeds.append(embed)
-        self.embeds = embeds
-        return
+
+        return embeds
 
 
 def setup(bot):
