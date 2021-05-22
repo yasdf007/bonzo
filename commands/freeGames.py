@@ -49,7 +49,7 @@ class FreeGames(Cog):
         await msg.delete()
 
     @guild_only()
-    @initFreeGames.command(name='delete', desciption='Удаляет рассылку бесплатных игр')
+    @initFreeGames.command(name='delete', description='Удаляет рассылку бесплатных игр')
     async def removeFromFreeGames(self, ctx):
         await ctx.message.delete()
         async with self.bot.pool.acquire() as con:

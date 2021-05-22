@@ -36,7 +36,7 @@ class gameBlackjack(Cog):
         self.games.pop(str(ctx.guild.id))
 
     @guild_only()
-    @gameBlackjack.command(name='join', desciption='Присоедениться к игре blackjack')
+    @gameBlackjack.command(name='join', description='Присоедениться к игре blackjack')
     async def join(self, ctx):
         if not str(ctx.guild.id) in self.games:
             return
