@@ -24,7 +24,7 @@ class FreeGames(Cog):
     @guild_only()
     @has_permissions(administrator=True)
     @bot_has_permissions(send_messages=True)
-    @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `bd/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
+    @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
         await ctx.message.delete()
 

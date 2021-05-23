@@ -23,7 +23,7 @@ class gameBlackjack(Cog):
 
         self.games[str(ctx.guild.id)] = []
 
-        await ctx.send('Ждем игроков 15 секунд, bd/blackjack join для входа в игру')
+        await ctx.send('Ждем игроков 15 секунд, b/blackjack join для входа в игру')
 
         await asyncio.sleep(15)
 
@@ -36,7 +36,7 @@ class gameBlackjack(Cog):
         self.games.pop(str(ctx.guild.id))
 
     @guild_only()
-    @gameBlackjack.command(name='join', description='Присоедениться к игре blackjack')
+    @gameBlackjack.command(name='join', description='Присоединиться к игре blackjack')
     async def join(self, ctx):
         if not str(ctx.guild.id) in self.games:
             return
