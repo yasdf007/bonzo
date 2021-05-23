@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, command, guild_only, has_permissions, group
+from discord.ext.commands import Cog, guild_only, has_permissions, group, bot_has_permissions
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
@@ -23,6 +23,7 @@ class FreeGames(Cog):
 
     @guild_only()
     @has_permissions(administrator=True)
+    @bot_has_permissions(send_messages=True)
     @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `bd/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
         await ctx.message.delete()
@@ -76,12 +77,13 @@ class FreeGames(Cog):
 
         return res
 
-    async def getGameUrl(self):
+    async def getUrls(self):
         async with ClientSession() as session:
             async with session.get(self.link) as response:
                 resultJson = await response.json()
 
         games = resultJson['data']['Catalog']['searchStore']['elements']
+        msgs = []
         for game in games:
             promotions = game['promotions']
 
@@ -99,16 +101,22 @@ class FreeGames(Cog):
 
                     link = 'https://www.epicgames.com/store/ru/p/' + slug
 
-                    msg = f'Прямо сейчас бесплатна {game_name}\nСтоимость игры {game_price}\nСсылка {link}'
-        return msg
+                    msgs.append(
+                        f'Прямо сейчас бесплатна {game_name}\nСтоимость игры {game_price}\nСсылка {link}')
+        return msgs
 
     async def freeGames(self):
         channels = await self.getChannels()
-        msg = await self.getGameUrl()
+        if len(channels) < 1:
+            return
+
+        msgs = await self.getUrls()
         for channel in channels:
             channel = self.bot.get_channel(channel['channel_id'])
-            await channel.send(msg)
-            await sleep(1)
+
+            for msg in msgs:
+                await channel.send(msg)
+                await sleep(1)
 
 
 def setup(bot):
