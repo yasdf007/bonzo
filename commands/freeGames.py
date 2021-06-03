@@ -93,8 +93,6 @@ class FreeGames(Cog):
                 if gameProm:
                     game_name = game['title']
 
-                    game_price = game['price']['totalPrice']['fmtPrice']['originalPrice']
-
                     for attr in game['customAttributes']:
                         if attr['key'] == "com.epicgames.app.productSlug":
                             slug = attr['value']
@@ -102,7 +100,7 @@ class FreeGames(Cog):
                     link = 'https://www.epicgames.com/store/ru/p/' + slug
 
                     msgs.append(
-                        f'Прямо сейчас бесплатна {game_name}\nСтоимость игры {game_price}\nСсылка {link}')
+                        f'Прямо сейчас бесплатна {game_name}\nСсылка {link}')
         return msgs
 
     async def freeGames(self):
