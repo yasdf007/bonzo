@@ -17,7 +17,7 @@ class Blackjack:
         self.dealer = Hand(dealer=True)
         for player in self.players:
             self.game[str(player)] = [Hand(dealer=False),
-                                      {'stop': False, 'win': False}]
+                                      {'stop': False, 'win': -1}]
         await self.deck.createDeck()
 
     async def checkFor21(self, score):
@@ -37,11 +37,18 @@ class Blackjack:
             await self.dealer.drawCard(await self.deck.draw())
 
     async def checkWithDealer(self):
-        dealerScore = await self.dealer.getScore()
+        dealerScore = self.dealer.sum
         for player in self.players:
-            playerScore = await self.game[player][0].getScore()
-            if (playerScore > dealerScore and await self.hasLost(playerScore) == False) or (await self.hasLost(dealerScore) == True and playerScore <= 21):
-                self.game[player][1]['win'] = True
+            playerScore = self.game[player][0].sum
+
+            if await self.hasLost(playerScore):
+                continue
+            if ((playerScore > dealerScore) and dealerScore < 21) or (await self.hasLost(dealerScore) == True and playerScore <= 21):
+                self.game[player][1]['win'] = 1
+                continue
+            if ((playerScore == dealerScore) and dealerScore < 21):
+                self.game[player][1]['win'] = 0
+                continue
 
     async def printGame(self, forceShow=False):
         fields = []
@@ -61,14 +68,28 @@ class Blackjack:
 
     async def getWinners(self):
         winners = []
+        drawList = []
+        win = ''
+        draw = ''
+
         for player in self.players:
-            if self.game[player][1]['win'] == True:
+            if self.game[player][1]['win'] == 1:
                 winners.append(player)
+            if self.game[player][1]['win'] == 0:
+                drawList.append(player)
 
         if len(winners) > 0:
-            return ", ".join([self.ctx.guild.get_member(int(winner)).display_name for winner in winners])
+            win = 'Победители: ' + \
+                ", ".join([self.ctx.guild.get_member(
+                    int(winner)).display_name for winner in winners])
+        if len(drawList) > 0:
+            draw = 'Ничья: ' + \
+                ", ".join([self.ctx.guild.get_member(
+                    int(drawP)).display_name for drawP in drawList])
 
-        return "DEALER"
+        if winners or drawList:
+            return '\n'.join([win, draw])
+        return 'Победил DEALER'
 
     async def play(self):
         await self.initGame()
@@ -92,7 +113,8 @@ class Blackjack:
 
                 try:
                     decicion = await self.ctx.bot.wait_for(
-                        'message', check=lambda msg: msg.author.id == playerProfile.id and msg.channel.id == self.ctx.channel.id, timeout=15)
+                        'message', check=lambda msg: msg.author.id == int(player) and msg.channel.id == self.ctx.channel.id, timeout=15)
+
                 except asyncio.TimeoutError:
                     self.game[player][1]['stop'] == True
                     await self.ctx.send(f'{playerProfile.display_name} ничего не выбрал')
@@ -113,8 +135,7 @@ class Blackjack:
 
         while await self.dealer.getScore() < 17:
             await self.dealer.drawCard(await self.deck.draw())
-
         await self.checkWithDealer()
         await self.printGame(forceShow=True)
         winners = await self.getWinners()
-        await self.ctx.send(f'Победители: {winners}')
+        await self.ctx.send(winners)
