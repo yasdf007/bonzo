@@ -43,9 +43,9 @@ class helping(Cog):
         embed.add_field(name='Описание', value=cmd.description, inline=False)
 
         try:
-            subcommands = cmd.commands
+            subcommands = '\n'.join([str(i) for i in list(cmd.commands)])
             embed.add_field(name='Подкомманды',
-                            value=f'`{str(*subcommands)}`')
+                            value=f'`{subcommands}`')
         except:
             pass
 
