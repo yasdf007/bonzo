@@ -22,7 +22,7 @@ class FreeGames(Cog):
             await ctx.send('Только на серверах')
 
     @guild_only()
-    @has_permissions(administrator=True)
+    # @has_permissions(administrator=True)
     @bot_has_permissions(send_messages=True)
     @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
@@ -33,7 +33,8 @@ class FreeGames(Cog):
                 selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
                 res = await con.fetchrow(selectQuery)
                 if res:
-                    msg = await ctx.send(f'На этом сервере уже указан канал для бесплатных игр {ctx.channel.mention}(удаление через 3с)')
+                    channel = self.bot.get_channel(res['channel_id'])
+                    msg = await ctx.send(f'На этом сервере уже указан канал для бесплатных игр {channel.mention}(удаление через 3с)')
                     await sleep(3)
                     await msg.delete()
                     return
