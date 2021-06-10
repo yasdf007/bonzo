@@ -22,7 +22,7 @@ class FreeGames(Cog):
             await ctx.send('Только на серверах')
 
     @guild_only()
-    # @has_permissions(administrator=True)
+    @has_permissions(administrator=True)
     @bot_has_permissions(send_messages=True)
     @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
