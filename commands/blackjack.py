@@ -10,9 +10,9 @@ class gameBlackjack(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, NoPrivateMessage):
-            await ctx.send('Игра только на серверах')
+    # async def cog_command_error(self, ctx, error):
+    #     if isinstance(error, NoPrivateMessage):
+    #         await ctx.send('Игра только на серверах')
 
     @guild_only()
     @group(name='blackjack', description='игра blackjack (21)', invoke_without_command=True)
@@ -25,9 +25,6 @@ class gameBlackjack(Cog):
             [f'{ctx.author.id}'],
             {'start': False}
         ]
-        if len(self.games[str(ctx.guild.id)][0]) == 0:
-            self.games.pop(str(ctx.guild.id))
-            return
 
         while str(ctx.guild.id) in self.games:
             await ctx.send('Ждем игроков 15 секунд, `b/blackjack join` для входа в игру')
@@ -35,6 +32,10 @@ class gameBlackjack(Cog):
 
             if not (str(ctx.guild.id) in self.games):
                 break
+
+            if len(self.games[str(ctx.guild.id)][0]) == 0:
+                self.games.pop(str(ctx.guild.id))
+                return
 
             self.games[str(ctx.guild.id)][1] = True
             blackjack = Blackjack(
@@ -61,9 +62,23 @@ class gameBlackjack(Cog):
             return
         if self.games[str(ctx.guild.id)][1] == True:
             return
+        if ctx.message.author.bot:
+            return
 
         await ctx.send('Игра остановлена')
         self.games.pop(str(ctx.guild.id))
+
+    @guild_only()
+    @gameBlackjack.command(name='leave', description='Выйти из blackjack')
+    async def leave(self, ctx):
+        if not str(ctx.guild.id) in self.games:
+            return
+        if not str(ctx.author.id) in self.games[str(ctx.guild.id)][0]:
+            return
+
+        if str(ctx.message.author.id) in (self.games[str(ctx.guild.id)][0]) and not ctx.message.author.bot:
+            self.games[str(ctx.guild.id)][0].remove(str(ctx.message.author.id))
+            await ctx.reply(f'Удалил {ctx.message.author}')
 
 
 def setup(bot):
