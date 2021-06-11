@@ -21,9 +21,11 @@ class gameBlackjack(Cog):
             await ctx.send('Игра идет')
             return
 
-        self.games[str(ctx.guild.id)] = [f'{ctx.author.id}']
-
-        if len(self.games[str(ctx.guild.id)]) == 0:
+        self.games[str(ctx.guild.id)] = [
+            [f'{ctx.author.id}'],
+            {'start': False}
+        ]
+        if len(self.games[str(ctx.guild.id)][0]) == 0:
             self.games.pop(str(ctx.guild.id))
             return
 
@@ -34,17 +36,22 @@ class gameBlackjack(Cog):
             if not (str(ctx.guild.id) in self.games):
                 break
 
-            blackjack = Blackjack(ctx, players=self.games[str(ctx.guild.id)])
+            self.games[str(ctx.guild.id)][1] = True
+            blackjack = Blackjack(
+                ctx, players=self.games[str(ctx.guild.id)][0])
             await blackjack.play()
+
+            self.games[str(ctx.guild.id)][1] = False
 
     @guild_only()
     @gameBlackjack.command(name='join', description='Присоединиться к игре blackjack')
     async def join(self, ctx):
         if not str(ctx.guild.id) in self.games:
             return
-
-        if not str(ctx.message.author.id) in self.games[str(ctx.guild.id)] and not ctx.message.author.bot:
-            self.games[str(ctx.guild.id)].append(str(ctx.message.author.id))
+        if self.games[str(ctx.guild.id)][1] == True:
+            return
+        if not str(ctx.message.author.id) in (self.games[str(ctx.guild.id)][0]) and not ctx.message.author.bot:
+            self.games[str(ctx.guild.id)][0].append(str(ctx.message.author.id))
             await ctx.reply(f'Добавил {ctx.message.author}')
 
     @guild_only()
@@ -52,6 +59,9 @@ class gameBlackjack(Cog):
     async def stop(self, ctx):
         if not str(ctx.guild.id) in self.games:
             return
+        if self.games[str(ctx.guild.id)][1] == True:
+            return
+
         await ctx.send('Игра остановлена')
         self.games.pop(str(ctx.guild.id))
 
