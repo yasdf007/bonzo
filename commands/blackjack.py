@@ -10,9 +10,9 @@ class gameBlackjack(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # async def cog_command_error(self, ctx, error):
-    #     if isinstance(error, NoPrivateMessage):
-    #         await ctx.send('Игра только на серверах')
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            await ctx.send('Игра только на серверах')
 
     @guild_only()
     @group(name='blackjack', description='игра blackjack (21)', invoke_without_command=True)
