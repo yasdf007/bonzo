@@ -9,7 +9,7 @@ from os import listdir, getenv
 from time import time
 from platform import platform
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from discord.ext.commands import Bot as bonzoBot, Cog
+from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 import sys
 sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
@@ -25,7 +25,7 @@ class Bot(bonzoBot):
         self.game = Game("b/help | v1.0 RC GM")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-        super().__init__(command_prefix=getenv('PREFIX'),
+        super().__init__(command_prefix=when_mentioned_or(getenv('PREFIX')),
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
