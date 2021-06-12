@@ -32,23 +32,20 @@ class Blackjack:
             if not self.game[player][1]['split']:
                 playerScore = self.game[player][0].sum
 
-                if await self.checkOver21(playerScore):
-                    continue
-                if ((playerScore > dealerScore) and dealerScore < 21) or (await self.checkOver21(dealerScore) == True and playerScore <= 21):
+                if ((playerScore > dealerScore) and dealerScore < 21 and playerScore <= 21) or (dealerScore > 21 and playerScore <= 21):
                     self.game[player][1]['win'] = 1
                     continue
-                if ((playerScore == dealerScore) and dealerScore < 21):
+                if ((playerScore == dealerScore) and dealerScore <= 21) or (dealerScore > 21 and playerScore > 21):
                     self.game[player][1]['win'] = 0
                     continue
             else:
                 for index, hand in enumerate(self.game[player][0]):
                     playerScore = hand.sum
-                    if await self.checkOver21(playerScore):
-                        continue
-                    if ((playerScore > dealerScore) and dealerScore < 21) or (await self.checkOver21(dealerScore) == True and playerScore <= 21):
+
+                    if ((playerScore > dealerScore) and dealerScore < 21 and playerScore <= 21) or (dealerScore > 21 and playerScore <= 21):
                         self.game[player][1]['win'][index] = 1
                         continue
-                    if ((playerScore == dealerScore) and dealerScore < 21):
+                    if ((playerScore == dealerScore) and dealerScore <= 21) or (dealerScore > 21 and playerScore > 21):
                         self.game[player][1]['win'][index] = 0
                         continue
 
