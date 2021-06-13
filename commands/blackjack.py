@@ -17,6 +17,8 @@ class gameBlackjack(Cog):
     @guild_only()
     @group(name='blackjack', description='игра blackjack (21)', invoke_without_command=True)
     async def gameBlackjack(self, ctx):
+        if ctx.message.author.bot:
+            return
         if str(ctx.guild.id) in self.games:
             await ctx.send('Игра идет')
             return
@@ -47,6 +49,8 @@ class gameBlackjack(Cog):
     @guild_only()
     @gameBlackjack.command(name='join', description='Присоединиться к игре blackjack')
     async def join(self, ctx):
+        if ctx.message.author.bot:
+            return
         if not str(ctx.guild.id) in self.games:
             return
         if self.games[str(ctx.guild.id)][1] == True:
@@ -58,11 +62,11 @@ class gameBlackjack(Cog):
     @guild_only()
     @gameBlackjack.command(name='stop', description='Остановить blackjack')
     async def stop(self, ctx):
+        if ctx.message.author.bot:
+            return
         if not str(ctx.guild.id) in self.games:
             return
         if self.games[str(ctx.guild.id)][1] == True:
-            return
-        if ctx.message.author.bot:
             return
 
         await ctx.send('Игра остановлена')
@@ -71,12 +75,16 @@ class gameBlackjack(Cog):
     @guild_only()
     @gameBlackjack.command(name='leave', description='Выйти из blackjack')
     async def leave(self, ctx):
+        if ctx.message.author.bot:
+            return
         if not str(ctx.guild.id) in self.games:
             return
         if not str(ctx.author.id) in self.games[str(ctx.guild.id)][0]:
             return
+        if self.games[str(ctx.guild.id)][1] == True:
+            return
 
-        if str(ctx.message.author.id) in (self.games[str(ctx.guild.id)][0]) and not ctx.message.author.bot:
+        if str(ctx.message.author.id) in (self.games[str(ctx.guild.id)][0]):
             self.games[str(ctx.guild.id)][0].remove(str(ctx.message.author.id))
             await ctx.reply(f'Удалил {ctx.message.author}')
 
