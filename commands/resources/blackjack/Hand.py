@@ -26,7 +26,7 @@ class Hand:
 
     async def showHand(self, forceShow=False):
         if self.dealer and forceShow == False:
-            return ''.join(list(map(lambda x: f'[{x}]', ['HIDDEN', await self.cards[1].show()])))
+            return ''.join(list(map(lambda x: f'[{x}]', [await self.cards[0].show(), 'HIDDEN'])))
         else:
             return ''.join(list(map(lambda x: f'[{x}]', [await card.show() for card in self.cards])))
 
