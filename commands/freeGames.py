@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, guild_only, has_permissions, group, BucketType, cooldown
+from discord.ext.commands import Cog, guild_only, has_permissions, bot_has_permissions, group, BucketType, cooldown
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
@@ -26,6 +26,7 @@ class FreeGames(Cog):
     @guild_only()
     @cooldown(rate=2, per=600, type=BucketType.guild)
     @has_permissions(administrator=True)
+    @bot_has_permissions(send_messages=True)
     @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
         await ctx.message.delete()
@@ -56,6 +57,7 @@ class FreeGames(Cog):
     @cooldown(rate=2, per=600, type=BucketType.guild)
     @has_permissions(administrator=True)
     @initFreeGames.command(name='delete', description='Удаляет рассылку бесплатных игр')
+    @bot_has_permissions(send_messages=True)
     async def removeFromFreeGames(self, ctx):
         await ctx.message.delete()
         async with self.bot.pool.acquire() as con:
