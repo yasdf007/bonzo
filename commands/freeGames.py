@@ -1,10 +1,10 @@
-from discord.ext.commands import Cog, guild_only, has_permissions, group, bot_has_permissions
+from discord.ext.commands import Cog, guild_only, has_permissions, group, BucketType, cooldown
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
 
 
-from discord.ext.commands.errors import MissingPermissions, NoPrivateMessage
+from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, NoPrivateMessage
 
 
 class FreeGames(Cog):
@@ -20,8 +20,11 @@ class FreeGames(Cog):
             await ctx.message.reply('Только администратор может использовать эту команду')
         if isinstance(error, NoPrivateMessage):
             await ctx.send('Только на серверах')
+        if isinstance(error, CommandOnCooldown):
+            await ctx.message.reply(f'Server cooldown. Try again in {error.retry_after:.2f}s')
 
     @guild_only()
+    @cooldown(rate=2, per=600, type=BucketType.guild)
     @has_permissions(administrator=True)
     @group(name='freegames', description='Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала', aliases=['free', 'freeGames'], invoke_without_command=True)
     async def initFreeGames(self, ctx):
@@ -50,6 +53,7 @@ class FreeGames(Cog):
         await msg.delete()
 
     @guild_only()
+    @cooldown(rate=2, per=600, type=BucketType.guild)
     @has_permissions(administrator=True)
     @initFreeGames.command(name='delete', description='Удаляет рассылку бесплатных игр')
     async def removeFromFreeGames(self, ctx):
