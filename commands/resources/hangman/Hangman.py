@@ -65,7 +65,9 @@ class Hangman:
                 break
 
             letter = decicion.content.lower()
-            self.guessed.append(letter)
+            if len(letter) == 1:
+                self.guessed.append(letter)
+
             if (letter == self.word):
                 await self.ctx.send('Победа')
                 break
