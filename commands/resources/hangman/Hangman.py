@@ -1,5 +1,6 @@
 from discord.embeds import Embed
-from .res import *
+from .words import getWord
+from .states import *
 import random
 import asyncio
 
@@ -9,9 +10,10 @@ class Hangman:
         self.player = player
         self.ctx = ctx
         self.game = {'state': 0, 'lives': 7}
-        self.word = random.choice(words)
+        self.word = getWord()
         self.hiddenWord = ''.join(['#' for i in range(len(self.word))])
         self.hangmanArray = hangmanStates
+        self.guessed = []
 
     async def printGame(self):
         fields = []
@@ -20,6 +22,9 @@ class Hangman:
                        'value': self.hiddenWord})
         fields.append({'inline': True, 'name': 'Челик',
                        'value': self.hangmanArray[state]})
+        if len(self.guessed) > 0:
+            fields.append({'inline': False, 'name': 'Использованные буквы',
+                           'value': ", ".join(self.guessed)})
 
         gameDict = {'fields': fields, 'type': 'rich',
                     'title': 'Hangman'}
@@ -60,7 +65,7 @@ class Hangman:
                 break
 
             letter = decicion.content.lower()
-
+            self.guessed.append(letter)
             if (letter == self.word):
                 await self.ctx.send('Победа')
                 break
