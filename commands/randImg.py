@@ -1,4 +1,5 @@
 from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
+from bonzoboot import slash, guilds
 from random import sample
 from aiohttp import ClientSession
 from PIL import Image
@@ -18,8 +19,8 @@ class randImg(Cog):
             await ctx.message.reply(error)
 
     @cooldown(rate=1, per=5, type=BucketType.user)
-    @command(name=name, description=description, aliases=['randimg'])
-    async def randImg(self, ctx):
+    @slash.slash(name=name, description=description, guild_ids=guilds)
+    async def randImg(self, *ctx):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
@@ -40,10 +41,10 @@ class randImg(Cog):
         # Если картинки нет, то она имеет размер 161х81
         if img.size[0] == 161 and img.size[1] == 81:
             # Рекурсивно вызываем функцию пока картинка не будет найдена
-            await ctx.invoke(await self.randImg(ctx))
+            await self.send("Возникла непредвиденная ошибка. Попробуйте снова")
         else:
             # Картинка нашлась, отправляем ссылку на картинку
-            await ctx.message.reply(iImgurUrl)
+            await self.send(iImgurUrl)
 
 
 def setup(bot):

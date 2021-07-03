@@ -11,6 +11,7 @@ from platform import platform
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
+from discord_slash import SlashCommand
 import sys
 sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
 
@@ -60,4 +61,6 @@ class Bot(bonzoBot):
 
 
 bot = Bot()
+slash = SlashCommand(bot, sync_commands=True)
+guilds = [664485208745050112]
 bot.run()
