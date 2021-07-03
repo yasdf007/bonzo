@@ -1,4 +1,5 @@
 discord.py==1.7.3
+discord-py-slash-command==2.3.0
 python-dotenv==0.18.0
 Pillow==8.3.0
 google-api-python-client==2.11.0
