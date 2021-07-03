@@ -1,4 +1,6 @@
-# bonzo v1.0 RC GM (Release Candidate)
+## bonzo v1.1.001a SLASHED
+
+# ОБЯЗАТЕЛЬНО ПРОИЗВЕСТИ ОБНОВЛЕНИЕ DEPENDENCIES ПЕРЕД ЗАПУСКОМ! 
 
 ## made by yasdf007, vlaner & nohame
 
@@ -14,4 +16,4 @@
 
 ## запуск собственной инстанции крайне не рекомендуется в связи с зависимостью некоторых команд от сервера создателей
 
-### powered by [discord.py](https://github.com/Rapptz/discord.py)
+### powered by [discord.py](https://github.com/Rapptz/discord.py) and [slashHandler](https://github.com/discord-py-slash-commands/discord-py-interactions)
