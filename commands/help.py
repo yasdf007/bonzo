@@ -1,5 +1,7 @@
 from discord import Embed
 from discord.ext.commands import Cog, command
+from bonzoboot import slash, guilds
+from discord_slash import SlashContext, cog_ext
 from random import randint
 from math import ceil
 from commands.resources.paginator import Paginator
@@ -13,7 +15,7 @@ class helping(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
     async def help(self, ctx, cmd=None):
         if cmd is None:
             p = Paginator(ctx)
@@ -30,11 +32,11 @@ class helping(Cog):
         if cmd:
             embed = await self.getCmdEmbed(cmd)
 
-            await ctx.message.reply(embed=embed)
+            await ctx.send(embed=embed)
 
             return
 
-        await ctx.message.reply('Такой команды нет')
+        await ctx.send('Такой команды нет')
 
     async def getCmdEmbed(self, cmd):
         embed = Embed(title=f'`{cmd}`',
