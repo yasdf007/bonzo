@@ -47,7 +47,11 @@ class Bot(bonzoBot):
 
     @Cog.listener()
     async def on_ready(self):
-        self.pool = await db.connectToDB()
+        try:
+            self.pool = await db.connectToDB()
+        except:
+            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
+            
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
@@ -63,4 +67,7 @@ class Bot(bonzoBot):
 bot = Bot()
 slash = SlashCommand(bot, sync_commands=True)
 guilds = [664485208745050112]
-bot.run()
+try:
+    bot.run()
+except:
+    print("FATAL ERROR. \n THIS ERROR CAN OCCUR EITHER IF MAIN BOT EXECUTABLE IS CORRUPTED OR IF FRAMEWORK IS BROKEN.")
