@@ -23,7 +23,7 @@ class Bot(bonzoBot):
     def __init__(self):
         sys.dont_write_bytecode = True
         intents = Intents.all()
-        self.game = Game("b/help | v1.1.001a SLASHED")
+        self.game = Game("b/help | v1.1.001b SLASHED")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=when_mentioned_or(getenv('PREFIX')),

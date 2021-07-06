@@ -1,4 +1,4 @@
-## bonzo v1.1.001a SLASHED
+## bonzo v1.1.001b SLASHED
 
 # ОБЯЗАТЕЛЬНО ПРОИЗВЕСТИ ОБНОВЛЕНИЕ DEPENDENCIES ПЕРЕД ЗАПУСКОМ! 
 
