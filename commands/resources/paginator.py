@@ -2,13 +2,13 @@ from typing import Union
 from asyncio import FIRST_COMPLETED as ASYNCIO_FIRST_COMPLETED
 from asyncio import wait as asyncioWait
 from asyncio import TimeoutError as AsyncioTimeoutError
-from discord.ext.commands import Context
+from discord_slash import SlashContext
 from discord import errors
 from discord import Embed
 
 
 class Paginator:
-    def __init__(self, ctx: Context, reactions: Union[tuple, list] = None, timeout: int = 120):
+    def __init__(self, ctx: SlashContext, reactions: Union[tuple, list] = None, timeout: int = 120):
         self.reactions = reactions or ('⬅', '⏹', '➡')
         self.pages = []
         self.current = 0
@@ -41,7 +41,7 @@ class Paginator:
             raise IndexError(f"Currently added {len(self.pages)} pages, but you"
                              f"tried to call controller with start_page = {start_page}")
 
-        self.controller = await self.ctx.message.reply(embed=self.pages[start_page])
+        self.controller = await self.ctx.send(embed=self.pages[start_page])
 
         for emoji in self.reactions:
             await self.controller.add_reaction(emoji)
