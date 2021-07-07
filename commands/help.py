@@ -1,6 +1,6 @@
 from discord import Embed
 from discord.ext.commands import Cog, command
-from bonzoboot import slash, guilds
+from bonzoboot import guilds
 from discord_slash import SlashContext, cog_ext
 from random import randint
 from math import ceil
@@ -16,7 +16,7 @@ class helping(Cog):
         self.bot = bot
 
     @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
-    async def help(self, ctx, cmd=None):
+    async def help(self, ctx: SlashContext, cmd: str = None):
         if cmd is None:
             p = Paginator(ctx)
             embeds = await self.generateEmbed(ctx.author)

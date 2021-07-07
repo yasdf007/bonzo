@@ -1,6 +1,6 @@
 from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import slash, guilds
+from bonzoboot import guilds
 from random import sample
 from aiohttp import ClientSession
 
@@ -17,7 +17,6 @@ class randImg(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cooldown(rate=1, per=5, type=BucketType.user)
     @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
     async def randimg(self, ctx: SlashContext):
         photo = await self.process(ctx=ctx)
