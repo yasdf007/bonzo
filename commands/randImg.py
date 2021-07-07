@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
+from discord.ext.commands import Cog, CommandOnCooldown, BucketType
 from discord_slash import SlashContext, cog_ext
 from bonzoboot import guilds
 from random import sample

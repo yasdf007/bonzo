@@ -1,5 +1,5 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog
 from bonzoboot import guilds
 from discord_slash import SlashContext, cog_ext
 from random import randint
