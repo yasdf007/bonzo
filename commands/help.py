@@ -92,7 +92,7 @@ class helping(Cog):
             # i // 10 + 1:
             # 0/10 + 1 = 0 + 1 = 1 page
             # 10/10 +1 = 1 + 1 = 2 page и тд
-            embed.set_footer(text=f"/by bonzo/ for {author}  / Page {1 + (i // 10)}/{pages} /",
+            embed.set_footer(text=f"/by bonzo/ for {author}  / Page {1 + (i // 10)}/{pages} / powered by PAGINATOR /",
                              icon_url=author.avatar_url)
             embed.set_thumbnail(
                 url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
