@@ -1,50 +1,46 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command, BucketType
+from discord.ext.commands import Cog
+from discord_slash import SlashContext, cog_ext
 from discord import File
 from PIL import Image
 from io import BytesIO, StringIO
 from aiohttp import ClientSession
 from re import compile
+from bonzoboot import guilds
 
 
-class Ascii(Cog):
+class AsciiCog(Cog):
     urlValid = compile(r'https?://(?:www\.)?.+')
-    asciiChars = ['@', '%', '#', '*', '+', '=', '-', ';', ':', ',', '.']
+    asciiChars = ['@', '%', '#', '*',
+                  '+', '=', '-', ';', ':', ',', '.']
 
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply(error.original)
+    @cog_ext.cog_slash(name='ascii', description='Переводит картинку в ascii текст', guild_ids=guilds)
+    async def ascii(self, ctx: SlashContext, img_url) -> None:
 
-        if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
-
-    @cooldown(rate=1, per=10, type=BucketType.user)
-    @command(name='ascii', description='Переводит картинку в ascii текст (прикрепить фотку или ссылку)')
-    async def ascii(self, ctx, imageUrl=None):
-        imageUrl = imageUrl or ctx.message.attachments[0].url
-
-        if not self.urlValid.match(imageUrl):
-            raise CommandInvokeError('Ссылка не найдена')
+        if not self.urlValid.match(img_url):
+            await ctx.send('Ссылка не найдена')
+            return
 
         async with ClientSession() as session:
-            async with session.head(imageUrl) as response:
+            async with session.head(img_url) as response:
                 fileType = response.content_type.split('/')[-1]
 
-        if any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
-            await (await self.bot.loop.run_in_executor(None, self.asyncToAscii, ctx, imageUrl))
-        else:
-            raise CommandInvokeError(
-                f'Поддерживаемые форматы: png, jpeg, jpg. У тебя {fileType}')
+        if not any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
+            await ctx.send(f'Поддерживаемые форматы: png, jpeg, jpg. У тебя {fileType}')
+            return
 
-    async def asyncToAscii(self, ctx, url):
+        await (await self.bot.loop.run_in_executor(None, self.asyncToAscii, ctx, img_url))
+
+    async def asyncToAscii(self, ctx, url: str):
         async with ClientSession() as session:
             async with session.get(url) as response:
                 try:
                     requestImage = await response.read()
                 except:
-                    raise CommandInvokeError('Не удалось открыть файл')
+                    await ctx.send('Не удалось открыть файл')
+                    return
 
         with Image.open(BytesIO(requestImage)) as img:
             img = img.convert('L')
@@ -69,4 +65,4 @@ class Ascii(Cog):
 
 
 def setup(bot):
-    bot.add_cog(Ascii(bot))
+    bot.add_cog(AsciiCog(bot))
