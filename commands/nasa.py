@@ -18,11 +18,16 @@ class Nasa(Cog):
         async with ClientSession() as session:
             async with session.get(query) as response:
                 res = await response.json()
+        try:
+            image = res['hdurl']
+            title = res['title']
 
-        embed.set_image(url=res['hdurl'])
-        embed.set_footer(text=res['title'])
+            embed.set_image(url=image)
+            embed.set_footer(text=title)
 
-        await ctx.message.reply(embed=embed)
+            await ctx.message.reply(embed=embed)
+        except Exception:
+            await ctx.send('Не удалось получить картинку дня')
 
 
 def setup(bot):
