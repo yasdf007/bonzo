@@ -1,5 +1,7 @@
 from discord.ext.commands import Cog, command
 from discord import File
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 name = 'obser'
 description = 'Виды обсёров.......'
@@ -10,9 +12,9 @@ class obser(Cog):
         self.bot = bot
 
     # Прикол ахахха
-    @command(name=name, description=description)
-    async def obser(self, ctx):
-        await ctx.message.reply(content='https://www.youtube.com/watch?v=Nv9x7E5tnoA', file=File('./static/pictOBSER.jpg'))
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def obser(self, ctx: SlashContext):
+        await ctx.send(content='https://www.youtube.com/watch?v=Nv9x7E5tnoA', file=File('./static/pictOBSER.jpg'))
 
 
 def setup(bot):

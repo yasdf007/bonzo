@@ -1,5 +1,7 @@
 from discord.ext.commands import Cog, command
 from discord import File
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 name = 'nail'
 description = 'Бегающий гвоздь'
@@ -10,9 +12,9 @@ class Nail(Cog):
         self.bot = bot
 
     # Прикол ахахха
-    @command(name=name, description=description)
-    async def nail(self, ctx):
-        await ctx.message.reply(file=File('./static/nail.jpg'))
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def nail(self, ctx: SlashContext):
+        await ctx.send(file=File('./static/nail.jpg'))
 
 
 def setup(bot):

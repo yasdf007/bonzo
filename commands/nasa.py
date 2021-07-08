@@ -1,6 +1,8 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog
 from aiohttp import ClientSession
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 name = 'nasapict'
 description = 'Картинка дня от NASA'
@@ -10,8 +12,8 @@ class Nasa(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
-    async def nasapict(self, ctx):
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def nasapict(self, ctx: SlashContext):
         embed = Embed(title='Картинка дня от NASA', color=0x0000ff)
 
         query = 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY'
@@ -25,8 +27,9 @@ class Nasa(Cog):
             embed.set_image(url=image)
             embed.set_footer(text=title)
 
-            await ctx.message.reply(embed=embed)
-        except Exception:
+            await ctx.send(embed=embed)
+        except Exception as e:
+            print(e)
             await ctx.send('Не удалось получить картинку дня')
 
 

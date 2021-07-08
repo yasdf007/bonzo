@@ -1,6 +1,7 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
-from discord.ext.commands.core import guild_only
+from discord.ext.commands import Cog
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 
 name = 'serverinfo'
@@ -12,11 +13,9 @@ class info(Cog):
         self.bot = bot
 
     # функция, отправляющая информацию о сервере
-    @guild_only()
-    @command(name=name, description=description)
-    async def serverinfo(self, ctx):
-        server = ctx.message.guild
-
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def serverinfo(self, ctx: SlashContext):
+        server = ctx.guild
         embed = Embed(
             title='**Информация о сервере:**',
             colour=0x7D07DE
@@ -49,9 +48,9 @@ class info(Cog):
                         value=f'{server.premium_subscription_count}', inline=False)
 
         embed.set_footer(
-            text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
+            text=f'/by bonzo/ for {ctx.author}', icon_url=ctx.author.avatar_url)
 
-        await ctx.message.reply(embed=embed)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
