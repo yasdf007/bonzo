@@ -1,7 +1,6 @@
 from discord.embeds import Embed
 from .words import getWord
 from .states import *
-import random
 import asyncio
 
 
@@ -13,6 +12,7 @@ class Hangman:
         self.word = getWord()
         self.hiddenWord = ''.join(['#' for i in range(len(self.word))])
         self.hangmanArray = hangmanStates
+        self.isAFK = False
         self.guessed = []
 
     async def printGame(self):
@@ -61,12 +61,17 @@ class Hangman:
                 decicion = await self.ctx.bot.wait_for(
                     'message', check=lambda msg: msg.author.id == int(self.player) and msg.channel.id == self.ctx.channel.id, timeout=15)
             except asyncio.TimeoutError:
-                await self.ctx.send('Время вышло')
+                await self.ctx.send('Время вышло. Игра окончена')
+                self.isAFK = True
                 break
 
             letter = decicion.content.lower()
             if len(letter) == 1:
                 self.guessed.append(letter)
+
+            print(letter)
+            print(self.word)
+            print(self.hiddenWord)
 
             if (letter == self.word):
                 await self.ctx.send('Победа')
@@ -79,4 +84,7 @@ class Hangman:
             if (self.hiddenWord == self.word):
                 await self.ctx.send('Победа')
                 break
+
         await self.ctx.send(f'Игра кончилась, словом было {self.word}')
+
+        return self.isAFK

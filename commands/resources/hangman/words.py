@@ -8,4 +8,4 @@ def getWord():
             if random.randrange(num):
                 continue
             line = aline
-        return line
+        return line.strip()

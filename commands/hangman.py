@@ -1,7 +1,9 @@
+from discord_slash.context import SlashContext
 from commands.resources.hangman.Hangman import Hangman
-from discord.ext.commands import Cog, group, guild_only
+from discord.ext.commands import Cog
 import asyncio
-from discord.ext.commands.errors import NoPrivateMessage
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 
 class GameHangman(Cog):
@@ -10,52 +12,62 @@ class GameHangman(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, NoPrivateMessage):
-            await ctx.send('Игра только на серверах')
-
-    @guild_only()
-    @group(name='hangman', description='игра виселица', invoke_without_command=True)
+    @cog_ext.cog_subcommand(base='hangman', name='start', description='Начать игру виселица', guild_ids=guilds)
     async def gameHangman(self, ctx):
-        if ctx.message.author.bot:
+        if ctx.author.bot:
             return
+
         if str(ctx.guild.id) in self.games:
             await ctx.send('Игра идет')
             return
 
         self.games[str(ctx.guild.id)] = [
             f'{ctx.author.id}',
-            {'start': False}
+            {'started': False},
+            {'end': False}
         ]
 
-        while str(ctx.guild.id) in self.games:
-            await ctx.send(f'Игра начнется через 10с, игрок {ctx.author.mention}\nb/hangman stop для останвоки')
+        while str(ctx.guild.id) in self.games and self.games[str(ctx.guild.id)][2]['end'] == False:
+            await ctx.send(f'Игра начнется через 10с, игрок {ctx.author}\n/hangman stop для останвоки')
             await asyncio.sleep(10)
 
             if not (str(ctx.guild.id) in self.games):
                 break
 
-            if len(self.games[str(ctx.guild.id)][0]) == 0:
+            if self.games[str(ctx.guild.id)][2]['end'] == True:
                 self.games.pop(str(ctx.guild.id))
                 return
 
             self.games[str(ctx.guild.id)][1] = True
             hangman = Hangman(ctx, ctx.author.id)
-            await hangman.play()
-            self.games[str(ctx.guild.id)][1] = False
+            isAfk = await hangman.play()
 
-    @guild_only()
-    @gameHangman.command(name='stop', description='Остановить виселицу')
-    async def stop(self, ctx):
-        if ctx.message.author.bot:
+            if str(ctx.guild.id) in self.games:
+                self.games[str(ctx.guild.id)][1] = False
+
+            if isAfk == True:
+                self.games.pop(str(ctx.guild.id))
+
+    @cog_ext.cog_subcommand(base='hangman', name='stop', description='Остановить игру виселица', guild_ids=guilds)
+    async def stop(self, ctx: SlashContext):
+        if ctx.author.bot:
             return
+
         if not str(ctx.guild.id) in self.games:
-            return
-        if self.games[str(ctx.guild.id)][1] == True:
+            await ctx.send('Игра не идет')
             return
 
+        if str(ctx.author.id) != self.games[str(ctx.guild.id)][0]:
+            await ctx.send('Игру может остановить только тот, кто ее начал')
+            return
+
+        if self.games[str(ctx.guild.id)][1] == True:
+            await ctx.send('Игра будет остановлена после текущей игры')
+            self.games[str(ctx.guild.id)][2]['end'] = True
+            return
+
+        self.games[str(ctx.guild.id)][2]['end'] = True
         await ctx.send('Игра остановлена')
-        self.games.pop(str(ctx.guild.id))
 
 
 def setup(bot):
