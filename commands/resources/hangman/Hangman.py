@@ -69,10 +69,6 @@ class Hangman:
             if len(letter) == 1:
                 self.guessed.append(letter)
 
-            print(letter)
-            print(self.word)
-            print(self.hiddenWord)
-
             if (letter == self.word):
                 await self.ctx.send('Победа')
                 break
