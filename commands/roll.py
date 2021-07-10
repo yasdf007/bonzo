@@ -1,60 +1,55 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, cooldown, command, BucketType
+from discord.ext.commands import Cog
 from random import randint
 from discord import Embed
-from typing import Optional
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 name = 'roll'
 description = 'Ролит как в доте или между двумя числами (Будет переписан)'
 
 
-class roll(Cog):
+class Roll(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Обработка ошибок
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply(error.original)
-
     # dota 2 roll
-    @cooldown(rate=1, per=3, type=BucketType.user)
-    @command(name=name, description=description)
-    async def roll(self, ctx, numberFrom: Optional[int] = 100, *, numberTo: Optional[int]):
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def roll(self, ctx: SlashContext, number_from: int,  number_to: int):
         oneMillon = 10**6
 
         try:
             # Чекаем на значение, если больше ляма..
-            assert numberFrom <= oneMillon if numberFrom else 1
-            assert numberTo <= oneMillon if numberTo else 1
+            assert number_from <= oneMillon if number_from else 1
+            assert number_to <= oneMillon if number_to else 1
 
         except AssertionError:
             # То ошибка
-            raise CommandInvokeError(
+            await ctx.send(
                 f'{ctx.author.mention} больше мильёна роллить не буду')
+            return
+
         embed = Embed()
         # Еслм два числа указаны
-        if numberFrom and numberTo:
+        if number_from and number_to:
             # Если первое число больше второго
-            if numberFrom > numberTo:
+            if number_from > number_to:
                 # Меняем местами
-                numberFrom, numberTo = numberTo, numberFrom
+                number_from, number_to = number_to, number_from
 
-            embed.title = f'Rolling from {numberFrom} to {numberTo}:'
+            embed.title = f'Rolling from {number_from} to {number_to}:'
             embed.add_field(name='Number Is',
-                            value=f'{randint(numberFrom, numberTo)}', inline=False)
-            await ctx.message.reply(embed=embed)
+                            value=f'{randint(number_from, number_to)}', inline=False)
+            await ctx.send(embed=embed)
             return
 
         # Если указано одно
-        if numberFrom and not numberTo:
-            embed.title = f'Rolling from 1 to {numberFrom}:'
+        if number_from and not number_to:
+            embed.title = f'Rolling from 1 to {number_from}:'
             embed.add_field(name='Number Is',
-                            value=f'{randint(1, numberFrom)}', inline=False)
-            await ctx.message.reply(embed=embed)
+                            value=f'{randint(1, number_from)}', inline=False)
+            await ctx.send(embed=embed)
             return
 
 
 def setup(bot):
-    bot.add_cog(roll(bot))
+    bot.add_cog(Roll(bot))
