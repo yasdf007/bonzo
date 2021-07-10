@@ -28,7 +28,7 @@ class GameHangman(Cog):
         ]
 
         while str(ctx.guild.id) in self.games and self.games[str(ctx.guild.id)][2]['end'] == False:
-            await ctx.send(f'Игра начнется через 10с, игрок {ctx.author}\n/hangman stop для останвоки')
+            await ctx.send(f'Игра начнется через 10с, игрок {ctx.author}\n/hangman stop для остановки')
             await asyncio.sleep(10)
 
             if not (str(ctx.guild.id) in self.games):
