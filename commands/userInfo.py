@@ -2,6 +2,8 @@ from discord import Embed, Spotify, CustomActivity
 from discord.ext.commands import Cog, MemberNotFound, command
 from discord.ext.commands.core import guild_only
 from discord.member import Member
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 
 name = 'info'
 description = 'Выдаёт информацию о пользователе'
@@ -11,14 +13,9 @@ class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, MemberNotFound):
-            await ctx.message.reply(f'{error.argument} не найден')
-
-    @guild_only()
-    @command(name=name, description=description, aliases=['userinfo'])
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
     async def info(self, ctx, member: Member = None):
-
+        print(member)
         member = member or ctx.author
         embed = Embed(
             title=f'Информация о {member.display_name}', color=member.top_role.colour)
@@ -73,7 +70,7 @@ class Info(Cog):
         embed.add_field(name='Появился на свет:',
                         value=member.created_at.strftime('%d %B %Y %R UTC'), inline=False)
 
-        await ctx.message.reply(embed=embed)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
