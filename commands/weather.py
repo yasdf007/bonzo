@@ -3,6 +3,8 @@ from discord.ext.commands import Cog, CommandInvokeError, command
 from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
+from discord_slash import SlashContext, cog_ext
+from bonzoboot import guilds
 load_dotenv()
 
 name = 'weather'
@@ -13,15 +15,9 @@ class weather(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Обработка ошибок
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply(error.original)
-
-    @command(name=name, description=description, aliases=['погода'])
-    async def getWeather(self, ctx, *city):
-        # Если город состоит из нескольких слов, объединяем в одну строку
-        city = ' '.join(city)
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def getWeather(self, ctx, city):
+        print(city)
 
         # Получаем токен
         weatherToken = getenv('WEATHER_TOKEN')
@@ -31,7 +27,9 @@ class weather(Cog):
         async with ClientSession() as session:
             async with session.get(query) as response:
                 if(response.status == 404):
-                    raise CommandInvokeError(f'Город {city} не найден')
+                    await ctx.send(f'Город {city} не найден')
+                    return
+
                 # Загружаем запрос в формат JSON
                 jsonResult = await response.json()
 
@@ -67,7 +65,7 @@ class weather(Cog):
                         value=f'{weatherHumidity} %', inline=False)
         embed.set_footer(text='Powered by openweathermap.org')
 
-        await ctx.message.reply(embed=embed)
+        await ctx.send(embed=embed)
 
     async def getWeatherMoji(self, weatherId, weatherIsDay):
         if weatherId.startswith('2'):
