@@ -5,7 +5,7 @@ from discord_slash import SlashContext, cog_ext
 from bonzoboot import guilds
 
 name = 'roll'
-description = 'Ролит как в доте или между двумя числами (Будет переписан)'
+description = 'Ролит как в доте или между двумя числами'
 
 
 class Roll(Cog):

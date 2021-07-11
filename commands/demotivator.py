@@ -8,7 +8,7 @@ from re import compile
 from aiohttp import ClientSession
 
 name = 'demotivator'
-description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
+description = 'Как в мемах. Нужна ссылка'
 
 
 class Demotivator(Cog):

@@ -5,7 +5,7 @@ from bonzoboot import guilds
 
 
 name = 'serverinfo'
-description = 'Показывает информацию о сервере (BETA)'
+description = 'Показывает информацию о сервере'
 
 
 class info(Cog):
