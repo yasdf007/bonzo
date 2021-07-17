@@ -15,7 +15,7 @@ class YtTogether(Cog):
         if isinstance(error, BotMissingPermissions):
             await ctx.send(f'Не могу создать инвайт (нет прав)')
         if isinstance(error, CommandInvokeError):
-            await ctx.send(f'Найдо зайти в войс')
+            await ctx.send(f'Надо зайти в войс')
 
     @bot_has_permissions(create_instant_invite=True)
     @command(name=name, description=description)
