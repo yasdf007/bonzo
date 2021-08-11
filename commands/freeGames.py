@@ -120,7 +120,8 @@ class FreeGames(Cog):
             channel = self.bot.get_channel(channel['channel_id'])
 
             for msg in msgs:
-                await channel.send(msg)
+                announcement = await channel.send(msg)
+                await announcement.publish()
                 await sleep(1)
 
 
