@@ -101,7 +101,7 @@ class FreeGames(Cog):
 
                     for attr in game['customAttributes']:
                         if attr['key'] == "com.epicgames.app.productSlug":
-                            slug = attr['value']
+                            slug = attr['value'].replace('/home', '')
 
                     link = 'https://www.epicgames.com/store/ru/p/' + slug
 
