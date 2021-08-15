@@ -2,9 +2,8 @@ from discord.ext.commands import Cog, guild_only, has_permissions, bot_has_permi
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
-
-
 from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, NoPrivateMessage
+from discord.enums import ChannelType
 
 
 class FreeGames(Cog):
@@ -112,6 +111,7 @@ class FreeGames(Cog):
 
     async def freeGames(self):
         channels = await self.getChannels()
+
         if len(channels) < 1:
             return
 
@@ -121,7 +121,10 @@ class FreeGames(Cog):
 
             for msg in msgs:
                 announcement = await channel.send(msg)
-                await announcement.publish()
+
+                if channel.type == ChannelType.news:
+                    await announcement.publish()
+
                 await sleep(1)
 
 
