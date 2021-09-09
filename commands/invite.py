@@ -1,7 +1,7 @@
 from discord import Embed
 from discord.ext.commands import Cog
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'invite'
 description = 'Ссылка на приглашение бота'

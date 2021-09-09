@@ -3,7 +3,7 @@ from random import choices
 from typing import Optional
 from string import ascii_lowercase, digits
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'pict'
 description = 'Отправляет случайное изображение из prnt.sc :o'

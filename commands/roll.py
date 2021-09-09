@@ -2,7 +2,7 @@ from discord.ext.commands import Cog
 from random import randint
 from discord import Embed
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'roll'
 description = 'Ролит как в доте или между двумя числами'

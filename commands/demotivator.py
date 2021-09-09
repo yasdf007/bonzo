@@ -3,7 +3,7 @@ from discord import File
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 from re import compile
 from aiohttp import ClientSession
 
@@ -19,6 +19,9 @@ class Demotivator(Cog):
 
     @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
     async def demotivator(self, ctx: SlashContext, image_url, text):
+        if not self.urlValid.match(image_url):
+            await ctx.send('Ссылка не найдена')
+            return
 
         if len(text) > 25:
             await ctx.send('Максимум 25 символов')

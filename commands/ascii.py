@@ -5,7 +5,7 @@ from PIL import Image
 from io import BytesIO, StringIO
 from aiohttp import ClientSession
 from re import compile
-from bonzoboot import guilds
+from config import guilds
 
 
 class AsciiCog(Cog):

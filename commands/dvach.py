@@ -2,7 +2,7 @@ from discord.ext.commands import Cog
 from aiohttp import ClientSession
 from random import choice
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = '2ch'
 description = 'Рандомное видео с двача'

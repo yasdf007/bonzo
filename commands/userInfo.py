@@ -3,7 +3,7 @@ from discord.ext.commands import Cog, MemberNotFound, command
 from discord.ext.commands.core import guild_only
 from discord.member import Member
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'info'
 description = 'Выдаёт информацию о пользователе'
@@ -15,7 +15,6 @@ class Info(Cog):
 
     @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
     async def info(self, ctx, member: Member = None):
-        print(member)
         member = member or ctx.author
         embed = Embed(
             title=f'Информация о {member.display_name}', color=member.top_role.colour)

@@ -3,7 +3,7 @@ from commands.resources.hangman.Hangman import Hangman
 from discord.ext.commands import Cog
 import asyncio
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 
 class GameHangman(Cog):

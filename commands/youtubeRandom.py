@@ -6,7 +6,7 @@ import json
 from random import randint, choice
 from string import digits, ascii_uppercase
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 load_dotenv()
 

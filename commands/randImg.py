@@ -1,6 +1,6 @@
 from discord.ext.commands import Cog, CommandOnCooldown, BucketType
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 from random import sample
 from aiohttp import ClientSession
 

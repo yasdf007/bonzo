@@ -2,7 +2,7 @@ from discord import Embed
 from discord.ext.commands import Cog
 from aiohttp import ClientSession
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'nasapict'
 description = 'Картинка дня от NASA'
@@ -29,7 +29,6 @@ class Nasa(Cog):
 
             await ctx.send(embed=embed)
         except Exception as e:
-            print(e)
             await ctx.send('Не удалось получить картинку дня')
 
 

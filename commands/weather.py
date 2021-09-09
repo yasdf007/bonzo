@@ -4,7 +4,7 @@ from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 load_dotenv()
 
 name = 'weather'
@@ -17,8 +17,6 @@ class weather(Cog):
 
     @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
     async def getWeather(self, ctx, city):
-        print(city)
-
         # Получаем токен
         weatherToken = getenv('WEATHER_TOKEN')
         # Ссылка с запросом q=Город appid=Токен

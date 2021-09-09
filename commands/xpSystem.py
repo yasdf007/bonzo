@@ -4,7 +4,7 @@ from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from bonzoboot import guilds
+from config import guilds
 from discord_slash import SlashContext, cog_ext
 
 

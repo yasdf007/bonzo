@@ -4,7 +4,7 @@ from PIL import Image, ImageSequence
 from io import BytesIO
 from aiohttp import ClientSession
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 from re import compile
 
 name = 'shakalizator'

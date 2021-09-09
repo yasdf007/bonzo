@@ -1,5 +1,5 @@
 from discord.ext.commands import Cog
-from bonzoboot import guilds
+from config import guilds
 from discord_slash import SlashContext, cog_ext
 
 name = 'ping'

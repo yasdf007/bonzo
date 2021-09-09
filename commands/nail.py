@@ -1,7 +1,7 @@
 from discord.ext.commands import Cog, command
 from discord import File
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'nail'
 description = 'Бегающий гвоздь'

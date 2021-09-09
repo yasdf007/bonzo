@@ -2,21 +2,36 @@
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
 
-from colorama import Fore, Back, Style
-from dotenv import load_dotenv
-from database import db
-from os import listdir, getenv
-from time import time
-from platform import platform
-from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 from discord_slash import SlashCommand
+
+from config import OWNER_IDS
+
+from colorama import Fore, Back, Style
+from dotenv import load_dotenv
+from database import db
+from time import time
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+from platform import platform
+from os import listdir, getenv
 import sys
+import logging
 sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
 
 load_dotenv()  # загружает файл env
-OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+
+handler = logging.FileHandler(
+    filename='discord.log', encoding='utf-8', mode='w'
+)
+handler.setFormatter(
+    logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+)
+logger.addHandler(handler)
 
 
 class Bot(bonzoBot):
@@ -49,8 +64,9 @@ class Bot(bonzoBot):
     async def on_ready(self):
         try:
             self.pool = await db.connectToDB()
-        except:
+        except Exception as err:
             print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
+            print(err)
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
@@ -62,8 +78,6 @@ class Bot(bonzoBot):
         print(
             f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n / \n end.')
 
-
-guilds = [664485208745050112]
 
 if __name__ == '__main__':
     try:

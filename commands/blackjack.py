@@ -3,7 +3,8 @@ import asyncio
 from discord.ext.commands.errors import NoPrivateMessage
 from .resources.blackjack.Blackjack import Blackjack
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
+
 
 class gameBlackjack(Cog):
     games = {}

@@ -1,7 +1,7 @@
 from discord.ext.commands import Cog
 from random import randint
 from discord_slash import SlashContext, cog_ext
-from bonzoboot import guilds
+from config import guilds
 
 name = 'randomcat'
 description = 'Отправляет случайного котика :3'
