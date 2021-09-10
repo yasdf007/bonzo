@@ -57,12 +57,12 @@ class Bot(bonzoBot):
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
         print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
-        self.cogsLoad()
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
     @Cog.listener()
     async def on_ready(self):
         try:
+            self.cogsLoad()
             self.pool = await db.connectToDB()
         except Exception as err:
             print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
@@ -83,6 +83,7 @@ if __name__ == '__main__':
     try:
         bot = Bot()
         slash = SlashCommand(bot, sync_commands=True)
+        bot.slash = slash
         bot.run()
     except Exception as error:
         print("FATAL ERROR. \n THIS ERROR CAN OCCUR EITHER IF MAIN BOT EXECUTABLE IS CORRUPTED OR IF FRAMEWORK IS BROKEN.")
