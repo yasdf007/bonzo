@@ -77,8 +77,9 @@ class helping(Cog):
 
     async def generateEmbed(self, author):
         embeds = []
-        allCommands = sorted(list(self.bot.commands), key=lambda x: x.name)
-        # ceil - округляем в большую стороню
+        legacyNewCommands = list(self.bot.commands)
+        allCommands = sorted(legacyNewCommands, key=lambda x: x.name)
+        # ceil - округляем в большую сторону
         # 17/10 = 1.8 => 2
         # 20/10 = 2 => 2
         # 21/10 = 2.1 => 3
