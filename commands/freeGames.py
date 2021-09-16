@@ -2,9 +2,10 @@ from discord.ext.commands import Cog, guild_only, has_permissions, bot_has_permi
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
-
-
+from discord.ext.commands import command
 from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, NoPrivateMessage
+from datetime import datetime
+from discord.enums import ChannelType
 
 
 class FreeGames(Cog):
@@ -84,7 +85,7 @@ class FreeGames(Cog):
 
         return res
 
-    async def getUrls(self):
+    async def getMessages(self):
         async with ClientSession() as session:
             async with session.get(self.link) as response:
                 resultJson = await response.json()
@@ -94,20 +95,27 @@ class FreeGames(Cog):
         for game in games:
             promotions = game['promotions']
 
-            if promotions:
-                gameProm = promotions['promotionalOffers']
+            if promotions == None:
+                continue
 
-                if gameProm:
-                    game_name = game['title']
+            freeDiscountSetting = promotions['promotionalOffers'][0][
+                'promotionalOffers'][0]['discountSetting']['discountPercentage']
 
-                    for attr in game['customAttributes']:
-                        if attr['key'] == "com.epicgames.app.productSlug":
-                            slug = attr['value']
+            if freeDiscountSetting != 0:
+                continue
 
-                    link = 'https://www.epicgames.com/store/ru/p/' + slug
+            due_date = datetime.fromisoformat(promotions['promotionalOffers'][0][
+                'promotionalOffers'][0]['endDate'][:-1]).strftime('%d/%m/%Y')
 
-                    msgs.append(
-                        f'Прямо сейчас бесплатна {game_name}\nСсылка {link}')
+            game_name = game['title']
+
+            slug = game['productSlug']
+
+            link = 'https://www.epicgames.com/store/ru/p/' + slug
+
+            msgs.append(
+                f'Прямо сейчас бесплатна {game_name}\nСсылка {link}\nДействует до {due_date}')
+
         return msgs
 
     async def freeGames(self):
@@ -115,12 +123,16 @@ class FreeGames(Cog):
         if len(channels) < 1:
             return
 
-        msgs = await self.getUrls()
+        msgs = await self.getMessages()
+
         for channel in channels:
             channel = self.bot.get_channel(channel['channel_id'])
-
             for msg in msgs:
-                await channel.send(msg)
+                announcement = await channel.send(msg)
+
+                if channel.type == ChannelType.news:
+                    await announcement.publish()
+
                 await sleep(1)
 
 
