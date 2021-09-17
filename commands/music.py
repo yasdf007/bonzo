@@ -17,6 +17,7 @@ from discord import Embed
 from typing import Union
 from datetime import timedelta
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
+from colorama import Fore, Back, Style
 
 
 class IncorrectChannelError(commands.CommandError):
@@ -90,7 +91,13 @@ class Music(commands.Cog):
 
     async def start_nodes(self):
         await self.bot.wait_until_ready()
-        password = getenv('LAVAPASS')
+        try:
+            if getenv('LAVAPASS') == None:
+                raise NameError("No password Specified")
+            password = getenv('LAVAPASS')
+        except:
+            print(f'/ \n {Fore.GREEN} Music: {Style.RESET_ALL} {Fore.RED} NO LAVALINK NODE PASSWORD SPECIFIED. MUSIC UNLOADING. {Style.RESET_ALL} \n /')
+            self.cog_unload()
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
         node = await self.bot.wavelink.initiate_node(host='java',
