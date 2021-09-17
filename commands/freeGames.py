@@ -89,7 +89,6 @@ class FreeGames(Cog):
         return res
 
     async def getMessages(self):
-        print('asdsadasasdasdasdasdasdasd')
         async with ClientSession() as session:
             async with session.get(self.link) as response:
                 resultJson = await response.json()
@@ -131,23 +130,21 @@ class FreeGames(Cog):
             msgs.append(embedd)
         return msgs
 
-    @command(name="test", description='test')
-    async def freeGames(self, ctx):
-        # channels = await self.getChannels()
-        # if len(channels) < 1:
-        #     return
-        print('asdasdasdadasasdasdasdadasasdasdasdadasasdasdasdadasasdasdasdadas')
+    async def freeGames(self):
+        channels = await self.getChannels()
+        if len(channels) < 1:
+            return
         msgs = await self.getMessages()
 
-        # for channel in channels:
-        channel = self.bot.get_channel(681179689775398943)
-        for msg in msgs:
-            announcement = await channel.send(embed=msg)
+        for channel in channels:
+            channel = self.bot.get_channel(channel['channel_id'])
+            for msg in msgs:
+                announcement = await channel.send(embed=msg)
 
-            if channel.type == ChannelType.news:
-                await announcement.publish()
+                if channel.type == ChannelType.news:
+                    await announcement.publish()
 
-            await sleep(1)
+                await sleep(1)
 
 
 def setup(bot):
