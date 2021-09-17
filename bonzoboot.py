@@ -55,7 +55,7 @@ class Bot(bonzoBot):
             elif filename.startswith('music'):
                 self.load_extension('commands.music')
                 curr +=1 
-                print(f'/ \n {Fore.GREEN} MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n {curr}/{total} \n /')
+                print(f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
