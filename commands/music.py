@@ -1,5 +1,5 @@
 """
-Микс из 
+Микс из
 https://github.com/PythonistaGuild/Wavelink/blob/master/examples/advanced.py
 +
 https://github.com/PythonistaGuild/Wavelink/blob/master/examples/playlist.py
@@ -41,6 +41,25 @@ class MusicController:
 
         self.bot.loop.create_task(self.controller_loop())
 
+    async def nowPlayingEmbed(self, player):
+        track = player.current
+        if not track:
+            return
+
+        qsize = self.queue.qsize()
+
+        embed = Embed(title=f'Сейчас играет {track.title}')
+
+        embed.set_thumbnail(url=track.thumb)
+        embed.add_field(name='Продолжительность', value=str(
+            timedelta(milliseconds=int(track.length))))
+        embed.add_field(name='Очередь', value=str(qsize))
+        embed.add_field(name='Громкость', value=f'**`{player.volume}%`**')
+        embed.add_field(name='Ссылка на трек',
+                        value=f'[Клик]({track.uri})')
+
+        return embed
+
     async def controller_loop(self):
         await self.bot.wait_until_ready()
 
@@ -54,7 +73,7 @@ class MusicController:
 
             song = await self.queue.get()
             await player.play(song, replace=False)
-            self.now_playing = await self.channel.send(f'Сейчас играет: `{song.author} - {song.title}`')
+            self.now_playing = await self.channel.send(embed=await self.nowPlayingEmbed(player=player))
             await self.next.wait()
 
 
@@ -140,7 +159,25 @@ class Music(commands.Cog):
         if isinstance(error, NotInVoice):
             return await ctx.send('Ты не в войсе')
 
-    @commands.command(name='connect')
+        raise error
+
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if member.bot:
+            return
+
+        if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
+            if len([user for user in before.channel.members if not user.bot]) < 1:
+                player = self.bot.wavelink.get_player(member.guild.id)
+
+                try:
+                    del self.controllers[member.guild.id]
+                except:
+                    pass
+                finally:
+                    await player.destroy()
+
+    @commands.command(name='connect', description='Подрубается к войсу')
     async def connect_(self, ctx, *, channel: discord.VoiceChannel = None):
         """Connect to a valid voice channel."""
         if not channel:
@@ -156,12 +193,13 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
 
-    @commands.command(name='play')
+    @commands.command(name='play', description='Играет музыку по ссылке или по названию', aliases=['p'])
     async def play(self, ctx, *, query: str):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             await ctx.invoke(self.connect_)
 
+        query = query.strip('<>')
         await ctx.send(f'Ищу `{query}`')
         """Search for and add a song to the Queue."""
         if not RURL.match(query):
@@ -172,31 +210,44 @@ class Music(commands.Cog):
         if not tracks:
             return await ctx.send('Не нашел песню')
 
-        track = tracks[0]
-
-        duration = timedelta(milliseconds=int(track.length))
-
         controller = self.get_controller(ctx)
-        await controller.queue.put(track)
 
         embed = Embed(
             title=f'Добавил в очередь')
 
-        embed.set_thumbnail(
-            url=track.thumb)
+        if isinstance(tracks, wavelink.TrackPlaylist):
+            for track in tracks.tracks:
+                track = wavelink.Track(
+                    track.id, track.info)
 
-        embed.add_field(
-            name='Название', value=f'[{track.author} - {track.title}]({track.uri})')
+                await controller.queue.put(track)
 
-        embed.add_field(
-            name='Продолжительность', value=duration)
+            embed.description = f'Плейлист {tracks.data["playlistInfo"]["name"]} c {len(tracks.tracks)} треками'
+        else:
+            track = tracks[0]
 
-        embed.add_field(
-            name='Позиция в очереди', value=f'{controller.queue.qsize()}')
+            duration = timedelta(milliseconds=int(track.length))
+
+            await controller.queue.put(track)
+
+            embed.set_thumbnail(
+                url=track.thumb)
+
+            embed.add_field(
+                name='Название', value=f'[{track.title}]({track.uri})')
+
+            embed.add_field(
+                name='Автор', value=f'{track.author}')
+
+            embed.add_field(
+                name='Продолжительность', value=duration)
+
+            embed.add_field(
+                name='Позиция в очереди', value=f'{controller.queue.qsize()}')
 
         await ctx.send(embed=embed)
 
-    @commands.command()
+    @commands.command(name='pause', description='Останавливает музыку')
     async def pause(self, ctx):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -206,7 +257,7 @@ class Music(commands.Cog):
         await ctx.send('Останавливаю проигрывание')
         await player.set_pause(True)
 
-    @commands.command()
+    @commands.command(name='resume', description='Возобновляет музыку')
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -216,7 +267,7 @@ class Music(commands.Cog):
         await ctx.send('Возобновляю проигрывание')
         await player.set_pause(False)
 
-    @commands.command()
+    @commands.command(name='skip', description='Пропускает играющую музыку')
     async def skip(self, ctx):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -225,12 +276,12 @@ class Music(commands.Cog):
             return await ctx.send('Я ничего не играю')
 
         embed = Embed(
-            title=f'Скипнул `{player.current.author} - {player.current.title}`')
+            title=f'Скипнул `{player.current.title}`')
 
         await ctx.send(embed=embed)
         await player.stop()
 
-    @commands.command()
+    @commands.command(name='volume', description='Устанавливает громкость плеера', aliases=['vol'])
     async def volume(self, ctx, *, vol: int):
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -245,7 +296,7 @@ class Music(commands.Cog):
 
         await player.set_volume(vol)
 
-    @commands.command(aliases=['np', 'current', 'nowplaying'])
+    @commands.command(name='now_playing', description='Показывает текущий трек', aliases=['np', 'current', 'nowplaying'])
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -256,12 +307,14 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         await controller.now_playing.delete()
 
-        controller.now_playing = await ctx.send(f'Сейчас играет: `{player.current.author} - {player.current.title}`')
+        controller.now_playing = await ctx.send(embed=await controller.nowPlayingEmbed(player))
 
-    @commands.command(aliases=['q'])
+    @commands.command(name='queue', description='Показывает очередь из треков(первые 5)', aliases=['q'])
     async def queue(self, ctx):
         """Retrieve information on the next 5 songs from the queue."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+        if not player.is_connected:
+            return
         controller = self.get_controller(ctx)
 
         if not player.current or not controller.queue._queue:
@@ -277,7 +330,7 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(aliases=['disconnect', 'dc'])
+    @commands.command(name='stop', description='Отключается и чистит очередь', aliases=['disconnect', 'dc'])
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -285,13 +338,13 @@ class Music(commands.Cog):
         try:
             del self.controllers[ctx.guild.id]
         except KeyError:
-            await player.disconnect()
-            return await ctx.send('Вышел')
+            await player.destroy()
+            return await ctx.send('Вышел и удалил очередь')
 
-        await player.disconnect()
-        await ctx.send('Вышел')
+        await player.destroy()
+        await ctx.send('Вышел и удалил очередь')
 
-    @commands.command(name='equalizer', description='Эквалайзер музыки, состоит из 15 уровней', aliases=['eq'])
+    @commands.command(name='equalizer', description='Пресеты эквалайзера музыки', aliases=['eq'])
     async def equalizer(self, ctx, equalizer='None'):
         """Change the players equalizer."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
