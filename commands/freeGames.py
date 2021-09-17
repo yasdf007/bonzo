@@ -8,7 +8,8 @@ from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, N
 from datetime import datetime
 from discord.enums import ChannelType
 from discord import Embed
-from resources.animationFW import randCol
+from .resources.animationFW import randCol
+
 
 class FreeGames(Cog):
     link = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'
@@ -88,6 +89,7 @@ class FreeGames(Cog):
         return res
 
     async def getMessages(self):
+        print('asdsadasasdasdasdasdasdasd')
         async with ClientSession() as session:
             async with session.get(self.link) as response:
                 resultJson = await response.json()
@@ -116,35 +118,36 @@ class FreeGames(Cog):
             link = 'https://www.epicgames.com/store/ru/p/' + slug
 
             embedd = Embed(
-                title='**Бесплатная игра недели (Epic Games)**', colour=randCol)
-            embedd.set_thumbnail(url='https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg')
+                title='**Бесплатная игра недели (Epic Games)**', colour=await randCol())
+            embedd.set_thumbnail(
+                url='https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg')
             embedd.add_field(
                 name=f'**{game_name}**', value=f'**{link}**'
             )
             embedd.add_field(
-                name='**Действует до: ', value={due_date}
+                name='**Действует до: **', value=f'{due_date}'
             )
-            
-            msgs.append(embedd)
 
+            msgs.append(embedd)
         return msgs
 
-    async def freeGames(self):
-        channels = await self.getChannels()
-        if len(channels) < 1:
-            return
-
+    @command(name="test", description='test')
+    async def freeGames(self, ctx):
+        # channels = await self.getChannels()
+        # if len(channels) < 1:
+        #     return
+        print('asdasdasdadasasdasdasdadasasdasdasdadasasdasdasdadasasdasdasdadas')
         msgs = await self.getMessages()
 
-        for channel in channels:
-            channel = self.bot.get_channel(channel['channel_id'])
-            for msg in msgs:
-                announcement = await channel.send(msg)
+        # for channel in channels:
+        channel = self.bot.get_channel(681179689775398943)
+        for msg in msgs:
+            announcement = await channel.send(embed=msg)
 
-                if channel.type == ChannelType.news:
-                    await announcement.publish()
+            if channel.type == ChannelType.news:
+                await announcement.publish()
 
-                await sleep(1)
+            await sleep(1)
 
 
 def setup(bot):
