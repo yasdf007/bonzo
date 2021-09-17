@@ -3,6 +3,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-guilds = [664485208745050112]
+guilds = None
 OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
 prefix ="b/"
