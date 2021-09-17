@@ -117,7 +117,6 @@ class FreeGames(Cog):
 
             embedd = Embed(
                 title='**Бесплатная игра недели (Epic Games)**', colour=randCol)
-            )
             embedd.set_thumbnail(url='https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg')
             embedd.add_field(
                 name=f'**{game_name}**', value=f'**{link}**'
