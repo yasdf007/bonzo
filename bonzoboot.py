@@ -70,7 +70,7 @@ class Bot(bonzoBot):
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        # self.load_extension('commands.music')
+        self.load_extension('commands.music')
         self.scheduler.start()
 
         endTime = time() - self.startTime

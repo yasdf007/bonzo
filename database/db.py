@@ -7,7 +7,8 @@ load_dotenv()  # загружает файл env
 
 BUILD_SQL = './database/build.sql'
 
-connection_string = getenv('DATABASE_URL')
+connection_string = \
+    f'postgresql://{getenv("POSTGRES_USER")}:{getenv("POSTGRES_PASSWORD")}@{getenv("POSTGRES_IP")}/{getenv("POSTGRES_DB")}'
 
 
 async def createDB(pool):
@@ -16,6 +17,6 @@ async def createDB(pool):
 
 
 async def connectToDB():
-    pool = await asyncpg.create_pool(dsn=connection_string, max_inactive_connection_lifetime=180, ssl='require')
+    pool = await asyncpg.create_pool(dsn=connection_string, max_inactive_connection_lifetime=180)
     await createDB(pool)
     return pool

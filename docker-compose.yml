@@ -1,0 +1,44 @@
+version: "3"
+networks:
+  bot:
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgresql_bot
+    restart: always
+    tty: true
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: "$POSTGRES_PASSWORD"
+      POSTGRES_USER: "$POSTGRES_USER"
+      POSTGRES_DB: "$POSTGRES_DB"
+    networks:
+      - bot
+
+  python:
+    build:
+      context: .
+      dockerfile: Python.Dockerfile
+    volumes:
+      - ./:/home/bonzo
+    container_name: bonzo_py
+    restart: always
+    depends_on:
+      - java
+    networks:
+      - bot
+
+  java:
+    build:
+      context: .
+      dockerfile: Java.Dockerfile
+    container_name: lavalink
+    restart: always
+    volumes:
+      - ./lavalink:/home/lavalink
+    networks:
+      - bot
