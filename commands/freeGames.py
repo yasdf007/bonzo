@@ -1,3 +1,4 @@
+from os import name
 from discord.ext.commands import Cog, guild_only, has_permissions, bot_has_permissions, group, BucketType, cooldown
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
@@ -6,7 +7,8 @@ from discord.ext.commands import command
 from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, NoPrivateMessage
 from datetime import datetime
 from discord.enums import ChannelType
-
+from discord import Embed
+from resources.animationFW import randCol
 
 class FreeGames(Cog):
     link = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'
@@ -113,8 +115,18 @@ class FreeGames(Cog):
 
             link = 'https://www.epicgames.com/store/ru/p/' + slug
 
-            msgs.append(
-                f'Прямо сейчас бесплатна {game_name}\nСсылка {link}\nДействует до {due_date}')
+            embedd = Embed(
+                title='**Бесплатная игра недели (Epic Games)**', colour=randCol)
+            )
+            embedd.set_thumbnail(url=https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg)
+            embedd.add_field(
+                name=f'**{game_name}**', value=f'**{link}**'
+            )
+            embedd.add_field(
+                name='**Действует до: ', value={due_date}
+            )
+            
+            msgs.append(embedd)
 
         return msgs
 
