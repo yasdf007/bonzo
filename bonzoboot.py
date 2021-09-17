@@ -6,7 +6,7 @@ from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 from discord_slash import SlashCommand
 
-from config import OWNER_IDS
+from config import OWNER_IDS, prefix
 
 from colorama import Fore, Back, Style
 from dotenv import load_dotenv
@@ -41,7 +41,7 @@ class Bot(bonzoBot):
         self.game = Game("b/help | v1.1.001b SLASHED")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-        super().__init__(command_prefix=when_mentioned_or(getenv('PREFIX')),
+        super().__init__(command_prefix=when_mentioned_or(prefix),
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
