@@ -2,6 +2,9 @@
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
 
+import sys
+sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
+
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 from discord_slash import SlashCommand
@@ -16,9 +19,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from platform import platform
 from os import listdir, getenv
-import sys
 import logging
-sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
 
 load_dotenv()  # загружает файл env
 
@@ -38,7 +39,7 @@ class Bot(bonzoBot):
     def __init__(self):
         sys.dont_write_bytecode = True
         intents = Intents.all()
-        self.game = Game("b/help | v1.1.001b SLASHED")
+        self.game = Game(f'{prefix}help | v1.11a okshaw')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=when_mentioned_or(prefix),

@@ -12,6 +12,8 @@ except:
     print(f'{Fore.GREEN} Config: {Style.RESET_ALL} Owners unspecified.')
 
 try:
+    if getenv('PREFIX') == None:
+        raise NameError("No Specified")
     prefix = getenv('PREFIX')
 except:
     prefix ="b/"
