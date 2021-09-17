@@ -46,12 +46,16 @@ class Bot(bonzoBot):
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
-        curr, total = 0, len(listdir('./commands')) - 2
+        curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
-            if filename.endswith('.py') and not filename.startswith('music'):
+            if filename.endswith('.py') and not filename.startswith('music'):                    
                 self.load_extension(f'commands.{filename[:-3]}')
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
+            elif filename.startswith('music'):
+                self.load_extension('commands.music')
+                curr +=1 
+                print(f'/ \n {Fore.GREEN} MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n {curr}/{total} \n /')
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
@@ -69,9 +73,8 @@ class Bot(bonzoBot):
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        self.load_extension('commands.music')
+        
         self.scheduler.start()
-
         endTime = time() - self.startTime
 
         print(
