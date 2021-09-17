@@ -45,14 +45,12 @@ class Bot(bonzoBot):
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
-        curr, total = 0, len(listdir('./commands')) - 3
+        curr, total = 0, len(listdir('./commands')) - 2
         for filename in listdir('./commands'):
             if filename.endswith('.py') and not filename.startswith('music'):
                 self.load_extension(f'commands.{filename[:-3]}')
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
-        print(Back.WHITE + Fore.BLACK +
-              "MUSIC WAS TEMPORARILY REMOVED FROM BONZO DUE TO HOSTING ISSUES" + Style.RESET_ALL)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
