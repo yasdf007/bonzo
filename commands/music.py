@@ -16,8 +16,11 @@ from discord.ext import commands
 from discord import Embed
 from typing import Union
 from datetime import timedelta
-RURL = re.compile('https?:\/\/(?:www\.)?.+')
+from discord_slash import SlashContext, cog_ext
 from colorama import Fore, Back, Style
+from config import guilds
+
+RURL = re.compile('https?:\/\/(?:www\.)?.+')
 
 
 class IncorrectChannelError(commands.CommandError):
@@ -40,7 +43,27 @@ class MusicController:
 
         self.now_playing = None
 
+        self.loop = False
+        self.toLoop = None
+
         self.bot.loop.create_task(self.controller_loop())
+
+    async def controller_loop(self):
+        await self.bot.wait_until_ready()
+
+        player = self.bot.wavelink.get_player(self.guild_id)
+
+        while True:
+            if self.now_playing:
+                await self.now_playing.delete()
+
+            self.next.clear()
+
+            song = self.toLoop if (self.loop) else (await self.queue.get())
+
+            await player.play(song, replace=False)
+            self.now_playing = await self.channel.send(embed=await self.nowPlayingEmbed(player=player))
+            await self.next.wait()
 
     async def nowPlayingEmbed(self, player):
         track = player.current
@@ -60,22 +83,6 @@ class MusicController:
                         value=f'[Клик]({track.uri})')
 
         return embed
-
-    async def controller_loop(self):
-        await self.bot.wait_until_ready()
-
-        player = self.bot.wavelink.get_player(self.guild_id)
-
-        while True:
-            if self.now_playing:
-                await self.now_playing.delete()
-
-            self.next.clear()
-
-            song = await self.queue.get()
-            await player.play(song, replace=False)
-            self.now_playing = await self.channel.send(embed=await self.nowPlayingEmbed(player=player))
-            await self.next.wait()
 
 
 class Music(commands.Cog):
@@ -173,6 +180,9 @@ class Music(commands.Cog):
         if member.bot:
             return
 
+        # Вырубается из войса, если не осталось людей
+
+        # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
             if len([user for user in before.channel.members if not user.bot]) < 1:
                 player = self.bot.wavelink.get_player(member.guild.id)
@@ -200,7 +210,8 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
 
-    @commands.command(name='play', description='Играет музыку по ссылке или по названию', aliases=['p'])
+    # @cog_ext.cog_slash(name='play', description='Играет музыку по ссылке или по названию', guild_ids=guilds)
+    @commands.command(name='play', description='Играет музыку по ссылке или по названию')
     async def play(self, ctx, *, query: str):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
@@ -258,8 +269,12 @@ class Music(commands.Cog):
     async def pause(self, ctx):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+
         if not player.is_playing:
             return await ctx.send('Я ничего не играю')
+
+        if player.is_paused:
+            return await ctx.send('Я на паузе')
 
         await ctx.send('Останавливаю проигрывание')
         await player.set_pause(True)
@@ -268,8 +283,11 @@ class Music(commands.Cog):
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
-        if not player.paused:
+        if not player.is_playing:
             return await ctx.send('Я ничего не играю')
+
+        if not player.paused:
+            return await ctx.send('Я не в паузе')
 
         await ctx.send('Возобновляю проигрывание')
         await player.set_pause(False)
@@ -285,6 +303,9 @@ class Music(commands.Cog):
         embed = Embed(
             title=f'Скипнул `{player.current.title}`')
 
+        controller = self.get_controller(ctx)
+        controller.loop = False
+
         await ctx.send(embed=embed)
         await player.stop()
 
@@ -292,10 +313,8 @@ class Music(commands.Cog):
     async def volume(self, ctx, *, vol: int):
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
-        controller = self.get_controller(ctx)
 
         vol = max(min(vol, 1000), 0)
-        controller.volume = vol
 
         embed = Embed(
             title=f':speaker: Установил громкость плеера `{vol}`')
@@ -373,6 +392,30 @@ class Music(commands.Cog):
 
         await player.set_eq(eq)
         await ctx.send(f'Поставил эквалайзер {equalizer}. Применение займет несколько секунд...')
+
+    @commands.command(name='loop', description='Зацикливает, расцикливает трек')
+    async def loop(self, ctx):
+        """Stop and disconnect the player and controller."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
+
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
+        controller = self.get_controller(ctx)
+
+        if controller.loop == False:
+            embed = Embed(title=f'Трек `{player.current}` зациклен')
+            controller.loop = True
+            controller.toLoop = player.current
+        else:
+            embed = Embed(title=f'Трек `{player.current}` больше не зациклен')
+            controller.loop = False
+            controller.toLoop = None
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
