@@ -12,7 +12,7 @@ class gameBlackjack(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_subcommand(base='blackjack', name='start', description='Начать игру blackjack', guild_ids=guilds)
+    @cog_ext.cog_subcommand(base='blackjack', name='start', description='Начать игру blackjack')
     async def gameBlackjack(self, ctx):
         if ctx.author.bot:
             return
@@ -44,7 +44,7 @@ class gameBlackjack(Cog):
 
             self.games[str(ctx.guild.id)][1] = False
 
-    @cog_ext.cog_subcommand(base='blackjack', name='join', description='Присоединиться к игре blackjack', guild_ids=guilds)
+    @cog_ext.cog_subcommand(base='blackjack', name='join', description='Присоединиться к игре blackjack')
     async def join(self, ctx):
         if ctx.author.bot:
             return
@@ -64,7 +64,7 @@ class gameBlackjack(Cog):
         self.games[str(ctx.guild.id)][0].append(str(ctx.author.id))
         await ctx.send(f'Добавил {ctx.message.author}')
 
-    @cog_ext.cog_subcommand(base='blackjack', name='stop', description='Остановить blackjack', guild_ids=guilds)
+    @cog_ext.cog_subcommand(base='blackjack', name='stop', description='Остановить blackjack')
     async def stop(self, ctx):
         if ctx.author.bot:
             return
@@ -80,7 +80,7 @@ class gameBlackjack(Cog):
         self.games.pop(str(ctx.guild.id))
         await ctx.send('Игра остановлена')
 
-    @cog_ext.cog_subcommand(base='blackjack', name='leave', description='Выйти из blackjack', guild_ids=guilds)
+    @cog_ext.cog_subcommand(base='blackjack', name='leave', description='Выйти из blackjack')
     async def leave(self, ctx):
         if ctx.author.bot:
             return

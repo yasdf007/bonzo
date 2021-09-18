@@ -16,7 +16,9 @@ from discord.ext import commands
 from discord import Embed
 from typing import Union
 from datetime import timedelta
+
 from discord_slash import SlashContext, cog_ext
+from discord_slash.error import SlashCommandError
 from colorama import Fore, Back, Style
 from config import guilds
 
@@ -27,7 +29,7 @@ class IncorrectChannelError(commands.CommandError):
     pass
 
 
-class NotInVoice(commands.CommandError):
+class NotInVoice(SlashCommandError):
     pass
 
 
@@ -143,11 +145,11 @@ class Music(commands.Cog):
             raise commands.NoPrivateMessage
         return True
 
-    async def cog_before_invoke(self, ctx: commands.Context):
+    async def on_slash_command(self, ctx):
         """Coroutine called before command invocation.
         We mainly just want to check whether the user is in the players controller channel.
         """
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild_id)
 
         if not player.channel_id:
             return
@@ -159,8 +161,8 @@ class Music(commands.Cog):
                 await ctx.send(f'{ctx.author.mention}, ты должен быть в `{channel.name}` для использования музыки')
                 raise IncorrectChannelError
 
-    async def cog_command_error(self, ctx, error):
-        """A local error handler for all errors arising from commands in this cog."""
+    @commands.Cog.listener()
+    async def on_slash_command_error(self, ctx: SlashContext, error):
         if isinstance(error, commands.NoPrivateMessage):
             try:
                 return await ctx.send('This command can not be used in Private Messages.')
@@ -188,14 +190,14 @@ class Music(commands.Cog):
                 player = self.bot.wavelink.get_player(member.guild.id)
 
                 try:
-                    del self.controllers[member.guild.id]
+                    del self.controllers[member.guild_id]
                 except:
                     pass
                 finally:
                     await player.destroy()
 
-    @commands.command(name='connect', description='Подрубается к войсу')
-    async def connect_(self, ctx, *, channel: discord.VoiceChannel = None):
+    @cog_ext.cog_slash(name='connect', description='Подрубается к войсу')
+    async def connect_(self, ctx: SlashContext, channel: discord.VoiceChannel = None):
         """Connect to a valid voice channel."""
         if not channel:
             try:
@@ -203,23 +205,25 @@ class Music(commands.Cog):
             except AttributeError:
                 raise NotInVoice
 
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild_id)
         await ctx.send(f'Подрубаюсь в **`{channel.name}`**\nВидео с ограничением по возрасту не будут работать')
         await player.connect(channel.id)
 
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
 
-    # @cog_ext.cog_slash(name='play', description='Играет музыку по ссылке или по названию', guild_ids=guilds)
-    @commands.command(name='play', description='Играет музыку по ссылке или по названию')
-    async def play(self, ctx, *, query: str):
-        player = self.bot.wavelink.get_player(ctx.guild.id)
-        if not player.is_connected:
-            await ctx.invoke(self.connect_)
+    @cog_ext.cog_slash(name='play', description='Играет музыку по ссылке или по названию')
+    async def play(self, ctx: SlashContext, query: str):
+        player = self.bot.wavelink.get_player(ctx.guild_id)
+        try:
+            if not player.is_connected:
+                await ctx.invoke(self.connect_, ctx, ctx.author.voice.channel)
+        except AttributeError:
+            raise NotInVoice
 
         query = query.strip('<>')
         await ctx.send(f'Ищу `{query}`')
-        """Search for and add a song to the Queue."""
+
         if not RURL.match(query):
             query = f'ytsearch:{query}'
 
@@ -265,7 +269,8 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
-    @commands.command(name='pause', description='Останавливает музыку')
+    # @commands.command(name='pause', description='Останавливает музыку')
+    @cog_ext.cog_slash(name='pause', description='Останавливает музыку')
     async def pause(self, ctx):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -279,7 +284,8 @@ class Music(commands.Cog):
         await ctx.send('Останавливаю проигрывание')
         await player.set_pause(True)
 
-    @commands.command(name='resume', description='Возобновляет музыку')
+    # @commands.command(name='resume', description='Возобновляет музыку')
+    @cog_ext.cog_slash(name='resume', description='Возобновляет музыку')
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -292,10 +298,14 @@ class Music(commands.Cog):
         await ctx.send('Возобновляю проигрывание')
         await player.set_pause(False)
 
-    @commands.command(name='skip', description='Пропускает играющую музыку')
+    # @commands.command(name='skip', description='Пропускает играющую музыку')
+    @cog_ext.cog_slash(name='skip', description='Пропускает играющую музыку')
     async def skip(self, ctx):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
 
         if not player.is_playing:
             return await ctx.send('Я ничего не играю')
@@ -309,10 +319,14 @@ class Music(commands.Cog):
         await ctx.send(embed=embed)
         await player.stop()
 
-    @commands.command(name='volume', description='Устанавливает громкость плеера', aliases=['vol'])
+    # @commands.command(name='volume', description='Пропускает играющую музыку', aliases=['vol'])
+    @cog_ext.cog_slash(name='volume', description='Пропускает играющую музыку')
     async def volume(self, ctx, *, vol: int):
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
 
         vol = max(min(vol, 1000), 0)
 
@@ -322,10 +336,14 @@ class Music(commands.Cog):
 
         await player.set_volume(vol)
 
-    @commands.command(name='now_playing', description='Показывает текущий трек', aliases=['np', 'current', 'nowplaying'])
+    # @commands.command(name='now_playing', description='Показывает текущий трек', aliases=['np', 'current', 'nowplaying'])
+    @cog_ext.cog_slash(name='now_playing', description='Показывает текущий трек')
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
 
         if not player.current:
             return await ctx.send('Я ничего не играю')
@@ -335,12 +353,14 @@ class Music(commands.Cog):
 
         controller.now_playing = await ctx.send(embed=await controller.nowPlayingEmbed(player))
 
-    @commands.command(name='queue', description='Показывает очередь из треков(первые 5)', aliases=['q'])
+    # @commands.command(name='queue', description='Показывает очередь из треков(первые 5)', aliases=['q'])
+    @cog_ext.cog_slash(name='queue', description='Показывает очередь из треков(первые 5)')
     async def queue(self, ctx):
         """Retrieve information on the next 5 songs from the queue."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             return
+
         controller = self.get_controller(ctx)
 
         if not player.current or not controller.queue._queue:
@@ -348,19 +368,22 @@ class Music(commands.Cog):
 
         upcoming = list(controller.queue._queue)
 
-        fmt = '\n'.join(
-            f'`[{song.author} - {song.title}]({song.uri})`' for song in upcoming[:5])
-
         embed = discord.Embed(
-            title=f'В очереди - {len(upcoming)}', description=fmt)
+            title=f'В очереди - {len(upcoming)}')
 
+        for song in upcoming[:5]:
+            embed.add_field(name=song.author,
+                            value=f'[{song.title}]({song.uri})')
         await ctx.send(embed=embed)
 
-    @commands.command(name='stop', description='Отключается и чистит очередь', aliases=['disconnect', 'dc'])
+    # @commands.command(name='stop', description='Отключается и чистит очередь', aliases=['disconnect', 'dc'])
+    @cog_ext.cog_slash(name='stop', description='Отключается и чистит очередь')
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
 
+        if not player.is_connected:
+            return
         try:
             del self.controllers[ctx.guild.id]
         except KeyError:
@@ -370,7 +393,8 @@ class Music(commands.Cog):
         await player.destroy()
         await ctx.send('Вышел и удалил очередь')
 
-    @commands.command(name='equalizer', description='Пресеты эквалайзера музыки', aliases=['eq'])
+    # @commands.command(name='equalizer', description='Пресеты эквалайзера музыки', aliases=['eq'])
+    @cog_ext.cog_slash(name='equalizer', description='Пресеты эквалайзера музыки')
     async def equalizer(self, ctx, equalizer='None'):
         """Change the players equalizer."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
@@ -393,7 +417,8 @@ class Music(commands.Cog):
         await player.set_eq(eq)
         await ctx.send(f'Поставил эквалайзер {equalizer}. Применение займет несколько секунд...')
 
-    @commands.command(name='loop', description='Зацикливает, расцикливает трек')
+    # @commands.command(name='loop', description='Зацикливает, расцикливает трек')
+    @cog_ext.cog_slash(name='loop', description='Зацикливает, расцикливает трек')
     async def loop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id)

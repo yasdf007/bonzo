@@ -12,7 +12,7 @@ class randomCat(Cog):
         self.bot = bot
 
     # Обработа ошибок
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def randomcat(self, ctx: SlashContext, num: int = 1):
         if int(num) > 2:
             num = 2

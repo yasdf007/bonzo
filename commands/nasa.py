@@ -12,7 +12,7 @@ class Nasa(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def nasapict(self, ctx: SlashContext):
         embed = Embed(title='Картинка дня от NASA', color=0x0000ff)
 

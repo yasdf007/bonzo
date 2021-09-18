@@ -13,7 +13,7 @@ class Roll(Cog):
         self.bot = bot
 
     # dota 2 roll
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def roll(self, ctx: SlashContext, number_from: int,  number_to: int):
         oneMillon = 10**6
 

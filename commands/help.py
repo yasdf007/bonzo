@@ -16,7 +16,7 @@ class helping(Cog):
         self.bot = bot
         self._discord = bot
 
-    @cog_ext.cog_slash(name='help_slash', description='Все слеш комманды', guild_ids=guilds)
+    @cog_ext.cog_slash(name='help_slash', description='Все слеш комманды')
     async def help_slash(self, ctx: SlashContext):
         p = Paginator(ctx)
 
@@ -26,7 +26,7 @@ class helping(Cog):
 
         await p.call_controller()
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def help(self, ctx: SlashContext, cmd: str = None):
         if cmd is None:
             p = Paginator(ctx)

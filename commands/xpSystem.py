@@ -168,7 +168,7 @@ class AddXP(Cog):
 
         await self.executeQuery(updateQuery, 'execute')
 
-    @cog_ext.cog_slash(name='top', description='Показывает топ 10 по опыту', guild_ids=guilds)
+    @cog_ext.cog_slash(name='top', description='Показывает топ 10 по опыту')
     async def leaderboard(self, ctx):
         selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
         where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;'
@@ -195,7 +195,7 @@ class AddXP(Cog):
 
         await ctx.send(embed=embed)
 
-    @cog_ext.cog_slash(name='rank', description='Показывает карточку с опытом', guild_ids=guilds)
+    @cog_ext.cog_slash(name='rank', description='Показывает карточку с опытом')
     async def rank(self, ctx: SlashContext):
         selectQuery = f'select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
                         join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \

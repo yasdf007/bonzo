@@ -13,7 +13,7 @@ class info(Cog):
         self.bot = bot
 
     # функция, отправляющая информацию о сервере
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def serverinfo(self, ctx: SlashContext):
         server = ctx.guild
         embed = Embed(

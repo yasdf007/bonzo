@@ -12,7 +12,7 @@ class GameHangman(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_subcommand(base='hangman', name='start', description='Начать игру виселица', guild_ids=guilds)
+    @cog_ext.cog_subcommand(base='hangman', name='start', description='Начать игру виселица')
     async def gameHangman(self, ctx):
         if ctx.author.bot:
             return
@@ -48,7 +48,7 @@ class GameHangman(Cog):
             if isAfk == True:
                 self.games.pop(str(ctx.guild.id))
 
-    @cog_ext.cog_subcommand(base='hangman', name='stop', description='Остановить игру виселица', guild_ids=guilds)
+    @cog_ext.cog_subcommand(base='hangman', name='stop', description='Остановить игру виселица')
     async def stop(self, ctx: SlashContext):
         if ctx.author.bot:
             return
