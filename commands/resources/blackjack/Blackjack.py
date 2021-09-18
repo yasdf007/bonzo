@@ -2,7 +2,9 @@ from .Deck import Deck
 from .Hand import Hand
 from discord import Embed
 import asyncio
-
+from discord_slash.utils.manage_components import create_button, create_actionrow
+from discord_slash.model import ButtonStyle
+from discord_slash.utils.manage_components import wait_for_component
 
 class Blackjack:
     def __init__(self, ctx, players):
@@ -73,6 +75,7 @@ class Blackjack:
         embed = Embed.from_dict(myDict)
 
         await self.ctx.send(embed=embed)
+        await asyncio.sleep(0.25)
 
     async def getResult(self):
         winners = []
@@ -147,38 +150,61 @@ class Blackjack:
                 self.game[player][1]['stop'] = True
 
             while True:
+
                 if self.game[player][1]['stop'] == True:
                     break
+                buttons = []
 
                 await self.printGame()
                 playerProfile = self.ctx.guild.get_member(int(player))
-                msg = f'Ход {playerProfile.mention}\n`h - взять карту, s - не брать (15s)`'
+                msg = f'Ход {playerProfile.mention} (15s)'
+                
+                buttons.append(create_button(
+                        style=ButtonStyle.green,
+                        label="(HIT) Взять карту",
+                        custom_id='h'
+                    ))
+                buttons.append(create_button(
+                        style=ButtonStyle.red,
+                        label="(STAND) Не брать",
+                        custom_id='s'
+                    ))
 
                 if not self.game[player][1]['split']:
                     if len(self.game[player][0].cards) == 2:
                         if await self.checkForDoubleDown(score):
                             doubleDown = True
-                            msg += '\n`Возможен double down - dd`'
-
+                            buttons.append(create_button(
+                                style=ButtonStyle.gray,
+                                label="(Double Down) Возможен double down",
+                                custom_id='dd'
+                            ))
                         if await self.checkForSplit(self.game[player][0].cards):
                             split_ = True
-                            msg += '\n`Возможен split - sp`'
+                            buttons.append(create_button(
+                                style=ButtonStyle.blue,
+                                label="(SPLIT) Возможен split",
+                                custom_id='sp'
+                            ))
                 else:
                     msg += f'\n`Рука {handPos+1}`'
 
-                await self.ctx.send(msg)
+                action_row = create_actionrow(*buttons)
+                msg = await self.ctx.send(msg,components=[action_row])
+                await asyncio.sleep(0.25)
 
                 try:
-                    decicion = await self.ctx.bot.wait_for(
-                        'message', check=lambda msg: msg.author.id == int(player) and msg.channel.id == self.ctx.channel.id, timeout=15)
-
+                    decicion = await wait_for_component(
+                        self.ctx.bot, check=lambda msg: msg.author.id == int(player) and msg.channel.id == self.ctx.channel.id, timeout=15,components=action_row)
+                    await decicion.edit_origin(content=f'{playerProfile.display_name} {decicion.component["label"]}')
                 except asyncio.TimeoutError:
                     self.game[player][1]['stop'] == True
-                    await self.ctx.send(f'{playerProfile.display_name} ничего не выбрал')
+                    await self.ctx.send(f'{playerProfile.mention} ничего не выбрал')
+                    await asyncio.sleep(0.25)
                     break
 
                 if not self.game[player][1]['split']:
-                    if decicion.content.lower() == 'h':
+                    if decicion.component['custom_id'] == 'h':
                         await self.game[player][0].drawCard(await self.deck.draw())
                         score = await self.game[player][0].getScore()
 
@@ -188,22 +214,22 @@ class Blackjack:
                         if await self.checkOver21(score):
                             self.game[player][1]['stop'] = True
 
-                    if decicion.content.lower() == 's':
+                    if decicion.component['custom_id'] == 's':
                         self.game[player][1]['stop'] = True
 
-                    if doubleDown and decicion.content.lower() == 'dd':
+                    if doubleDown and decicion.component['custom_id'] == 'dd':
                         await self.game[player][0].drawCard(await self.deck.draw())
                         self.game[player][1]['stop'] = True
                         await self.game[player][0].getScore()
 
-                    if split_ and decicion.content.lower() == 'sp':
+                    if split_ and decicion.component['custom_id'] == 'sp':
                         self.game[player][1]['split'] = True
                         self.game[player][1]['win'] = [-1, -1]
                         await self.splitHand(player)
                         handPos = 0
 
                 if self.game[player][1]['split']:
-                    if decicion.content.lower() == 'h':
+                    if decicion.component['custom_id'] == 'h':
                         await self.game[player][0][handPos].drawCard(await self.deck.draw())
                         score = await self.game[player][0][handPos].getScore()
 
@@ -217,7 +243,7 @@ class Blackjack:
                                 self.game[player][1]['stop'] = True
                             handPos = 1
 
-                    if decicion.content.lower() == 's':
+                    if decicion.component['custom_id'] == 's':
                         if handPos == 1:
                             self.game[player][1]['stop'] = True
                         handPos = 1
@@ -228,3 +254,4 @@ class Blackjack:
         await self.printGame(forceShow=True)
         result = await self.getResult()
         await self.ctx.send(result)
+        await asyncio.sleep(0.25)

@@ -2,41 +2,60 @@
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
 
+from sys import dont_write_bytecode
+dont_write_bytecode = True # убирает генерацию машинного кода python
+
+from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
+from discord import Intents, Game, Status
+from discord_slash import SlashCommand
+
+from config import OWNER_IDS, prefix
+
 from colorama import Fore, Back, Style
 from dotenv import load_dotenv
 from database import db
-from os import listdir, getenv
 from time import time
-from platform import platform
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
-from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
-from discord import Intents, Game, Status
-import sys
-sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
+
+from platform import platform
+from os import listdir, getenv
+import logging
 
 load_dotenv()  # загружает файл env
-OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+
+handler = logging.FileHandler(
+    filename='discord.log', encoding='utf-8', mode='w'
+)
+handler.setFormatter(
+    logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s')
+)
+logger.addHandler(handler)
 
 
 class Bot(bonzoBot):
     def __init__(self):
-        sys.dont_write_bytecode = True
         intents = Intents.all()
-        self.game = Game("b/help | v1.0 RC GM")
+        self.game = Game(f'{prefix}help | v1.11a okshaw')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-        super().__init__(command_prefix=when_mentioned_or(getenv('PREFIX')),
+        super().__init__(command_prefix=when_mentioned_or(prefix),
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
-        curr, total = 0, len(listdir('./commands')) - 3
+        curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
             if filename.endswith('.py') and not filename.startswith('music'):
                 self.load_extension(f'commands.{filename[:-3]}')
+
+                # if filename.startswith('music'):
+                #     print(
+                #         f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
+
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
-        print(Back.WHITE + Fore.BLACK +
-              "MUSIC WAS TEMPORARILY REMOVED FROM BONZO DUE TO HOSTING ISSUES" + Style.RESET_ALL)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
@@ -46,18 +65,28 @@ class Bot(bonzoBot):
 
     @Cog.listener()
     async def on_ready(self):
-        self.pool = await db.connectToDB()
+        try:
+            self.pool = await db.connectToDB()
+        except Exception as err:
+            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
+            print(err)
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        # self.load_extension('commands.music')
-        self.scheduler.start()
 
+        self.scheduler.start()
         endTime = time() - self.startTime
 
         print(
             f'/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n / \n end.')
 
 
-bot = Bot()
-bot.run()
+if __name__ == '__main__':
+    try:
+        bot = Bot()
+        slash = SlashCommand(bot, sync_commands=True)
+        bot.slash = slash
+        bot.run()
+    except Exception as error:
+        print("FATAL ERROR. \n THIS ERROR CAN OCCUR EITHER IF MAIN BOT EXECUTABLE IS CORRUPTED OR IF FRAMEWORK IS BROKEN.")
+        print(error)

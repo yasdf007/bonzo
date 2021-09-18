@@ -1,43 +1,44 @@
-from discord.ext.commands import Cog, CommandInvokeError, CommandOnCooldown, BadArgument, cooldown, command, BucketType
+from discord.ext.commands import Cog
 from discord import File
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
+from discord_slash import SlashContext, cog_ext
+from config import guilds
+from re import compile
+from aiohttp import ClientSession
 
 name = 'demotivator'
-description = 'Как в мемах. Надо прикрепить фотку к сообщению (по ссылкам пока не работает)'
+description = 'Как в мемах. Нужна ссылка'
 
 
 class Demotivator(Cog):
+    urlValid = compile(r'https?://(?:www\.)?.+')
+
     def __init__(self, bot):
         self.bot = bot
 
-    # Обработка ошибок
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply('Где фотка')
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def demotivator(self, ctx: SlashContext, image_url, text):
+        if not self.urlValid.match(image_url):
+            await ctx.send('Ссылка не найдена')
+            return
 
-        if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
-
-        if isinstance(error, BadArgument):
-            await ctx.message.reply('Максимум 25 символов')
-
-    @cooldown(rate=1, per=5, type=BucketType.user)
-    @command(name=name, description=description)
-    async def demotivator(self, ctx, *text):
-        underText = ' '.join(text)
-
-        if len(underText) > 25:
-            raise BadArgument()
-
-        attachment = ctx.message.attachments[0]
+        if len(text) > 25:
+            await ctx.send('Максимум 25 символов')
+            return
 
         # O_O - первый await создает coroutine, второй его ждет и все работает
-        await (await self.bot.loop.run_in_executor(None, self.asyncDemotivator, ctx, attachment, underText))
+        await (await self.bot.loop.run_in_executor(None, self.asyncDemotivator, ctx, image_url, text))
 
-    async def asyncDemotivator(self, ctx, attachment, underText):
+    async def asyncDemotivator(self, ctx, image_url, underText):
 
-        photo = await attachment.read()
+        async with ClientSession() as session:
+            async with session.get(image_url) as response:
+                try:
+                    photo = await response.read()
+                except:
+                    await ctx.send('Не удалось открыть файл')
+                    return
 
         img = Image.open(BytesIO(photo))
         template = Image.open('./static/demotivatorTemplate.png')
@@ -57,7 +58,7 @@ class Demotivator(Cog):
         with BytesIO() as temp:
             template.save(temp, "png", quality=100)
             temp.seek(0)
-            await ctx.message.reply(file=File(fp=temp, filename='now.png'))
+            await ctx.send(file=File(fp=temp, filename='now.png'))
 
 
 def setup(bot):

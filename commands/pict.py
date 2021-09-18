@@ -1,7 +1,10 @@
-from discord.ext.commands import Cog, command, CommandInvokeError
+from discord.ext.commands import Cog
 from random import choices
 from typing import Optional
 from string import ascii_lowercase, digits
+from discord_slash import SlashContext, cog_ext
+from config import guilds
+
 name = 'pict'
 description = 'Отправляет случайное изображение из prnt.sc :o'
 
@@ -12,30 +15,13 @@ class pict(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Обработка ошибок
-
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply('Нужно ввести количество ссылок (до 2)')
-
-    @command(name=name, description=description)
-    async def pict(self, ctx, num: Optional[int]):
-        # Если количество не указано
-        if num is None:
-            # Делаем одну ссылку
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def pict(self, ctx: SlashContext, num: int = 1):
+        if int(num) > 2:
+            num = 2
+        for _ in range(0, num):
             url = await self.makePictUrl()
-            await ctx.message.reply(url)
-
-        # Если количество указано
-        elif num > 2:
-            # Если число больше максимума, отправляем ошибку
-            raise CommandInvokeError()
-
-        else:
-            # Делаем num ссылок
-            for _ in range(0, num):
-                url = await self.makePictUrl()
-                await ctx.message.reply(url)
+            await ctx.send(url)
 
     # Функция, генерирующая ссылку
     async def makePictUrl(self):

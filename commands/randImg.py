@@ -1,8 +1,8 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
+from discord.ext.commands import Cog, CommandOnCooldown, BucketType
+from discord_slash import SlashContext, cog_ext
+from config import guilds
 from random import sample
 from aiohttp import ClientSession
-from PIL import Image
-from io import BytesIO
 
 name = 'randImg'
 description = 'Отправляет случайное изображение из imgur'
@@ -17,9 +17,16 @@ class randImg(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cooldown(rate=1, per=5, type=BucketType.user)
-    @command(name=name, description=description, aliases=['randimg'])
-    async def randImg(self, ctx):
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def randimg(self, ctx: SlashContext):
+        photo = await self.process(ctx=ctx)
+
+        while(photo == None):
+            photo = await self.process(ctx=ctx)
+
+        await ctx.send(photo)
+
+    async def process(self, ctx: SlashContext):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
@@ -31,19 +38,15 @@ class randImg(Cog):
 
         # Получаем инфу об картинке
         async with ClientSession() as session:
-            async with session.get(iImgurUrl) as response:
-                res = await response.read()
+            async with session.head(iImgurUrl) as response:
+                res = response
 
-        # Открываем картинку
-        img = Image.open(BytesIO(res))
-
-        # Если картинки нет, то она имеет размер 161х81
-        if img.size[0] == 161 and img.size[1] == 81:
-            # Рекурсивно вызываем функцию пока картинка не будет найдена
-            await ctx.invoke(await self.randImg(ctx))
+        # Если картинки нет, то она имеет размер 161х81 (размер 0 на сервере)
+        if res.headers['content-length'] == '0':
+            return None
         else:
             # Картинка нашлась, отправляем ссылку на картинку
-            await ctx.message.reply(iImgurUrl)
+            return iImgurUrl
 
 
 def setup(bot):

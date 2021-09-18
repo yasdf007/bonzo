@@ -2,6 +2,8 @@ from discord.ext.commands import Cog, group, guild_only
 import asyncio
 from discord.ext.commands.errors import NoPrivateMessage
 from .resources.blackjack.Blackjack import Blackjack
+from discord_slash import SlashContext, cog_ext
+from config import guilds
 
 
 class gameBlackjack(Cog):
@@ -10,15 +12,11 @@ class gameBlackjack(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, NoPrivateMessage):
-            await ctx.send('Игра только на серверах')
-
-    @guild_only()
-    @group(name='blackjack', description='игра blackjack (21)', invoke_without_command=True)
+    @cog_ext.cog_subcommand(base='blackjack', name='start', description='Начать игру blackjack', guild_ids=guilds)
     async def gameBlackjack(self, ctx):
-        if ctx.message.author.bot:
+        if ctx.author.bot:
             return
+
         if str(ctx.guild.id) in self.games:
             await ctx.send('Игра идет')
             return
@@ -29,8 +27,8 @@ class gameBlackjack(Cog):
         ]
 
         while str(ctx.guild.id) in self.games:
-            await ctx.send('Ждем игроков 15 секунд, `b/blackjack join` для входа в игру')
-            await asyncio.sleep(15)
+            await ctx.send('Ждем игроков 15 секунд, `/blackjack join` для входа в игру')
+            await asyncio.sleep(5)
 
             if not (str(ctx.guild.id) in self.games):
                 break
@@ -46,47 +44,62 @@ class gameBlackjack(Cog):
 
             self.games[str(ctx.guild.id)][1] = False
 
-    @guild_only()
-    @gameBlackjack.command(name='join', description='Присоединиться к игре blackjack')
+    @cog_ext.cog_subcommand(base='blackjack', name='join', description='Присоединиться к игре blackjack', guild_ids=guilds)
     async def join(self, ctx):
-        if ctx.message.author.bot:
+        if ctx.author.bot:
             return
-        if not str(ctx.guild.id) in self.games:
-            return
-        if self.games[str(ctx.guild.id)][1] == True:
-            return
-        if not str(ctx.message.author.id) in (self.games[str(ctx.guild.id)][0]) and not ctx.message.author.bot:
-            self.games[str(ctx.guild.id)][0].append(str(ctx.message.author.id))
-            await ctx.reply(f'Добавил {ctx.message.author}')
 
-    @guild_only()
-    @gameBlackjack.command(name='stop', description='Остановить blackjack')
+        if not str(ctx.guild.id) in self.games:
+            await ctx.send(f'Игра не идет')
+            return
+
+        if self.games[str(ctx.guild.id)][1] == True:
+            await ctx.send(f'Игра идет')
+            return
+
+        if str(ctx.author.id) in (self.games[str(ctx.guild.id)][0]):
+            await ctx.send(f'Уже в игре')
+            return
+
+        self.games[str(ctx.guild.id)][0].append(str(ctx.author.id))
+        await ctx.send(f'Добавил {ctx.message.author}')
+
+    @cog_ext.cog_subcommand(base='blackjack', name='stop', description='Остановить blackjack', guild_ids=guilds)
     async def stop(self, ctx):
-        if ctx.message.author.bot:
-            return
-        if not str(ctx.guild.id) in self.games:
-            return
-        if self.games[str(ctx.guild.id)][1] == True:
+        if ctx.author.bot:
             return
 
-        await ctx.send('Игра остановлена')
+        if not str(ctx.guild.id) in self.games:
+            await ctx.send(f'Игра не идет')
+            return
+
+        if self.games[str(ctx.guild.id)][1] == True:
+            await ctx.send(f'Игра идет')
+            return
+
         self.games.pop(str(ctx.guild.id))
+        await ctx.send('Игра остановлена')
 
-    @guild_only()
-    @gameBlackjack.command(name='leave', description='Выйти из blackjack')
+    @cog_ext.cog_subcommand(base='blackjack', name='leave', description='Выйти из blackjack', guild_ids=guilds)
     async def leave(self, ctx):
-        if ctx.message.author.bot:
-            return
-        if not str(ctx.guild.id) in self.games:
-            return
-        if not str(ctx.author.id) in self.games[str(ctx.guild.id)][0]:
-            return
-        if self.games[str(ctx.guild.id)][1] == True:
+        if ctx.author.bot:
             return
 
-        if str(ctx.message.author.id) in (self.games[str(ctx.guild.id)][0]):
-            self.games[str(ctx.guild.id)][0].remove(str(ctx.message.author.id))
-            await ctx.reply(f'Удалил {ctx.message.author}')
+        if not str(ctx.guild.id) in self.games:
+            await ctx.send(f'Игра не идет')
+            return
+
+        if not str(ctx.author.id) in self.games[str(ctx.guild.id)][0]:
+            await ctx.send(f'Ты не в игре')
+            return
+
+        if self.games[str(ctx.guild.id)][1] == True:
+            await ctx.send(f'Игра идет')
+            return
+
+        if str(ctx.author.id) in (self.games[str(ctx.guild.id)][0]):
+            self.games[str(ctx.guild.id)][0].remove(str(ctx.author.id))
+            await ctx.send(f'Удалил {ctx.author}')
 
 
 def setup(bot):

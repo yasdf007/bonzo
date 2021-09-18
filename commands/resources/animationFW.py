@@ -12,3 +12,6 @@ async def reColoring(x):
         embed.color = newcolor
         await x.edit(embed=embed)
         await sleep(.25)
+
+async def randCol():
+    return randint(0, 0xFFFFFF)

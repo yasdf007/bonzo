@@ -1,6 +1,8 @@
-from discord.ext.commands import Cog, CommandInvokeError, command
+from discord.ext.commands import Cog
 from random import randint
-from typing import Optional
+from discord_slash import SlashContext, cog_ext
+from config import guilds
+
 name = 'randomcat'
 description = 'Отправляет случайного котика :3'
 
@@ -10,28 +12,14 @@ class randomCat(Cog):
         self.bot = bot
 
     # Обработа ошибок
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.message.reply('Нужно ввести количество ссылок (до 2)')
-
-    @command(name=name, description=description)
-    async def randomcat(self, ctx, num: Optional[int]):
-        # Если количество не указано
-        if num is None:
-            # Отправляем одну ссылку
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def randomcat(self, ctx: SlashContext, num: int = 1):
+        if int(num) > 2:
+            num = 2
+        # Делаем Num ссылок
+        for _ in range(0, num):
             cat = await self.makeCatUrl()
-            await ctx.message.reply(cat)
-
-        # Если указано
-        elif num > 2:
-            # Если число больше максимума, отправляем ошибку
-            raise CommandInvokeError()
-
-        else:
-            # Делаем Num ссылок
-            for _ in range(0, num):
-                cat = await self.makeCatUrl()
-                await ctx.message.reply(cat)
+            await ctx.send(cat)
     # Функци создания картинки
 
     async def makeCatUrl(self):

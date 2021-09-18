@@ -1,4 +1,6 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog
+from config import guilds
+from discord_slash import SlashContext, cog_ext
 
 name = 'ping'
 description = 'Понг!'
@@ -9,10 +11,10 @@ class ping(Cog):
         self.bot = bot
 
     # Задержка
-    @command(name=name, description=description)
-    async def ping(self, ctx):
-        botLatency = round(self.bot.latency * 1000, 2)
-        await ctx.message.reply('Pong! ' + str(botLatency) + 'ms ' + '(задержка)')
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    async def ping(self, ctx: SlashContext):
+        botLatency = round(ctx.bot.latency * 1000, 2)
+        await ctx.send(f'Pong! {str(botLatency)}ms (задержка)')
 
 
 def setup(bot):

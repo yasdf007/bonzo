@@ -4,6 +4,8 @@ from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
+from config import guilds
+from discord_slash import SlashContext, cog_ext
 
 
 class AddXP(Cog):
@@ -166,9 +168,7 @@ class AddXP(Cog):
 
         await self.executeQuery(updateQuery, 'execute')
 
-    @guild_only()
-    @cooldown(rate=1, per=20, type=BucketType.user)
-    @command(name='leaderboard', description='Показывает топ 10 по опыту', aliases=['top'])
+    @cog_ext.cog_slash(name='top', description='Показывает топ 10 по опыту', guild_ids=guilds)
     async def leaderboard(self, ctx):
         selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
         where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;'
@@ -183,7 +183,7 @@ class AddXP(Cog):
             title='TOP 10 участников по опыту', color=ctx.author.color)
 
         embed.set_footer(
-            text=f'/by bonzo/ for {ctx.message.author}', icon_url=ctx.message.author.avatar_url)
+            text=f'/by bonzo/ for {ctx.author}', icon_url=ctx.author.avatar_url)
         embed.set_thumbnail(url=ctx.guild.icon_url)
 
         guild = self.bot.get_guild(ctx.guild.id)
@@ -192,12 +192,11 @@ class AddXP(Cog):
             member = guild.get_member(id_)
             embed.add_field(
                 name=f'`{member.display_name}`', value=f'LVL: {lvl}\nEXP: {exp}', inline=False)
-        await ctx.message.reply(embed=embed)
 
-    @guild_only()
-    @cooldown(rate=1, per=60, type=BucketType.user)
-    @command(name='rank', description='Показывает карточку с опытом')
-    async def rank(self, ctx):
+        await ctx.send(embed=embed)
+
+    @cog_ext.cog_slash(name='rank', description='Показывает карточку с опытом', guild_ids=guilds)
+    async def rank(self, ctx: SlashContext):
         selectQuery = f'select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
                         join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \
                         join (select count(distinct id) as overall from user_server where serverid={ctx.guild.id}) as p on x.userid={ctx.author.id};'
@@ -273,7 +272,7 @@ class AddXP(Cog):
                     with BytesIO() as temp:
                         template.save(temp, 'png')
                         temp.seek(0)
-                        await ctx.message.reply(file=File(fp=temp, filename='now.png'))
+                        await ctx.send(file=File(fp=temp, filename='now.png'))
 
 
 def setup(bot):

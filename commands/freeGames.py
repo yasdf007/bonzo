@@ -1,9 +1,14 @@
+from os import name
 from discord.ext.commands import Cog, guild_only, has_permissions, bot_has_permissions, group, BucketType, cooldown
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
+from discord.ext.commands import command
 from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, NoPrivateMessage
+from datetime import datetime
 from discord.enums import ChannelType
+from discord import Embed
+from .resources.animationFW import randCol
 
 
 class FreeGames(Cog):
@@ -83,7 +88,7 @@ class FreeGames(Cog):
 
         return res
 
-    async def getUrls(self):
+    async def getMessages(self):
         async with ClientSession() as session:
             async with session.get(self.link) as response:
                 resultJson = await response.json()
@@ -93,34 +98,48 @@ class FreeGames(Cog):
         for game in games:
             promotions = game['promotions']
 
-            if promotions:
-                gameProm = promotions['promotionalOffers']
+            if promotions == None:
+                continue
 
-                if gameProm:
-                    game_name = game['title']
+            freeDiscountSetting = promotions['promotionalOffers'][0][
+                'promotionalOffers'][0]['discountSetting']['discountPercentage']
 
-                    for attr in game['customAttributes']:
-                        if attr['key'] == "com.epicgames.app.productSlug":
-                            slug = attr['value'].replace('/home', '')
+            if freeDiscountSetting != 0:
+                continue
 
-                    link = 'https://www.epicgames.com/store/ru/p/' + slug
+            due_date = datetime.fromisoformat(promotions['promotionalOffers'][0][
+                'promotionalOffers'][0]['endDate'][:-1]).strftime('%d/%m/%Y')
 
-                    msgs.append(
-                        f'Прямо сейчас бесплатна {game_name}\nСсылка {link}')
+            game_name = game['title']
+
+            slug = game['productSlug']
+
+            link = 'https://www.epicgames.com/store/ru/p/' + slug
+
+            embedd = Embed(
+                title='**Бесплатная игра недели (Epic Games)**', colour=await randCol())
+            embedd.set_thumbnail(
+                url='https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg')
+            embedd.add_field(
+                name=f'**{game_name}**', value=f'**{link}**'
+            )
+            embedd.add_field(
+                name='**Действует до: **', value=f'{due_date}'
+            )
+
+            msgs.append(embedd)
         return msgs
 
     async def freeGames(self):
         channels = await self.getChannels()
-
         if len(channels) < 1:
             return
+        msgs = await self.getMessages()
 
-        msgs = await self.getUrls()
         for channel in channels:
             channel = self.bot.get_channel(channel['channel_id'])
-
             for msg in msgs:
-                announcement = await channel.send(msg)
+                announcement = await channel.send(embed=msg)
 
                 if channel.type == ChannelType.news:
                     await announcement.publish()
