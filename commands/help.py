@@ -121,7 +121,8 @@ class helping(Cog):
 
     async def generateSlashEmbed(self, author):
         embeds = []
-        allCommands = await self.get_all_commands(guild_id=guilds[0])
+
+        allCommands = await self.bot.slash.req.get_all_commands()
         allCommands = sorted(allCommands, key=lambda x: x['name'])
         # ceil - округляем в большую сторону
         # 17/10 = 1.8 => 2
