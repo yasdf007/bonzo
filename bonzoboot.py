@@ -47,12 +47,12 @@ class Bot(bonzoBot):
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
-            if filename.endswith('.py') and not filename.startswith('music'):
+            if filename.endswith('.py'):
                 self.load_extension(f'commands.{filename[:-3]}')
 
-                # if filename.startswith('music'):
-                #     print(
-                #         f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
+                if filename.startswith('music'):
+                    print(
+                        f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
 
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
