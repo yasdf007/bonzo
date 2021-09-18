@@ -210,7 +210,7 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
 
-    # @cog_ext.cog_slash(name='play', description='Играет музыку по ссылке или по названию', guild_ids=guilds)
+    # @cog_ext.cog_slash(name='play', description='Играет музыку по ссылке или по названию')
     @commands.command(name='play', description='Играет музыку по ссылке или по названию')
     async def play(self, ctx, *, query: str):
         player = self.bot.wavelink.get_player(ctx.guild.id)

@@ -19,7 +19,7 @@ class Dvach(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def dvach(self, ctx: SlashContext):
         async with ClientSession(headers=self.USERAGENT) as session:
             async with session.get(self.URL, params=self.PARAMS) as response:

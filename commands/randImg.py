@@ -17,7 +17,7 @@ class randImg(Cog):
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(error)
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def randimg(self, ctx: SlashContext):
         photo = await self.process(ctx=ctx)
 

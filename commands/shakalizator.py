@@ -17,7 +17,7 @@ class Shakalizator(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def shakalizator(self, ctx: SlashContext, image_url: str):
 
         async with ClientSession() as session:

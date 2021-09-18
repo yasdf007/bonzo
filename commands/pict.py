@@ -15,7 +15,7 @@ class pict(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def pict(self, ctx: SlashContext, num: int = 1):
         if int(num) > 2:
             num = 2

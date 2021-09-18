@@ -24,7 +24,7 @@ class YoutubeRandom(Cog):
     videoNameStart = ['IMG_']
     videoNameEnd = ['.mp4']
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def randomVideo(self, ctx: SlashContext):
         # Делаем рандомное название запроса из 4 символов и цифр
         query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))

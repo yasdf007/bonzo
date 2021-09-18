@@ -13,7 +13,7 @@ class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def info(self, ctx, member: Member = None):
         member = member or ctx.author
         embed = Embed(

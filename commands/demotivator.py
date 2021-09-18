@@ -17,7 +17,7 @@ class Demotivator(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def demotivator(self, ctx: SlashContext, image_url, text):
         if not self.urlValid.match(image_url):
             await ctx.send('Ссылка не найдена')

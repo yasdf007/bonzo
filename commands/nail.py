@@ -12,7 +12,7 @@ class Nail(Cog):
         self.bot = bot
 
     # Прикол ахахха
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def nail(self, ctx: SlashContext):
         await ctx.send(file=File('./static/nail.jpg'))
 

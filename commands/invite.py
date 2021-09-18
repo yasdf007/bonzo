@@ -12,7 +12,7 @@ class invite(Cog):
         self.bot = bot
 
     # функция, отправляющая инвайт-ссылку бота в чат
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=guilds)
+    @cog_ext.cog_slash(name=name, description=description)
     async def invite(self, ctx: SlashContext):
         embedd = Embed(
             title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)

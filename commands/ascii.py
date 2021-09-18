@@ -16,7 +16,7 @@ class AsciiCog(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_slash(name='ascii', description='Переводит картинку в ascii текст', guild_ids=guilds)
+    @cog_ext.cog_slash(name='ascii', description='Переводит картинку в ascii текст')
     async def ascii(self, ctx: SlashContext, img_url) -> None:
 
         if not self.urlValid.match(img_url):
