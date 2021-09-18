@@ -6,7 +6,7 @@ from random import randint
 from math import ceil
 from commands.resources.paginator import Paginator
 
-name = 'help'
+name = 'helpLegacy'
 description = 'Все команды бота, инфа о команде help <cmd>'
 
 
@@ -16,8 +16,8 @@ class helping(Cog):
         self.bot = bot
         self._discord = bot
 
-    @cog_ext.cog_slash(name='help_slash', description='Все слеш комманды')
-    async def help_slash(self, ctx: SlashContext):
+    @cog_ext.cog_slash(name='help', description='Все слеш комманды')
+    async def help(self, ctx: SlashContext):
         p = Paginator(ctx)
 
         embeds = await self.generateSlashEmbed(ctx.author)
@@ -27,7 +27,7 @@ class helping(Cog):
         await p.call_controller()
 
     @cog_ext.cog_slash(name=name, description=description)
-    async def help(self, ctx: SlashContext, cmd: str = None):
+    async def helpLegacy(self, ctx: SlashContext, cmd: str = None):
         if cmd is None:
             p = Paginator(ctx)
             embeds = await self.generateEmbed(ctx.author)
