@@ -3,7 +3,6 @@
 # осуществлять запуск только из этого файла.
 
 import sys
-sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
 
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
@@ -20,6 +19,8 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from platform import platform
 from os import listdir, getenv
 import logging
+
+sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
 
 load_dotenv()  # загружает файл env
 
@@ -48,24 +49,25 @@ class Bot(bonzoBot):
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
-            if filename.endswith('.py') and not filename.startswith('music'):                    
+            if filename.endswith('.py'):
                 self.load_extension(f'commands.{filename[:-3]}')
+
+                if filename.startswith('music'):
+                    print(
+                        f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
+
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
-            elif filename.startswith('music'):
-                self.load_extension('commands.music')
-                curr +=1 
-                print(f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
         print('/', 'initialization file has been successfully read. starting up bonzo...', sep='\n')
+        self.cogsLoad()
         super().run(getenv('TOKEN'))  # берёт переменную TOKEN из .env
 
     @Cog.listener()
     async def on_ready(self):
         try:
-            self.cogsLoad()
             self.pool = await db.connectToDB()
         except Exception as err:
             print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
@@ -73,7 +75,7 @@ class Bot(bonzoBot):
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        
+
         self.scheduler.start()
         endTime = time() - self.startTime
 

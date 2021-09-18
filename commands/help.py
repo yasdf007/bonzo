@@ -2,7 +2,6 @@ from discord import Embed
 from discord.ext.commands import Cog
 from config import guilds
 from discord_slash import SlashContext, cog_ext
-from discord_slash.http import SlashCommandRequest
 from random import randint
 from math import ceil
 from commands.resources.paginator import Paginator
@@ -11,11 +10,10 @@ name = 'help'
 description = 'Все команды бота, инфа о команде help <cmd>'
 
 
-class helping(Cog, SlashCommandRequest):
+class helping(Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self._application_id = bot.user.id
         self._discord = bot
 
     @cog_ext.cog_slash(name='help_slash', description='Все слеш комманды', guild_ids=guilds)
