@@ -2,7 +2,8 @@
 # файл-загрузчик бота.
 # осуществлять запуск только из этого файла.
 
-import sys
+from sys import dont_write_bytecode
+dont_write_bytecode = True # убирает генерацию машинного кода python
 
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
@@ -20,8 +21,6 @@ from platform import platform
 from os import listdir, getenv
 import logging
 
-sys.dont_write_bytecode = True  # убирает генерацию машинного кода python
-
 load_dotenv()  # загружает файл env
 
 logger = logging.getLogger('discord')
@@ -38,7 +37,6 @@ logger.addHandler(handler)
 
 class Bot(bonzoBot):
     def __init__(self):
-        sys.dont_write_bytecode = True
         intents = Intents.all()
         self.game = Game(f'{prefix}help | v1.11a okshaw')
         self.scheduler = AsyncIOScheduler()
