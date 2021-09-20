@@ -16,7 +16,7 @@ class helping(Cog):
         self.bot = bot
         self._discord = bot
 
-    @cog_ext.cog_slash(name='help', description='Все слеш комманды')
+    @cog_ext.cog_slash(name='help', description='Все слеш команды')
     async def help(self, ctx: SlashContext):
         p = Paginator(ctx)
 
@@ -98,7 +98,7 @@ class helping(Cog):
 
         for i in range(0, len(allCommands), 10):
             embed = Embed(
-                title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
+                title='**Команды бота (префикс b/):**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
 
             # i // 10 + 1:
@@ -132,7 +132,7 @@ class helping(Cog):
 
         for i in range(0, len(allCommands), 10):
             embed = Embed(
-                title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
+                title='**slash команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
 
             # i // 10 + 1:
