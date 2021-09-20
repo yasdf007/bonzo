@@ -1,5 +1,6 @@
 from discord import Embed
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from config import guilds
 from discord_slash import SlashContext, cog_ext
 from random import randint
@@ -16,8 +17,16 @@ class helping(Cog):
         self.bot = bot
         self._discord = bot
 
+#   --------------------------------------------------------------------
+    @command(name='help_slash', description='Все слеш комманды')
+    async def help_slash_prefix(self, ctx: Context):
+        await self.help_slash(ctx)
+
     @cog_ext.cog_slash(name='help_slash', description='Все слеш комманды')
-    async def help_slash(self, ctx: SlashContext):
+    async def help_slash_slash(self, ctx: SlashContext):
+        await self.help_slash(ctx)
+
+    async def help_slash(self, ctx):
         p = Paginator(ctx)
 
         embeds = await self.generateSlashEmbed(ctx.author)
@@ -26,8 +35,16 @@ class helping(Cog):
 
         await p.call_controller()
 
+#   --------------------------------------------------------------------
+    @command(name=name, description=description)
+    async def _help_prefix(self, ctx: Context):
+        await self.help(ctx)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def help(self, ctx: SlashContext, cmd: str = None):
+    async def _help_slash(self, ctx: SlashContext):
+        await self.help(ctx)
+
+    async def help(self, ctx, cmd: str = None):
         if cmd is None:
             p = Paginator(ctx)
             embeds = await self.generateEmbed(ctx.author)

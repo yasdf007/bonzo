@@ -1,7 +1,10 @@
 from discord.ext.commands import Cog
 from random import randint
 from discord import Embed
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from discord_slash import SlashContext, cog_ext
+from typing import Optional
 from config import guilds
 
 name = 'roll'
@@ -12,9 +15,16 @@ class Roll(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # dota 2 roll
+    @command(name=name, description=description)
+    async def roll_prefix(self, ctx: Context, number_from: Optional[int] = 100, *,  number_to:  Optional[int]):
+        await self.roll(ctx, number_from, number_to)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def roll(self, ctx: SlashContext, number_from: int,  number_to: int):
+    async def roll_slash(self, ctx: SlashContext, number_from: int,  number_to: int):
+        await self.roll(ctx, number_from, number_to)
+    # dota 2 roll
+
+    async def roll(self, ctx, number_from: int,  number_to: int):
         oneMillon = 10**6
 
         try:

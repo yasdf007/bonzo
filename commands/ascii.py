@@ -6,6 +6,9 @@ from io import BytesIO, StringIO
 from aiohttp import ClientSession
 from re import compile
 from config import guilds
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
+from typing import Optional
 
 
 class AsciiCog(Cog):
@@ -16,8 +19,17 @@ class AsciiCog(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @command(name='ascii', description='Переводит картинку в ascii текст')
+    async def ascii_prefix(self, ctx: Context, img_url: Optional[str]):
+        img_url = img_url or ctx.message.attachments[0].url if len(
+            ctx.message.attachments) > 0 else ''
+        await self.ascii(ctx, img_url)
+
     @cog_ext.cog_slash(name='ascii', description='Переводит картинку в ascii текст')
-    async def ascii(self, ctx: SlashContext, img_url) -> None:
+    async def ascii_slash(self, ctx: SlashContext, img_url: str):
+        await self.ascii(ctx, img_url)
+
+    async def ascii(self, ctx, img_url) -> None:
 
         if not self.urlValid.match(img_url):
             await ctx.send('Ссылка не найдена')

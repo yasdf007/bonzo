@@ -1,4 +1,5 @@
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from random import randint
 from discord_slash import SlashContext, cog_ext
 from config import guilds
@@ -11,9 +12,15 @@ class randomCat(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Обработа ошибок
+    @command(name=name, description=description)
+    async def randomcat_prefix(self, ctx: Context, num: int = 1):
+        await self.randomcat(ctx, num)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def randomcat(self, ctx: SlashContext, num: int = 1):
+    async def randomcat_slash(self, ctx: SlashContext, num: int = 1):
+        await self.randomcat(ctx, num)
+
+    async def randomcat(self, ctx, num: int = 1):
         if int(num) > 2:
             num = 2
         # Делаем Num ссылок

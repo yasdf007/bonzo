@@ -1,4 +1,7 @@
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
+from discord.ext.commands.errors import MissingRequiredArgument
+from typing import Optional
 from discord import File
 from PIL import Image, ImageSequence
 from io import BytesIO
@@ -17,8 +20,21 @@ class Shakalizator(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MissingRequiredArgument):
+            await ctx.send('Нужно указать текст/ссылку')
+
+    @command(name=name, description=description, aliases=['шакал', 'сжать', 'shakal'])
+    async def shakalizator_prefix(self, ctx: Context, img_url: Optional[str]):
+        img_url = img_url or (ctx.message.attachments[0].url if len(
+            ctx.message.attachments) > 0 else '')
+        await self.shakalizator(ctx, img_url)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def shakalizator(self, ctx: SlashContext, image_url: str):
+    async def shakalizator_slash(self, ctx: SlashContext, image_url: str):
+        await self.shakalizator(ctx, image_url)
+
+    async def shakalizator(self, ctx, image_url: str):
 
         async with ClientSession() as session:
             async with session.head(image_url) as response:

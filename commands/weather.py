@@ -1,5 +1,6 @@
 from discord import Embed
-from discord.ext.commands import Cog, CommandInvokeError, command
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
@@ -15,7 +16,14 @@ class weather(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @command(name=name, description=description)
+    async def getWeather_prefix(self, ctx: Context, *city: str):
+        await self.getWeather(ctx, ' '.join(city))
+
     @cog_ext.cog_slash(name=name, description=description)
+    async def getWeather_slash(self, ctx: SlashContext, city: str):
+        await self.getWeather(ctx, city)
+
     async def getWeather(self, ctx, city):
         # Получаем токен
         weatherToken = getenv('WEATHER_TOKEN')
