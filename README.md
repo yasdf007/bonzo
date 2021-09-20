@@ -10,7 +10,7 @@
 
 ## полезные ссылки
 
-ссылка на инвайт бота: [тык!](https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot)
+ссылка на инвайт бота: [тык!](https://discord.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot%20applications.commands)
 
 ## запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульной режиме.
 
