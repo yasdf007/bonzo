@@ -1,5 +1,6 @@
 from discord.channel import DMChannel
 from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType, guild_only
+from discord.ext.commands.context import Context
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
@@ -168,7 +169,15 @@ class AddXP(Cog):
 
         await self.executeQuery(updateQuery, 'execute')
 
+    @guild_only()
+    @command(name='top', description='Показывает топ 10 по опыту')
+    async def leaderboard_prefix(self, ctx: Context):
+        await self.leaderboard(ctx)
+
     @cog_ext.cog_slash(name='top', description='Показывает топ 10 по опыту')
+    async def leaderboard_slash(self, ctx: SlashContext):
+        await self.leaderboard(ctx)
+
     async def leaderboard(self, ctx):
         selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
         where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;'
@@ -195,8 +204,16 @@ class AddXP(Cog):
 
         await ctx.send(embed=embed)
 
-    @cog_ext.cog_slash(name='rank', description='Показывает карточку с опытом')
-    async def rank(self, ctx: SlashContext):
+    @guild_only()
+    @command(name='rank', description='Показывает топ 10 по опыту')
+    async def rank_prefix(self, ctx: Context):
+        await self.rank(ctx)
+
+    @cog_ext.cog_slash(name='rank', description='Показывает топ 10 по опыту')
+    async def rank_slash(self, ctx: SlashContext):
+        await self.rank(ctx)
+
+    async def rank(self, ctx):
         selectQuery = f'select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
                         join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \
                         join (select count(distinct id) as overall from user_server where serverid={ctx.guild.id}) as p on x.userid={ctx.author.id};'

@@ -22,14 +22,14 @@ class randImg(Cog):
         await self.randimg(ctx)
 
     async def randimg(self, ctx):
-        photo = await self.process(ctx=ctx)
+        photo = await self.process(ctx)
 
         while(photo == None):
-            photo = await self.process(ctx=ctx)
+            photo = await self.process(ctx)
 
         await ctx.send(photo)
 
-    async def process(self, ctx: SlashContext):
+    async def process(self, ctx):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 
