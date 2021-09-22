@@ -1,10 +1,11 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
 from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, command, CommandError
+from discord_slash.error import SlashCommandError
+from discord_slash import SlashContext, cog_ext
 from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
-from discord_slash import SlashContext, cog_ext
 from config import guilds
 load_dotenv()
 
@@ -12,9 +13,22 @@ name = 'weather'
 description = 'Погода по запрашиваемому городу'
 
 
+class CityNotFound(CommandError, SlashCommandError):
+    pass
+
+
 class weather(Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, CityNotFound):
+            return await ctx.send(f'Город {error} не найден')
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, CityNotFound):
+            return await ctx.send(f'Город {error} не найден')
 
     @command(name=name, description=description)
     async def getWeather_prefix(self, ctx: Context, *city: str):
@@ -33,8 +47,7 @@ class weather(Cog):
         async with ClientSession() as session:
             async with session.get(query) as response:
                 if(response.status == 404):
-                    await ctx.send(f'Город {city} не найден')
-                    return
+                    raise CityNotFound(city)
 
                 # Загружаем запрос в формат JSON
                 jsonResult = await response.json()

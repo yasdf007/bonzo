@@ -1,5 +1,5 @@
 from discord import Embed, Spotify, CustomActivity
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, MemberNotFound
 from discord.ext.commands.context import Context
 from discord.member import Member
 from discord_slash import SlashContext, cog_ext
@@ -13,6 +13,10 @@ description = 'Выдаёт информацию о пользователе'
 class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, MemberNotFound):
+            await ctx.message.reply(f'{error.argument} не найден')
 
     @guild_only()
     @command(name=name, description=description)

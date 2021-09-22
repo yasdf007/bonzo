@@ -1,17 +1,31 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
 from discord.ext.commands.context import Context
-from aiohttp import ClientSession
+from discord.ext.commands import Cog, command, CommandError
 from discord_slash import SlashContext, cog_ext
+from discord_slash.error import SlashCommandError
+from aiohttp import ClientSession
 from config import guilds
 
 name = 'nasapict'
 description = 'Картинка дня от NASA'
 
 
+class NoPhotoFound(CommandError, SlashCommandError):
+    pass
+
+
 class Nasa(Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, NoPhotoFound):
+            return await ctx.send('Не удалось получить картинку дня')
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoPhotoFound):
+            return await ctx.send('Не удалось получить картинку дня')
 
     @command(name=name, description=description)
     async def nasapict_prefix(self, ctx: Context):
@@ -37,7 +51,7 @@ class Nasa(Cog):
 
             await ctx.send(embed=embed)
         except Exception as e:
-            await ctx.send('Не удалось получить картинку дня')
+            raise NoPhotoFound
 
 
 def setup(bot):

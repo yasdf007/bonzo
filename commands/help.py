@@ -1,14 +1,18 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
-from discord.ext.commands.context import Context
-from config import guilds
+from discord.ext.commands import Cog, command, CommandError, Context
 from discord_slash import SlashContext, cog_ext
+from discord_slash.error import SlashCommandError
 from random import randint
 from math import ceil
+from config import guilds
 from commands.resources.paginator import Paginator
 
 name = 'help'
 description = 'Все команды бота, инфа о команде help <cmd>'
+
+
+class NoCommandFound(CommandError, SlashCommandError):
+    pass
 
 
 class helping(Cog):
@@ -17,7 +21,16 @@ class helping(Cog):
         self.bot = bot
         self._discord = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, NoCommandFound):
+            return await ctx.send('Такой команды нет')
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoCommandFound):
+            return await ctx.send('Такой команды нет')
 #   --------------------------------------------------------------------
+
     @command(name='help_slash', description='Все слеш комманды')
     async def help_slash_prefix(self, ctx: Context):
         await self.help_slash(ctx)
@@ -37,12 +50,12 @@ class helping(Cog):
 
 #   --------------------------------------------------------------------
     @command(name=name, description=description)
-    async def _help_prefix(self, ctx: Context):
-        await self.help(ctx)
+    async def _help_prefix(self, ctx: Context, cmd=None):
+        await self.help(ctx, cmd)
 
     @cog_ext.cog_slash(name=name, description=description)
-    async def _help_slash(self, ctx: SlashContext):
-        await self.help(ctx)
+    async def _help_slash(self, ctx: SlashContext, cmd=None):
+        await self.help(ctx, cmd)
 
     async def help(self, ctx, cmd: str = None):
         if cmd is None:
@@ -57,14 +70,12 @@ class helping(Cog):
         # проверяем есть ли команда -> получаем инфу о комнде
         cmd = self.bot.get_command(cmd)
 
-        if cmd:
-            embed = await self.getCmdEmbed(cmd)
+        if not cmd:
+            raise NoCommandFound
 
-            await ctx.send(embed=embed)
+        embed = await self.getCmdEmbed(cmd)
 
-            return
-
-        await ctx.send('Такой команды нет')
+        await ctx.send(embed=embed)
 
     async def getCmdEmbed(self, cmd):
         embed = Embed(title=f'`{cmd}`',

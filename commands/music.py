@@ -156,7 +156,7 @@ class Music(commands.Cog):
                 pass
 
         if isinstance(error, IncorrectChannelError):
-            return
+            return await ctx.send(error)
 
         if isinstance(error, NotInVoice):
             return await ctx.send('Ты не в войсе')
@@ -166,24 +166,7 @@ class Music(commands.Cog):
         raise error
 
     @commands.Cog.listener()
-    async def on_slash_command(self, ctx):
-        """Coroutine called before command invocation.
-        We mainly just want to check whether the user is in the players controller channel.
-        """
-        player = self.bot.wavelink.get_player(ctx.guild_id)
-
-        if not player.channel_id:
-            return
-
-        channel = self.bot.get_channel(player.channel_id)
-
-        if player.is_connected:
-            if ctx.author not in channel.members:
-                await ctx.send(f'{ctx.author.mention}, ты должен быть в `{channel.name}` для использования музыки')
-                raise IncorrectChannelError
-
-    @commands.Cog.listener()
-    async def on_slash_command_error(self, ctx: SlashContext, error):
+    async def on_slash_command_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             try:
                 return await ctx.send('This command can not be used in Private Messages.')
@@ -191,7 +174,7 @@ class Music(commands.Cog):
                 pass
 
         if isinstance(error, IncorrectChannelError):
-            return
+            return await ctx.send(str(error))
 
         if isinstance(error, NotInVoice):
             return await ctx.send('Ты не в войсе')
@@ -218,6 +201,11 @@ class Music(commands.Cog):
                     pass
                 finally:
                     await player.destroy()
+
+    async def checkIsSameVoice(self, ctx, voiceChannel):
+        if ctx.author not in voiceChannel.members:
+            raise IncorrectChannelError(
+                f'{ctx.author}, ты должен быть в `{voiceChannel.name}` для использования музыки')
 
     @commands.command(name='connect', description='Подрубается к войсу')
     async def connect_prefix(self, ctx: Context,  channel: discord.VoiceChannel = None):
@@ -246,6 +234,11 @@ class Music(commands.Cog):
             guild_id = ctx.guild.id
 
         player = self.bot.wavelink.get_player(guild_id)
+
+        if player.channel_id:
+            vc = self.bot.get_channel(player.channel_id)
+            await self.checkIsSameVoice(ctx, vc)
+
         await ctx.send(f'Подрубаюсь в **`{channel.name}`**\nВидео с ограничением по возрасту не будут работать')
         await player.connect(channel.id)
 
@@ -273,9 +266,11 @@ class Music(commands.Cog):
             guild_id = ctx.guild.id
 
         player = self.bot.wavelink.get_player(guild_id)
-
         try:
-            if not player.is_connected:
+            if player.is_connected:
+                vc = self.bot.get_channel(player.channel_id)
+                await self.checkIsSameVoice(ctx, vc)
+            else:
                 if isinstance(ctx, Context):
                     await ctx.invoke(self.connect_prefix)
                 if isinstance(ctx, SlashContext):
@@ -343,6 +338,12 @@ class Music(commands.Cog):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
 
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
         if not player.is_playing:
             return await ctx.send('Я ничего не играю')
 
@@ -363,6 +364,13 @@ class Music(commands.Cog):
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
         if not player.is_playing:
             return await ctx.send('Я ничего не играю')
 
@@ -386,6 +394,9 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
 
         if not player.is_playing:
             return await ctx.send('Я ничего не играю')
@@ -414,6 +425,9 @@ class Music(commands.Cog):
         if not player.is_connected:
             return
 
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
         vol = max(min(vol, 1000), 0)
 
         embed = Embed(
@@ -437,6 +451,9 @@ class Music(commands.Cog):
         if not player.is_connected:
             return
 
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
         if not player.current:
             return await ctx.send('Я ничего не играю')
 
@@ -458,6 +475,9 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id)
         if not player.is_connected:
             return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
 
         controller = self.get_controller(ctx)
 
@@ -488,14 +508,18 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
         try:
             del self.controllers[ctx.guild.id]
         except KeyError:
             await player.destroy()
-            return await ctx.send('Вышел и удалил очередь')
+            return await ctx.send('Отключился и удалил очередь')
 
         await player.destroy()
-        await ctx.send('Вышел и удалил очередь')
+        await ctx.send('Отключился и удалил очередь')
 
     @commands.command(name='equalizer', description='Пресеты эквалайзера музыки', aliases=['eq'])
     async def equalizer_prefix(self, ctx: Context, equalizer='None'):
@@ -511,6 +535,9 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
 
         predefiend = {'default': wavelink.Equalizer.flat(),
                       'boost': wavelink.Equalizer.boost(),
@@ -541,6 +568,9 @@ class Music(commands.Cog):
 
         if not player.is_connected:
             return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
 
         if not player.is_playing:
             return await ctx.send('Я ничего не играю')
