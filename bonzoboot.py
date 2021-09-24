@@ -45,19 +45,17 @@ class Bot(bonzoBot):
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
     def cogsLoad(self):
-        curr, total = 0, len(listdir('./commands')) - 2
+        curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
             if filename.endswith('.py'):
-                if not filename == 'music.py':
-                    self.load_extension(f'commands.{filename[:-3]}')
-
-                    curr += 1
-                    print(f'loaded {filename}, {curr}/{total}')
-
-                elif filename.startswith('music'):
+                if filename.startswith('music'):
+                        curr += 1
                         print(
                             f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
-                        curr += 1
+                self.load_extension(f'commands.{filename[:-3]}')
+
+                curr += 1
+                print(f'loaded {filename}, {curr}/{total}')
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
