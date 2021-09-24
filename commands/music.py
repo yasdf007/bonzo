@@ -23,6 +23,7 @@ from discord_slash import SlashContext, cog_ext
 from discord_slash.error import SlashCommandError
 from colorama import Fore, Back, Style
 from config import guilds
+from random import shuffle
 
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 
@@ -34,6 +35,8 @@ class IncorrectChannelError(commands.CommandError, SlashCommandError):
 class NotInVoice(commands.CommandError, SlashCommandError):
     pass
 
+class QueueTooShort(commands.CommandError, SlashCommandError):
+    pass
 
 class MusicController:
 
@@ -125,6 +128,10 @@ class Music(commands.Cog):
         """Node hook callback."""
         if isinstance(event, (wavelink.TrackEnd, wavelink.TrackException)):
             controller = self.get_controller(event.player)
+
+            if isinstance(event,wavelink.TrackException):
+                await controller.channel.send(f'Ошибка при проигрывании {event.player.current}')
+
             controller.next.set()
 
     def get_controller(self, value: Union[commands.Context, wavelink.Player]):
@@ -163,6 +170,10 @@ class Music(commands.Cog):
 
         if isinstance(error, MissingRequiredArgument):
             return await ctx.send('Нужно указать трек')
+
+        if isinstance(error, QueueTooShort):
+            return await ctx.send('Очередь слишком маленькая для перемешивания')
+
         raise error
 
     @commands.Cog.listener()
@@ -181,6 +192,10 @@ class Music(commands.Cog):
 
         if isinstance(error, MissingRequiredArgument):
             return await ctx.send('Нужно указать трек')
+
+        if isinstance(error, QueueTooShort):
+            return await ctx.send('Очередь слишком маленькая для перемешивания')
+
         raise error
 
     @commands.Cog.listener()
@@ -195,12 +210,12 @@ class Music(commands.Cog):
             if len([user for user in before.channel.members if not user.bot]) < 1:
                 player = self.bot.wavelink.get_player(member.guild.id)
 
+
                 try:
-                    del self.controllers[member.guild_id]
+                    del self.controllers[member.guild.id]
                 except:
                     pass
-                finally:
-                    await player.destroy()
+                await player.destroy()
 
     async def checkIsSameVoice(self, ctx, voiceChannel):
         if ctx.author not in voiceChannel.members:
@@ -246,8 +261,9 @@ class Music(commands.Cog):
         controller.channel = ctx.channel
 
     @commands.command(name='play', description='Играет музыку по ссылке или по названию')
-    async def play_prefix(self, ctx: Context, query: str):
+    async def play_prefix(self, ctx: Context, *query):
         try:
+            query = " ".join(query)
             await self.play(ctx, query)
         except:
             raise
@@ -487,11 +503,11 @@ class Music(commands.Cog):
         upcoming = list(controller.queue._queue)
 
         embed = discord.Embed(
-            title=f'В очереди - {len(upcoming)}')
+            title=f'В очереди - {len(upcoming)} (первые 5)')
 
         for song in upcoming[:5]:
             embed.add_field(name=song.author,
-                            value=f'[{song.title}]({song.uri})')
+                            value=f'[{song.title}]({song.uri})',inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(name='stop', description='Отключается и чистит очередь', aliases=['disconnect', 'dc'])
@@ -588,6 +604,33 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed)
 
+    @commands.command(name='shuffle', description='Перемешивает треки в очереди', aliases=['mix'])
+    async def shuffle_prefix(self, ctx: Context):
+        await self.shuffle_(ctx)
+
+    @cog_ext.cog_slash(name='shuffle', description='Перемешивает треки в очереди')
+    async def shuffle_slash(self, ctx: SlashContext):
+        await self.shuffle_(ctx)
+
+    async def shuffle_(self, ctx):
+        """Stop and disconnect the player and controller."""
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
+        controller = self.get_controller(ctx)
+
+        if not (len(controller.queue._queue) > 2):
+            raise QueueTooShort
+
+        shuffle(controller.queue._queue)
+        return await ctx.send('Очередь перемешана')
+        
+        
 
 def setup(bot):
     bot.add_cog(Music(bot))
