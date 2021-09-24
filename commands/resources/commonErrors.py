@@ -19,7 +19,7 @@ class Errors:
     )
 
     TooManySymbols = Embed(
-        title='**Максимум 25 символов**',
+        title='**Команда поддерживает не более 25 символов**',
         color=randCol()
     )
     
