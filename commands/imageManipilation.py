@@ -13,6 +13,8 @@ from aiohttp import ClientSession
 from re import compile
 from config import guilds
 
+from .resources.commonErrors import *
+
 
 class NoUrlFound(CommandError, SlashCommandError):
     pass
@@ -44,38 +46,38 @@ class ImageManipulation(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
-            return await ctx.send('Ссылка не найдена')
+            return await ctx.send(embed=Errors.NoUrl)
 
         if isinstance(error, InvalidFileType):
-            return await ctx.send(f'Поддерживаемые форматы: png, jpeg, jpg. У тебя {error}')
+            return await ctx.send(embed=Errors.InvalidType)
 
         if isinstance(error, RequestNetworkError):
-            return await ctx.send('Не удалось открыть файл')
+            return await ctx.send(embed=Errors.RequestNetworkError)
 
         if isinstance(error, TooManySymblos):
-            return await ctx.send('Максимум 25 символов')
+            return await ctx.send(embed=Errors.TooManySymbols)
 
         if isinstance(error, FileTooLarge):
-            return await ctx.send('Максимальный размер файла 5 мегабайт')
+            return await ctx.send(embed=Errors.FileTooLarge)
 
         raise error
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
-            return await ctx.send('Ссылка не найдена')
+            return await ctx.send(embed=Errors.NoUrl)
 
         if isinstance(error, InvalidFileType):
-            return await ctx.send(f'Поддерживаемые форматы: png, jpeg, jpg. У тебя {error}')
+            return await ctx.send(embed=Errors.InvalidType)
 
         if isinstance(error, RequestNetworkError):
-            return await ctx.send('Не удалось открыть файл')
+            return await ctx.send(embed=Errors.RequestNetworkError)
 
         if isinstance(error, TooManySymblos):
-            return await ctx.send('Максимум 25 символов')
+            return await ctx.send(embed=Errors.TooManySymbols)
 
         if isinstance(error, FileTooLarge):
-            return await ctx.send('Максимальный размер файла 5 мегабайт')
+            return await ctx.send(embed=Errors.FileTooLarge)
 
         raise error
 
