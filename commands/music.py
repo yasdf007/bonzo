@@ -21,9 +21,13 @@ from datetime import timedelta
 
 from discord_slash import SlashContext, cog_ext
 from discord_slash.error import SlashCommandError
+from discord_slash.utils.manage_commands import create_choice
+
 from colorama import Fore, Back, Style
 from config import guilds
 from random import shuffle
+
+from .resources.equalizers import equalizers
 
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 
@@ -35,8 +39,10 @@ class IncorrectChannelError(commands.CommandError, SlashCommandError):
 class NotInVoice(commands.CommandError, SlashCommandError):
     pass
 
+
 class QueueTooShort(commands.CommandError, SlashCommandError):
     pass
+
 
 class MusicController:
 
@@ -97,6 +103,7 @@ class Music(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.controllers = {}
+        self.eqs = equalizers
 
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
@@ -129,7 +136,7 @@ class Music(commands.Cog):
         if isinstance(event, (wavelink.TrackEnd, wavelink.TrackException)):
             controller = self.get_controller(event.player)
 
-            if isinstance(event,wavelink.TrackException):
+            if isinstance(event, wavelink.TrackException):
                 await controller.channel.send(f'Ошибка при проигрывании {event.player.current}')
 
             controller.next.set()
@@ -209,7 +216,6 @@ class Music(commands.Cog):
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
             if len([user for user in before.channel.members if not user.bot]) < 1:
                 player = self.bot.wavelink.get_player(member.guild.id)
-
 
                 try:
                     del self.controllers[member.guild.id]
@@ -507,7 +513,7 @@ class Music(commands.Cog):
 
         for song in upcoming[:5]:
             embed.add_field(name=song.author,
-                            value=f'[{song.title}]({song.uri})',inline=False)
+                            value=f'[{song.title}]({song.uri})', inline=False)
         await ctx.send(embed=embed)
 
     @commands.command(name='stop', description='Отключается и чистит очередь', aliases=['disconnect', 'dc'])
@@ -541,7 +547,26 @@ class Music(commands.Cog):
     async def equalizer_prefix(self, ctx: Context, equalizer='None'):
         await self.equalizer(ctx, equalizer)
 
-    @cog_ext.cog_slash(name='equalizer', description='ресеты эквалайзера музыки')
+    @cog_ext.cog_slash(name='equalizer', description='Пресеты эквалайзера музыки',
+                       options=[
+                           {
+                               "name": "equalizer",
+                               "description": "Пресеты эквалайзера музыки",
+                               "type": 3,
+                               "required": "true",
+                               "choices": [
+                                   create_choice(
+                                       name="bass",
+                                       value="bass"
+                                   ),
+                                   create_choice(
+                                       name="default",
+                                       value="default"
+                                   ),
+                               ]
+                           }
+                       ]
+                       )
     async def equalizer_slash(self, ctx: SlashContext, equalizer='None'):
         await self.equalizer(ctx, equalizer)
 
@@ -555,17 +580,11 @@ class Music(commands.Cog):
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
 
-        predefiend = {'default': wavelink.Equalizer.flat(),
-                      'boost': wavelink.Equalizer.boost(),
-                      'metal': wavelink.Equalizer.metal(),
-                      'piano': wavelink.Equalizer.piano()
-                      }
-
-        eq = predefiend.get(equalizer.lower(), None)
+        eq = self.eqs.get(equalizer.lower(), None)
 
         if not eq or not equalizer:
-            joined = "\n".join(predefiend.keys())
-            return await ctx.send(f'Такого эквалайзера нет, доступны:\n{joined}')
+            joined = ", ".join(self.eqs.keys())
+            return await ctx.send(f'Такого эквалайзера нет, доступны: {joined}')
 
         await player.set_eq(eq)
         await ctx.send(f'Поставил эквалайзер {equalizer}. Применение займет несколько секунд...')
@@ -629,8 +648,7 @@ class Music(commands.Cog):
 
         shuffle(controller.queue._queue)
         return await ctx.send('Очередь перемешана')
-        
-        
+
 
 def setup(bot):
     bot.add_cog(Music(bot))
