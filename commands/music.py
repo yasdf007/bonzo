@@ -3,7 +3,8 @@
 https://github.com/PythonistaGuild/Wavelink/blob/master/examples/advanced.py
 +
 https://github.com/PythonistaGuild/Wavelink/blob/master/examples/playlist.py
-
++
+https://github.com/Carberra/discord.py-music-tutorial/blob/master/bot/cogs/music.py
 """
 
 
@@ -30,6 +31,7 @@ from random import shuffle
 from .resources.equalizers import equalizers
 
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
+TIME_REGEX = re.compile('([0-9]{1,2})m:([0-9]{1,2})s')
 
 
 class IncorrectChannelError(commands.CommandError, SlashCommandError):
@@ -176,7 +178,7 @@ class Music(commands.Cog):
             return await ctx.send('Ты не в войсе')
 
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send('Нужно указать трек')
+            return await ctx.send('Нужно указать аргумент')
 
         if isinstance(error, QueueTooShort):
             return await ctx.send('Очередь слишком маленькая для перемешивания')
@@ -198,7 +200,7 @@ class Music(commands.Cog):
             return await ctx.send('Ты не в войсе')
 
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send('Нужно указать трек')
+            return await ctx.send('Нужно указать аргумент')
 
         if isinstance(error, QueueTooShort):
             return await ctx.send('Очередь слишком маленькая для перемешивания')
@@ -450,6 +452,9 @@ class Music(commands.Cog):
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
 
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
         vol = max(min(vol, 1000), 0)
 
         embed = Embed(
@@ -580,6 +585,9 @@ class Music(commands.Cog):
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
 
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
         eq = self.eqs.get(equalizer.lower(), None)
 
         if not eq or not equalizer:
@@ -648,6 +656,36 @@ class Music(commands.Cog):
 
         shuffle(controller.queue._queue)
         return await ctx.send('Очередь перемешана')
+
+    @commands.command(name='skip_to', description='Пропускает до таймкода в треке (формат 0m:00s)', aliases=['seek'])
+    async def skip_to_prefix(self, ctx: Context, time: str):
+        await self.skip_to(ctx, time)
+
+    @cog_ext.cog_slash(name='skip_to', description='Пропускает до таймкода в треке (формат 0m:00s)')
+    async def skip_to_slash(self, ctx: SlashContext, time: str):
+        await self.skip_to(ctx, time)
+
+    async def skip_to(self, ctx, time: str):
+        player = self.bot.wavelink.get_player(ctx.guild.id)
+
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
+        match = TIME_REGEX.match(time)
+        if not match:
+            return await ctx.send('Неправильный формат времени')
+
+        milliseconds = (int(match.group(1)) * 60 + int(match.group(2))) * 1000
+
+        await player.seek(milliseconds)
+
+        await ctx.send(f'Скипаю до {time}')
 
 
 def setup(bot):
