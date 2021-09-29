@@ -13,7 +13,7 @@ from os import getenv
 import discord
 import re
 from discord.ext.commands.context import Context
-from discord.ext.commands import MissingRequiredArgument
+from discord.ext.commands import MissingRequiredArgument, BadArgument
 import wavelink
 from discord.ext import commands
 from discord import Embed
@@ -29,6 +29,8 @@ from config import guilds
 from random import shuffle
 
 from .resources.equalizers import equalizers
+from .resources.music.bonzoPlayer import BonzoPlayer
+from .resources.music.filters import *
 
 RURL = re.compile('https?:\/\/(?:www\.)?.+')
 TIME_REGEX = re.compile('([0-9]{1,2})m:([0-9]{1,2})s')
@@ -66,7 +68,7 @@ class MusicController:
     async def controller_loop(self):
         await self.bot.wait_until_ready()
 
-        player = self.bot.wavelink.get_player(self.guild_id)
+        player = self.bot.wavelink.get_player(self.guild_id, cls=BonzoPlayer)
 
         while True:
             if self.now_playing:
@@ -183,6 +185,12 @@ class Music(commands.Cog):
         if isinstance(error, QueueTooShort):
             return await ctx.send('Очередь слишком маленькая для перемешивания')
 
+        if isinstance(error, FilterInvalidArgument):
+            return await ctx.send('Значение не может быть меньше либо равно нулю')
+
+        if isinstance(error, BadArgument):
+            return await ctx.send('Неправильный аргумент')
+
         raise error
 
     @commands.Cog.listener()
@@ -205,6 +213,12 @@ class Music(commands.Cog):
         if isinstance(error, QueueTooShort):
             return await ctx.send('Очередь слишком маленькая для перемешивания')
 
+        if isinstance(error, FilterInvalidArgument):
+            return await ctx.send('Значение не может быть меньше либо равно нулю')
+
+        if isinstance(error, BadArgument):
+            return await ctx.send('Неправильный аргумент')
+
         raise error
 
     @commands.Cog.listener()
@@ -217,7 +231,8 @@ class Music(commands.Cog):
         # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
             if len([user for user in before.channel.members if not user.bot]) < 1:
-                player = self.bot.wavelink.get_player(member.guild.id)
+                player = self.bot.wavelink.get_player(
+                    member.guild.id, cls=BonzoPlayer)
 
                 try:
                     del self.controllers[member.guild.id]
@@ -256,7 +271,7 @@ class Music(commands.Cog):
         except AttributeError:
             guild_id = ctx.guild.id
 
-        player = self.bot.wavelink.get_player(guild_id)
+        player = self.bot.wavelink.get_player(guild_id, cls=BonzoPlayer)
 
         if player.channel_id:
             vc = self.bot.get_channel(player.channel_id)
@@ -289,7 +304,7 @@ class Music(commands.Cog):
         except AttributeError:
             guild_id = ctx.guild.id
 
-        player = self.bot.wavelink.get_player(guild_id)
+        player = self.bot.wavelink.get_player(guild_id, cls=BonzoPlayer)
         try:
             if player.is_connected:
                 vc = self.bot.get_channel(player.channel_id)
@@ -360,7 +375,7 @@ class Music(commands.Cog):
 
     async def pause(self, ctx):
         """Pause the player."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -387,7 +402,7 @@ class Music(commands.Cog):
 
     async def resume(self, ctx):
         """Resume the player from a paused state."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -414,7 +429,7 @@ class Music(commands.Cog):
 
     async def skip(self, ctx):
         """Skip the currently playing song."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -444,7 +459,7 @@ class Music(commands.Cog):
 
     async def volume(self, ctx, vol: int):
         """Set the player volume."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -473,7 +488,7 @@ class Music(commands.Cog):
 
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -499,7 +514,7 @@ class Music(commands.Cog):
 
     async def queue(self, ctx):
         """Retrieve information on the next 5 songs from the queue."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
         if not player.is_connected:
             return
 
@@ -531,7 +546,7 @@ class Music(commands.Cog):
 
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -577,7 +592,7 @@ class Music(commands.Cog):
 
     async def equalizer(self, ctx, equalizer='None'):
         """Change the players equalizer."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -607,7 +622,7 @@ class Music(commands.Cog):
 
     async def loop(self, ctx):
         """Stop and disconnect the player and controller."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -641,7 +656,7 @@ class Music(commands.Cog):
 
     async def shuffle_(self, ctx):
         """Stop and disconnect the player and controller."""
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -666,7 +681,7 @@ class Music(commands.Cog):
         await self.skip_to(ctx, time)
 
     async def skip_to(self, ctx, time: str):
-        player = self.bot.wavelink.get_player(ctx.guild.id)
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
             return
@@ -686,6 +701,78 @@ class Music(commands.Cog):
         await player.seek(milliseconds)
 
         await ctx.send(f'Скипаю до {time}')
+
+    @commands.command(name='speed', description='Ставит скорость проигрывания')
+    async def set_speed_prefix(self, ctx: Context, speed: float):
+        await self.set_speed(ctx, speed)
+
+    @cog_ext.cog_slash(name='speed', description='Ставит скорость проигрывания')
+    async def set_speed_slash(self, ctx: SlashContext, speed: float):
+        await self.set_speed(ctx, speed)
+
+    async def set_speed(self, ctx: Context, speed: float):
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
+
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
+        await player.set_speed(speed)
+
+        await ctx.send(f'Поставил скорость {speed}. Применение займет несколько секунд...')
+
+    @commands.command(name='pitch', description='Ставит высоту проигрывания')
+    async def set_pitch_prefix(self, ctx: Context, pitch: float):
+        await self.set_pitch(ctx, pitch)
+
+    @cog_ext.cog_slash(name='pitch', description='Ставит высоту проигрывания')
+    async def set_pitch_slash(self, ctx: SlashContext, pitch: float):
+        await self.set_pitch(ctx, pitch)
+
+    async def set_pitch(self, ctx: Context, pitch: float):
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
+
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
+        await player.set_pitch(pitch)
+
+        await ctx.send(f'Поставил высоту {pitch}. Применение займет несколько секунд...')
+
+    @commands.command(name='reset_filters', description='Убирает фильтры')
+    async def reset_filters_prefix(self, ctx: Context, pitch: float):
+        await self.reset_filters(ctx, pitch)
+
+    @cog_ext.cog_slash(name='reset_filters', description='Убирает фильтры')
+    async def reset_filters_slash(self, ctx: SlashContext, pitch: float):
+        await self.reset_filters(ctx, pitch)
+
+    async def reset_filters(self, ctx: Context):
+        player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
+
+        if not player.is_connected:
+            return
+
+        vc = self.bot.get_channel(player.channel_id)
+        await self.checkIsSameVoice(ctx, vc)
+
+        if not player.is_playing:
+            return await ctx.send('Я ничего не играю')
+
+        await player.reset_filter()
+
+        await ctx.send(f'Убрал фильтры. Применение займет несколько секунд...')
 
 
 def setup(bot):
