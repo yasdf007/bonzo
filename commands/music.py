@@ -180,16 +180,16 @@ class Music(commands.Cog):
             return await ctx.send('Ты не в войсе')
 
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send('Нужно указать аргумент')
+            return await ctx.send('Нужно указать запрос')
 
         if isinstance(error, QueueTooShort):
             return await ctx.send('Очередь слишком маленькая для перемешивания')
 
         if isinstance(error, FilterInvalidArgument):
-            return await ctx.send('Значение не может быть меньше либо равно нулю')
+            return await ctx.send('Значение должно быть больше нуля')
 
         if isinstance(error, BadArgument):
-            return await ctx.send('Неправильный аргумент')
+            return await ctx.send('Неправильный запрос')
 
         raise error
 
@@ -208,16 +208,16 @@ class Music(commands.Cog):
             return await ctx.send('Ты не в войсе')
 
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send('Нужно указать аргумент')
+            return await ctx.send('Нужно указать запрос')
 
         if isinstance(error, QueueTooShort):
             return await ctx.send('Очередь слишком маленькая для перемешивания')
 
         if isinstance(error, FilterInvalidArgument):
-            return await ctx.send('Значение не может быть меньше либо равно нулю')
+            return await ctx.send('Значение должно быть больше нуля')
 
         if isinstance(error, BadArgument):
-            return await ctx.send('Неправильный аргумент')
+            return await ctx.send('Неправильный запрос')
 
         raise error
 
@@ -299,6 +299,8 @@ class Music(commands.Cog):
             raise
 
     async def play(self, ctx, query: str):
+        if len(query) < 1:
+            raise MissingRequiredArgument(ctx.author)
         try:
             guild_id = ctx.guild_id
         except AttributeError:
@@ -711,6 +713,9 @@ class Music(commands.Cog):
         await self.set_speed(ctx, speed)
 
     async def set_speed(self, ctx: Context, speed: float):
+        if speed <= 0:
+            raise FilterInvalidArgument
+
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
@@ -735,6 +740,9 @@ class Music(commands.Cog):
         await self.set_pitch(ctx, pitch)
 
     async def set_pitch(self, ctx: Context, pitch: float):
+        if pitch <= 0:
+            raise FilterInvalidArgument
+
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
