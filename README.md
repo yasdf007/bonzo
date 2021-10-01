@@ -1,4 +1,4 @@
-## bonzo v1.12a stacknox
+## bonzo v1.12.1a stacknox
 
 ## made by yasdf007, vlaner & nohame
 
@@ -12,6 +12,6 @@
 
 ссылка на инвайт бота: [тык!](https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot)
 
-## запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульной режиме.
+## запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульном режиме.
 
 ### powered by [discord.py](https://github.com/Rapptz/discord.py) and [slashHandler](https://github.com/discord-py-slash-commands/discord-py-interactions)
