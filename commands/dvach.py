@@ -1,3 +1,4 @@
+from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog, command, CommandError, Context
 from aiohttp import ClientSession
 from random import choice
@@ -26,12 +27,12 @@ class Dvach(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, RequestNetworkError):
-            return await ctx.send('Ошибка при запросе')
+            return await ctx.send(embed=automata.generateEmbErr('Ошибка при запросе'))
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, RequestNetworkError):
-            return await ctx.send('Не удалось открыть файл')
+            return await ctx.send(embed=automata.generateEmbErr('Ошибка при запросе'))
 
     @command(name=name, description=description)
     async def dvach_prefix(self, ctx: Context):
