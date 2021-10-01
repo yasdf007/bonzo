@@ -17,7 +17,7 @@ class FreeGames(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.bot.scheduler.add_job(
-            self.freeGames, CronTrigger(day_of_week='thu', hour=16, minute=3, jitter=120))
+            self.freeGames, CronTrigger(day_of_week='thu', hour=19, minute=3, jitter=120))
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingPermissions):

@@ -7,8 +7,7 @@ load_dotenv()  # загружает файл env
 
 BUILD_SQL = './database/build.sql'
 
-connection_string = \
-    f'postgresql://{getenv("POSTGRES_USER")}:{getenv("POSTGRES_PASSWORD")}@{getenv("POSTGRES_IP")}/{getenv("POSTGRES_DB")}'
+connection_string = getenv('DATABASE_URL')
 
 
 async def createDB(pool):

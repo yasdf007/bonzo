@@ -6,6 +6,7 @@ from config import guilds
 
 name = 'invite'
 description = 'Ссылка на приглашение бота'
+invlink = 'https://discord.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot%20applications.commands'
 
 
 class invite(Cog):
@@ -27,7 +28,7 @@ class invite(Cog):
         embedd.set_thumbnail(
             url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
         embedd.add_field(
-            name='кликните вот', value='[сюда](https://discord.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot%20applications.commands)')
+            name='кликните вот', value=f'[сюда]({invlink})')
         embedd.set_footer(text="/by bonzo/ for @" + ctx.author.name)
         await ctx.send(embed=embedd)
 
