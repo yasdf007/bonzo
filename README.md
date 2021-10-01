@@ -1,4 +1,4 @@
-## bonzo v1.11a2 okshaw
+## bonzo v1.12a stacknox
 
 ## made by yasdf007, vlaner & nohame
 
@@ -10,7 +10,7 @@
 
 ## полезные ссылки
 
-ссылка на инвайт бота: [тык!](https://discord.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot%20applications.commands)
+ссылка на инвайт бота: [тык!](https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&permissions=8&scope=bot)
 
 ## запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульной режиме.
 

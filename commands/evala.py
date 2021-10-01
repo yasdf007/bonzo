@@ -1,3 +1,4 @@
+from commands.resources.AutomatedMessages import automata
 from discord import TextChannel
 from discord.ext.commands import Cog, command, is_owner
 from discord.ext.commands.errors import CommandInvokeError, NotOwner
@@ -12,10 +13,10 @@ class evala(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandInvokeError):
-            await ctx.send('Ошибка при выполении запроса')
+            await ctx.send(embed=automata.generateEmbErr('Ошибка при выполении запроса'))
 
         if isinstance(error, NotOwner):
-            await ctx.send('Только для разработчиков бота')
+            await ctx.send(embed=automata.generateEmbErr('Только для разработчиков бота'))
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)

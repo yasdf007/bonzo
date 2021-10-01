@@ -1,3 +1,4 @@
+from asyncio.tasks import sleep
 from discord.embeds import Embed
 from .words import getWord
 from .states import *
@@ -56,7 +57,7 @@ class Hangman:
                 break
 
             await self.ctx.send('Введи букву (15с)')
-
+            await sleep(0.25)
             try:
                 decicion = await self.ctx.bot.wait_for(
                     'message', check=lambda msg: msg.author.id == int(self.player) and msg.channel.id == self.ctx.channel.id, timeout=15)

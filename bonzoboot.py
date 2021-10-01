@@ -38,7 +38,7 @@ logger.addHandler(handler)
 class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.all()
-        self.game = Game(f'/help | v1.11a2 okshaw')
+        self.game = Game(f'{prefix}help | v1.12a stacknox')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=when_mentioned_or(prefix),
@@ -47,12 +47,12 @@ class Bot(bonzoBot):
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
-            if filename.endswith('.py') and not filename.startswith('music'):
+            if filename.endswith('.py'):
+                if filename.startswith('music'):
+                        curr += 1
+                        print(
+                            f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
                 self.load_extension(f'commands.{filename[:-3]}')
-
-                # if filename.startswith('music'):
-                #     print(
-                #         f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
 
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')

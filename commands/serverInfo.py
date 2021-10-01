@@ -1,6 +1,8 @@
 from discord import Embed
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from discord_slash import SlashContext, cog_ext
+from discord.ext.commands.core import guild_only
 from config import guilds
 
 
@@ -12,9 +14,17 @@ class info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # функция, отправляющая информацию о сервере
+    @guild_only()
+    @command(name=name, description=description)
+    async def serverinfo_prefix(self, ctx: Context):
+        await self.serverinfo(ctx)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def serverinfo(self, ctx: SlashContext):
+    async def serverinfo_slash(self, ctx: SlashContext):
+        await self.serverinfo(ctx)
+
+    # функция, отправляющая информацию о сервере
+    async def serverinfo(self, ctx):
         server = ctx.guild
         embed = Embed(
             title='**Информация о сервере:**',

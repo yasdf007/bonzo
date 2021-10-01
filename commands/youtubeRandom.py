@@ -1,12 +1,13 @@
-from discord.ext.commands import Cog, CommandOnCooldown, command, cooldown, BucketType
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
+
 from googleapiclient.discovery import build
 from os import getenv
 from dotenv import load_dotenv
 import json
-from random import randint, choice
+from random import choice
 from string import digits, ascii_uppercase
 from discord_slash import SlashContext, cog_ext
-from config import guilds
 
 load_dotenv()
 
@@ -24,8 +25,15 @@ class YoutubeRandom(Cog):
     videoNameStart = ['IMG_']
     videoNameEnd = ['.mp4']
 
+    @command(name=name, description=description, aliases=['randvid', 'video'])
+    async def randomVideo_prefix(self, ctx: Context):
+        await self.randomVideo(ctx)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def randomVideo(self, ctx: SlashContext):
+    async def randomVideo_slash(self, ctx: SlashContext):
+        await self.randomVideo(ctx)
+
+    async def randomVideo(self, ctx):
         # Делаем рандомное название запроса из 4 символов и цифр
         query2 = ''.join(choice(ascii_uppercase + digits) for _ in range(4))
         youtubeVideoId = ''

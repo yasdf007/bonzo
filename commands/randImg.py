@@ -1,4 +1,5 @@
-from discord.ext.commands import Cog, CommandOnCooldown, BucketType
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from discord_slash import SlashContext, cog_ext
 from config import guilds
 from random import sample
@@ -12,21 +13,23 @@ class randImg(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # Обработка ошибок
-    async def cog_command_error(self, ctx, error):
-        if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
+    @command(name=name, description=description, aliases=['randimg'])
+    async def randimg_prefix(self, ctx: Context):
+        await self.randimg(ctx)
 
     @cog_ext.cog_slash(name=name, description=description)
-    async def randimg(self, ctx: SlashContext):
-        photo = await self.process(ctx=ctx)
+    async def randimg_slash(self, ctx: SlashContext):
+        await self.randimg(ctx)
+
+    async def randimg(self, ctx):
+        photo = await self.process(ctx)
 
         while(photo == None):
-            photo = await self.process(ctx=ctx)
+            photo = await self.process(ctx)
 
         await ctx.send(photo)
 
-    async def process(self, ctx: SlashContext):
+    async def process(self, ctx):
         url = 'https://i.imgur.com/'
         symbols = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
 

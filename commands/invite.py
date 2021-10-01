@@ -1,5 +1,6 @@
 from discord import Embed
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, command
+from discord.ext.commands.context import Context
 from discord_slash import SlashContext, cog_ext
 from config import guilds
 
@@ -12,9 +13,16 @@ class invite(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    # функция, отправляющая инвайт-ссылку бота в чат
+    @command(name=name, description=description)
+    async def invite_prefix(self, ctx: Context):
+        await self.invite(ctx)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def invite(self, ctx: SlashContext):
+    async def invite_slash(self, ctx: SlashContext):
+        await self.invite(ctx)
+    # функция, отправляющая инвайт-ссылку бота в чат
+
+    async def invite(self, ctx):
         embedd = Embed(
             title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)
         embedd.set_thumbnail(

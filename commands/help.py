@@ -1,13 +1,18 @@
 from discord import Embed
-from discord.ext.commands import Cog
-from config import guilds
+from discord.ext.commands import Cog, command, CommandError, Context
 from discord_slash import SlashContext, cog_ext
+from discord_slash.error import SlashCommandError
 from random import randint
 from math import ceil
+from config import guilds
 from commands.resources.paginator import Paginator
 
-name = 'helpLegacy'
+name = 'help'
 description = 'Все команды бота, инфа о команде help <cmd>'
+
+
+class NoCommandFound(CommandError, SlashCommandError):
+    pass
 
 
 class helping(Cog):
@@ -16,8 +21,25 @@ class helping(Cog):
         self.bot = bot
         self._discord = bot
 
-    @cog_ext.cog_slash(name='help', description='Все слеш команды')
-    async def help(self, ctx: SlashContext):
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, NoCommandFound):
+            return await ctx.send('Такой команды нет')
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoCommandFound):
+            return await ctx.send('Такой команды нет')
+#   --------------------------------------------------------------------
+
+    @command(name='help_slash', description='Все слеш комманды')
+    async def help_slash_prefix(self, ctx: Context):
+        await self.help_slash(ctx)
+
+    @cog_ext.cog_slash(name='help_slash', description='Все слеш комманды')
+    async def help_slash_slash(self, ctx: SlashContext):
+        await self.help_slash(ctx)
+
+    async def help_slash(self, ctx):
         p = Paginator(ctx)
 
         embeds = await self.generateSlashEmbed(ctx.author)
@@ -26,8 +48,16 @@ class helping(Cog):
 
         await p.call_controller()
 
+#   --------------------------------------------------------------------
+    @command(name=name, description=description)
+    async def _help_prefix(self, ctx: Context, cmd=None):
+        await self.help(ctx, cmd)
+
     @cog_ext.cog_slash(name=name, description=description)
-    async def helpLegacy(self, ctx: SlashContext, cmd: str = None):
+    async def _help_slash(self, ctx: SlashContext, cmd=None):
+        await self.help(ctx, cmd)
+
+    async def help(self, ctx, cmd: str = None):
         if cmd is None:
             p = Paginator(ctx)
             embeds = await self.generateEmbed(ctx.author)
@@ -40,14 +70,12 @@ class helping(Cog):
         # проверяем есть ли команда -> получаем инфу о комнде
         cmd = self.bot.get_command(cmd)
 
-        if cmd:
-            embed = await self.getCmdEmbed(cmd)
+        if not cmd:
+            raise NoCommandFound
 
-            await ctx.send(embed=embed)
+        embed = await self.getCmdEmbed(cmd)
 
-            return
-
-        await ctx.send('Такой команды нет')
+        await ctx.send(embed=embed)
 
     async def getCmdEmbed(self, cmd):
         embed = Embed(title=f'`{cmd}`',
@@ -98,7 +126,7 @@ class helping(Cog):
 
         for i in range(0, len(allCommands), 10):
             embed = Embed(
-                title='**Команды бота (префикс b/):**',  # title - головная часть, colour - hex-код цвета полоски
+                title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
 
             # i // 10 + 1:
@@ -132,7 +160,7 @@ class helping(Cog):
 
         for i in range(0, len(allCommands), 10):
             embed = Embed(
-                title='**slash команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
+                title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
 
             # i // 10 + 1:
