@@ -1,6 +1,6 @@
 from discord.ext.commands import Cog, command, bot_has_permissions
 from discord.ext.commands.errors import CommandInvokeError, BotMissingPermissions
-from discordTogether import DiscordTogether
+from discord_together import DiscordTogether
 
 name = 'youtube'
 description = 'Создает канал для совместного просмотра видео'
