@@ -33,7 +33,7 @@ class Clear(Cog):
         # удаляем запрошенное кол-во сообщений!
         await TextChannel.purge(ctx.message.channel, limit=count + 1, bulk=True)
         # отправляем отчёт
-        msg = await ctx.send(f'очистил {count} сообщений!')
+        msg = await ctx.send(f'Очистил {count} сообщений!')
         await sleep(2)  # ждём 2 секунды
         # удаляем отчёт
         await msg.delete()
