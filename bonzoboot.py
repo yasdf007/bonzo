@@ -8,6 +8,7 @@ dont_write_bytecode = True # убирает генерацию машинног�
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 from discord_slash import SlashCommand
+from discord_together import DiscordTogether
 
 from config import OWNER_IDS, prefix
 
@@ -73,6 +74,8 @@ class Bot(bonzoBot):
 
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
+        
+        self.togetherControl = await DiscordTogether(getenv('TOKEN'))
 
         self.scheduler.start()
         endTime = time() - self.startTime
