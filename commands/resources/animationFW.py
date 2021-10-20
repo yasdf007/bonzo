@@ -3,6 +3,7 @@
 
 from asyncio import sleep
 from random import randint
+from discord import Embed
 
 
 async def reColoring(x):
@@ -15,3 +16,8 @@ async def reColoring(x):
 
 def randCol():
     return randint(0, 0xFFFFFF)
+
+async def randCol2(x: Embed):
+    embed = x.embeds[0]
+    embed.color = randint(0, 0xFFFFFF)
+    await x.edit(embed=embed)
