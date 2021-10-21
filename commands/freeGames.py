@@ -4,7 +4,8 @@ from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
 from discord.ext.commands import command
-from discord.ext.commands.errors import CommandOnCooldown, MissingPermissions, NoPrivateMessage
+from discord.ext.commands.core import is_owner
+from discord.ext.commands.errors import CommandInvokeError, CommandOnCooldown, MissingPermissions, NoPrivateMessage
 from datetime import datetime
 from discord.enums import ChannelType
 from discord import Embed
@@ -26,6 +27,7 @@ class FreeGames(Cog):
             await ctx.send('Только на серверах')
         if isinstance(error, CommandOnCooldown):
             await ctx.message.reply(f'Server cooldown. Try again in {error.retry_after:.2f}s')
+        raise error
 
     @guild_only()
     @cooldown(rate=2, per=600, type=BucketType.guild)
@@ -90,15 +92,22 @@ class FreeGames(Cog):
 
     async def getMessages(self):
         async with ClientSession() as session:
-            async with session.get(self.link) as response:
-                resultJson = await response.json()
+            try:
+                async with session.get(self.link) as response:
+                    resultJson = await response.json()
+            except:
+                raise CommandInvokeError("Ошибка при запросе")
 
         games = resultJson['data']['Catalog']['searchStore']['elements']
         msgs = []
+
         for game in games:
             promotions = game['promotions']
 
-            if promotions == None:
+            if not promotions:
+                continue
+
+            if len(promotions['promotionalOffers']) == 0:
                 continue
 
             freeDiscountSetting = promotions['promotionalOffers'][0][
@@ -112,12 +121,12 @@ class FreeGames(Cog):
 
             game_name = game['title']
 
-            slug = game['productSlug']
+            slug = game['urlSlug']
 
             link = 'https://www.epicgames.com/store/ru/p/' + slug
 
             embedd = Embed(
-                title='**Бесплатная игра недели (Epic Games)**', colour=await randCol())
+                title='**Бесплатная игра недели (Epic Games)**', colour=randCol())
             embedd.set_thumbnail(
                 url='https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg')
             embedd.add_field(
@@ -130,6 +139,11 @@ class FreeGames(Cog):
             msgs.append(embedd)
         return msgs
 
+    @command(name="run_free_games",description="Ручной запуск бесплатных игр (только для создателей)")
+    @is_owner()
+    async def runFreeGanes(self,ctx):
+        await self.freeGames()
+        
     async def freeGames(self):
         channels = await self.getChannels()
         if len(channels) < 1:
@@ -137,7 +151,7 @@ class FreeGames(Cog):
         msgs = await self.getMessages()
 
         for channel in channels:
-            channel = self.bot.get_channel(channel['channel_id'])
+            channel = self.bot.get_channel(channel['channel_id']) 
             for msg in msgs:
                 announcement = await channel.send(embed=msg)
 
