@@ -9,7 +9,7 @@ from discord.ext.commands.errors import CommandInvokeError, CommandOnCooldown, M
 from datetime import datetime
 from discord.enums import ChannelType
 from discord import Embed
-from .resources.animationFW import randCol
+from discord import Colour
 
 
 class FreeGames(Cog):
@@ -126,7 +126,7 @@ class FreeGames(Cog):
             link = 'https://www.epicgames.com/store/ru/p/' + slug
 
             embedd = Embed(
-                title='**Бесплатная игра недели (Epic Games)**', colour=randCol())
+                title='**Бесплатная игра недели (Epic Games)**', colour=Colour.random())
             embedd.set_thumbnail(
                 url='https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg')
             embedd.add_field(
