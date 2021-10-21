@@ -1,13 +1,12 @@
 from discord import Embed
-from .animationFW import randCol2
+from discord import Colour
 
 class automata:
 
     def generateEmbErr(x: str, error=None):
         result = Embed(
-            title=f'**{x}**',
+            title=f'**{x}**', color=Colour.random()
         )
-        randCol2(result)
         if error:
             readableErr = type(error).__name__
             result.set_footer(text=f'Error message / by Bonzo / {readableErr}')

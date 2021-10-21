@@ -45,38 +45,38 @@ class ImageManipulation(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
-            return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена"))
+            return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена", error=error))
 
         if isinstance(error, InvalidFileType):
-            return await ctx.send(embed=automata.generateEmbErr("Неподдерживаемый формат файла - доступны png, jpeg и jpg"))
+            return await ctx.send(embed=automata.generateEmbErr("Неподдерживаемый формат файла - доступны png, jpeg и jpg", error=error))
 
         if isinstance(error, RequestNetworkError):
-            return await ctx.send(embed=automata.generateEmbErr("Не удалось открыть файл"))
+            return await ctx.send(embed=automata.generateEmbErr("Не удалось открыть файл", error=error))
 
         if isinstance(error, TooManySymblos):
-            return await ctx.send(embed=automata.generateEmbErr("Команда поддерживает не более 25 символов"))
+            return await ctx.send(embed=automata.generateEmbErr("Команда поддерживает не более 25 символов", error=error))
 
         if isinstance(error, FileTooLarge):
-            return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ"))
+            return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ", error=error))
 
         raise error
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
-            return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена"))
+            return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена", error=error))
 
         if isinstance(error, InvalidFileType):
-            return await ctx.send(embed=automata.generateEmbErr("Неподдерживаемый формат файла - доступны png, jpeg и jpg"))
+            return await ctx.send(embed=automata.generateEmbErr("Неподдерживаемый формат файла - доступны png, jpeg и jpg", error=error))
 
         if isinstance(error, RequestNetworkError):
-            return await ctx.send(embed=automata.generateEmbErr("Не удалось открыть файл"))
+            return await ctx.send(embed=automata.generateEmbErr("Не удалось открыть файл", error=error))
 
         if isinstance(error, TooManySymblos):
-            return await ctx.send(embed=automata.generateEmbErr("Команда поддерживает не более 25 символов"))
+            return await ctx.send(embed=automata.generateEmbErr("Команда поддерживает не более 25 символов", error=error))
 
         if isinstance(error, FileTooLarge):
-            return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ"))
+            return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ", error=error))
 
         raise error
 
