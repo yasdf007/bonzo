@@ -16,7 +16,7 @@ class CogsManagment(Cog):
     @command(name='load', description='Загружает ког')
     async def load_cog(self, ctx, cog: str):
         try:
-            self.bot.load_extension(cog)
+            self.bot.load_extension("commands." + cog)
         except:
             return await ctx.send('Невозможно загрузить ког')
         
@@ -26,7 +26,7 @@ class CogsManagment(Cog):
     @command(name='unload', description='Выгружает ког')
     async def unload_cog(self, ctx, cog: str):
         try:
-            self.bot.unload_extension(cog)
+            self.bot.unload_extension("commands." + cog)
         except:
             return await ctx.send('Невозможно выгрузить ког')
         
@@ -36,8 +36,8 @@ class CogsManagment(Cog):
     @command(name='reload', description='Перезагружает ког')
     async def reload_reload(self, ctx, cog: str):
         try:
-            self.bot.unload_extension(cog)
-            self.bot.load_extension(cog)
+            self.bot.unload_extension("commands." + cog)
+            self.bot.load_extension("commands." + cog)
         except:
             return await ctx.send('Невозможно перезагрузить ког')
         
