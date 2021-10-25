@@ -244,14 +244,7 @@ class Music(commands.Cog):
         # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
             if len([user for user in before.channel.members if not user.bot]) < 1:
-                player = self.bot.wavelink.get_player(
-                    member.guild.id, cls=BonzoPlayer)
-
-                try:
-                    del self.controllers[member.guild.id]
-                except:
-                    pass
-                await player.destroy()
+                await self.teardown(member.guild.id)
 
     async def checkIsSameVoice(self, ctx, voiceChannel):
         if ctx.author not in voiceChannel.members:
