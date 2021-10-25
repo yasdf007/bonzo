@@ -63,7 +63,7 @@ class MusicController:
         self.loop = False
         self.toLoop = None
 
-        self.bot.loop.create_task(self.controller_loop())
+        self.task = self.bot.loop.create_task(self.controller_loop())
 
     async def controller_loop(self):
         await self.bot.wait_until_ready()
@@ -81,6 +81,19 @@ class MusicController:
             await player.play(song, replace=False)
             self.now_playing = await self.channel.send(embed=await self.nowPlayingEmbed(player=player))
             await self.next.wait()
+
+    async def stop(self):
+        self.channel = None
+
+        self.next = asyncio.Event()
+        self.queue = asyncio.Queue()
+
+        self.now_playing = None
+
+        self.loop = False
+        self.toLoop = None
+
+        self.task.cancel()
 
     async def nowPlayingEmbed(self, player):
         track = player.current
@@ -244,6 +257,16 @@ class Music(commands.Cog):
         if ctx.author not in voiceChannel.members:
             raise IncorrectChannelError(
                 f'{ctx.author}, ты должен быть в `{voiceChannel.name}` для использования музыки')
+
+    async def teardown(self, guild_id):
+        player = self.bot.wavelink.get_player(guild_id, cls=BonzoPlayer)
+
+        await self.controllers[guild_id].stop()
+
+        del self.controllers[guild_id]
+
+        await player.destroy()
+
 
     @commands.command(name='connect', description='Подрубается к войсу')
     async def connect_prefix(self, ctx: Context,  channel: discord.VoiceChannel = None):
@@ -556,13 +579,8 @@ class Music(commands.Cog):
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
 
-        try:
-            del self.controllers[ctx.guild.id]
-        except KeyError:
-            await player.destroy()
-            return await ctx.send('Отключился и удалил очередь')
+        await self.teardown(ctx.guild.id)
 
-        await player.destroy()
         await ctx.send('Отключился и удалил очередь')
 
     @commands.command(name='equalizer', description='Пресеты эквалайзера музыки', aliases=['eq'])
