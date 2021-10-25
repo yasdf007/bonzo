@@ -83,16 +83,6 @@ class MusicController:
             await self.next.wait()
 
     async def stop(self):
-        self.channel = None
-
-        self.next = asyncio.Event()
-        self.queue = asyncio.Queue()
-
-        self.now_playing = None
-
-        self.loop = False
-        self.toLoop = None
-
         self.task.cancel()
 
     async def nowPlayingEmbed(self, player):
