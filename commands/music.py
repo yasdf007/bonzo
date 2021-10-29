@@ -28,6 +28,7 @@ from colorama import Fore, Back, Style
 from config import guilds
 from random import shuffle
 
+from .resources.AutomatedMessages import automata 
 from .resources.equalizers import equalizers
 from .resources.music.bonzoPlayer import BonzoPlayer
 from .resources.music.filters import *
@@ -172,7 +173,7 @@ class Music(commands.Cog):
         """A local error handler for all errors arising from commands in this cog."""
         if isinstance(error, commands.NoPrivateMessage):
             try:
-                return await ctx.send('This command can not be used in Private Messages.')
+                return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
             except discord.HTTPException:
                 pass
 
@@ -180,19 +181,19 @@ class Music(commands.Cog):
             return await ctx.send(error)
 
         if isinstance(error, NotInVoice):
-            return await ctx.send('Ты не в войсе')
+            return await ctx.send(embed=automata.generateEmbErr('Для использования комманды нужно быть в войсе', error=error))
 
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send('Нужно указать запрос')
+            return await ctx.send(embed=automata.generateEmbErr('Нужно указать запрос', error=error))
 
         if isinstance(error, QueueTooShort):
-            return await ctx.send('Очередь слишком маленькая для перемешивания')
+            return await ctx.send(embed=automata.generateEmbErr('Очередь слишком маленькая для перемешивания', error=error))
 
         if isinstance(error, FilterInvalidArgument):
-            return await ctx.send('Значение должно быть больше нуля')
+            return await ctx.send(embed=automata.generateEmbErr('Значение должно быть больше нуля', error=error))
 
         if isinstance(error, BadArgument):
-            return await ctx.send('Неправильный запрос')
+            return await ctx.send(embed=automata.generateEmbErr('Неправильный запрос', error=error))
 
         raise error
 
@@ -200,27 +201,27 @@ class Music(commands.Cog):
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, commands.NoPrivateMessage):
             try:
-                return await ctx.send('This command can not be used in Private Messages.')
+                return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
             except discord.HTTPException:
                 pass
 
         if isinstance(error, IncorrectChannelError):
-            return await ctx.send(str(error))
+            return await ctx.send(error)
 
         if isinstance(error, NotInVoice):
-            return await ctx.send('Ты не в войсе')
+            return await ctx.send(embed=automata.generateEmbErr('Для использования комманды нужно быть в войсе', error=error))
 
         if isinstance(error, MissingRequiredArgument):
-            return await ctx.send('Нужно указать запрос')
+            return await ctx.send(embed=automata.generateEmbErr('Нужно указать запрос', error=error))
 
         if isinstance(error, QueueTooShort):
-            return await ctx.send('Очередь слишком маленькая для перемешивания')
+            return await ctx.send(embed=automata.generateEmbErr('Очередь слишком маленькая для перемешивания', error=error))
 
         if isinstance(error, FilterInvalidArgument):
-            return await ctx.send('Значение должно быть больше нуля')
+            return await ctx.send(embed=automata.generateEmbErr('Значение должно быть больше нуля', error=error))
 
         if isinstance(error, BadArgument):
-            return await ctx.send('Неправильный запрос')
+            return await ctx.send(embed=automata.generateEmbErr('Неправильный запрос', error=error))
 
         raise error
 
