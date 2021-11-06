@@ -7,6 +7,8 @@ from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
 from config import guilds
+from .resources.AutomatedMessages import automata
+
 load_dotenv()
 
 name = 'weather'
@@ -23,12 +25,12 @@ class weather(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CityNotFound):
-            return await ctx.send(f'Город {error} не найден')
+            return await ctx.send(embed=automata.generateEmbErr('Запрашиваемый город не найден', error=error))
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, CityNotFound):
-            return await ctx.send(f'Город {error} не найден')
+            return await ctx.send(embed=automata.generateEmbErr('Запрашиваемый город не найден', error=error))
 
     @command(name=name, description=description)
     async def getWeather_prefix(self, ctx: Context, *city: str):

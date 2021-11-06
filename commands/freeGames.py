@@ -10,7 +10,7 @@ from datetime import datetime
 from discord.enums import ChannelType
 from discord import Embed
 from discord import Colour
-
+from .resources.AutomatedMessages import automata
 
 class FreeGames(Cog):
     link = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'
@@ -22,11 +22,11 @@ class FreeGames(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingPermissions):
-            await ctx.message.reply('Только администратор может использовать эту команду')
+            await ctx.message.reply(embed=automata.generateEmbErr('Только администратор может использовать эту команду', error=error))
         if isinstance(error, NoPrivateMessage):
-            await ctx.send('Только на серверах')
+            await ctx.send(embed=automata.generateEmbErr('Только на серверах', error=error))
         if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(f'Server cooldown. Try again in {error.retry_after:.2f}s')
+            await ctx.message.reply(embed=automata.generateEmbErr('Спам командами негативно влияет на общую производительность бота. Попробуйте позже.', error=error))
         raise error
 
     @guild_only()
