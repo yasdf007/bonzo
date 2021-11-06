@@ -5,7 +5,7 @@ class automata:
 
     def generateEmbErr(x: str, error=None):
         result = Embed(
-            title=f'**{x}**', color=Colour.random()
+            title=f'**{x}**', color=Colour.red()
         )
         if error:
             readableErr = type(error).__name__
