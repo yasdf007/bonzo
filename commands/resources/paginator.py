@@ -1,3 +1,9 @@
+# Paginator was initially created by another development team. 
+# Bonzo utilizes paginator in order to make beautiful multi-page help messages.
+
+# Пагинатор был изначально создан другой командой разработчиков.
+# Бонзо использует пагинатор для создания красивых и многостраничных [b]/help ответов
+
 from typing import Union
 from asyncio import FIRST_COMPLETED as ASYNCIO_FIRST_COMPLETED
 from asyncio import wait as asyncioWait
