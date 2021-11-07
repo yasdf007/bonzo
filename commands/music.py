@@ -230,7 +230,8 @@ class Music(commands.Cog):
         if member.bot:
             return
 
-        # Вырубается из войса, если не осталось людей
+        if not member.guild.id in self.controllers:
+            return
 
         # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
