@@ -18,6 +18,8 @@ description = 'Погода по запрашиваемому городу'
 class CityNotFound(CommandError, SlashCommandError):
     pass
 
+class BlankCityName(CommandError, SlashCommandError):
+    pass
 
 class weather(Cog):
     def __init__(self, bot):
@@ -26,18 +28,26 @@ class weather(Cog):
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CityNotFound):
             return await ctx.send(embed=automata.generateEmbErr('Запрашиваемый город не найден', error=error))
+        if isinstance(error, BlankCityName):
+            return await ctx.send(embed=automata.generateEmbErr('Город не указан', error=error))
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, CityNotFound):
             return await ctx.send(embed=automata.generateEmbErr('Запрашиваемый город не найден', error=error))
+        if isinstance(error, BlankCityName):
+            return await ctx.send(embed=automata.generateEmbErr('Город не указан', error=error))
 
     @command(name=name, description=description)
     async def getWeather_prefix(self, ctx: Context, *city: str):
+        if not city:
+            raise BlankCityName
         await self.getWeather(ctx, ' '.join(city))
 
     @cog_ext.cog_slash(name=name, description=description)
     async def getWeather_slash(self, ctx: SlashContext, city: str):
+        if not city:
+            raise BlankCityName
         await self.getWeather(ctx, city)
 
     async def getWeather(self, ctx, city):
