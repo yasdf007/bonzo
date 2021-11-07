@@ -39,7 +39,7 @@ logger.addHandler(handler)
 class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.all()
-        self.game = Game(f'{prefix}help | v1.12.1a stacknox')
+        self.game = Game(f'{prefix}help | v1.12.2 crypnox')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         super().__init__(command_prefix=when_mentioned_or(prefix),
