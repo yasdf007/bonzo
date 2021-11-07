@@ -50,7 +50,6 @@ class Bot(bonzoBot):
         for filename in listdir('./commands'):
             if filename.endswith('.py'):
                 if filename.startswith('music'):
-                        curr += 1
                         print(
                             f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
                 self.load_extension(f'commands.{filename[:-3]}')
