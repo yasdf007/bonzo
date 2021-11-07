@@ -64,7 +64,7 @@ class YtTogether(Cog):
 
         await self.activity(ctx, activity)
 
-    @cog_ext.cog_slash(name=name, description=description, guild_ids=[664485208745050112],
+    @cog_ext.cog_slash(name=name, description=description,
                            options=[
                            {
                                "name": name,
