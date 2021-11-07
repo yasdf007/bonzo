@@ -8,7 +8,7 @@ from datetime import datetime
 from os import getenv
 
 name = 'crypto'
-description = 'Выводит информацию о криптовалюте'
+description = 'Выводит информацию о криптовалюте (INDEV)'
 
 
 class RequestNetworkError(CommandError, SlashCommandError):
