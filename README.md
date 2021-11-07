@@ -1,4 +1,4 @@
-## bonzo v1.12.1a stacknox
+## bonzo v1.12.2 crypnox
 
 ## made by yasdf007, vlaner & nohame
 
