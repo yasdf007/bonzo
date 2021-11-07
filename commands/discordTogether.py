@@ -4,6 +4,8 @@ from discord.ext import commands
 from discord_slash import SlashContext, cog_ext
 from discord_slash.error import SlashCommandError
 from discord_slash.utils.manage_commands import create_choice
+from discord_slash.utils.manage_components import create_button, create_actionrow
+from discord_slash.model import ButtonStyle
 from commands.resources.AutomatedMessages import automata
 
 name = 'activity'
@@ -26,24 +28,16 @@ defaultApplications = {
             # Credits to awesomehet2124
             'letter-tile': '879863686565621790',
             'word-snack': '879863976006127627',
-            'doodle-crew': '878067389634314250'
+            'doodle-crew': '878067389634314250',
+
+            # 'spellcast': '852509694341283871',
+            # 'awkword': '879863881349087252',
+            # 'checkers': '832013003968348200',
         }
 
 class YtTogether(Cog):
     def __init__(self, bot):
         self.bot = bot
-        # self.defaultApplications = {
-        #     # Credits to RemyK888
-        #     'youtube': '880218394199220334',
-        #     'poker': '755827207812677713',
-        #     'betrayal': '773336526917861400',
-        #     'fishing': '814288819477020702',
-        #     'chess': '832012774040141894',
-        #     # Credits to awesomehet2124
-        #     'letter-tile': '879863686565621790',
-        #     'word-snack': '879863976006127627',
-        #     'doodle-crew': '878067389634314250'
-        # }
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, BotMissingPermissions):
@@ -70,7 +64,7 @@ class YtTogether(Cog):
 
         await self.activity(ctx, activity)
 
-    @cog_ext.cog_slash(name=name, description=description,
+    @cog_ext.cog_slash(name=name, description=description, guild_ids=[664485208745050112],
                            options=[
                            {
                                "name": name,
@@ -90,9 +84,16 @@ class YtTogether(Cog):
     async def activity(self, ctx, activity):
         if not ctx.author.voice:
             raise NotInVoice
-
         link = await self.bot.togetherControl.create_link(ctx.author.voice.channel.id, activity)
-        await ctx.send(f'Зайти\n{link}')
+        buttons = []
+        buttons.append(create_button(
+                                style=ButtonStyle.URL,
+                                label=activity,
+                                url=link
+                            ))
+                            
+        action_row = create_actionrow(*buttons)
+        await ctx.send(f"⬇️  ⬇️\n",components=[action_row])
 
 
 def setup(bot):
