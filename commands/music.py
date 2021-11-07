@@ -223,7 +223,6 @@ class Music(commands.Cog):
         if isinstance(error, BadArgument):
             return await ctx.send(embed=automata.generateEmbErr('Неправильный запрос', error=error))
 
-        raise error
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):

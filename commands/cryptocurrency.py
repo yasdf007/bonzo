@@ -38,7 +38,6 @@ class Dvach(Cog):
             return await ctx.send(embed=automata.generateEmbErr('Ошибка при запросе'))
         if isinstance(error, CurrencyDoesNotExist):
             return await ctx.send(embed=automata.generateEmbErr('Такой валюты не найдено'))
-        raise error
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
@@ -46,7 +45,6 @@ class Dvach(Cog):
             return await ctx.send(embed=automata.generateEmbErr('Ошибка при запросе'))
         if isinstance(error, CurrencyDoesNotExist):
             return await ctx.send(embed=automata.generateEmbErr('Такой валюты не найдено'))
-        raise error
 
     # @command(name=name, description=description)
     # async def get_crypto_info_prefix(self, ctx: Context, currency: str):

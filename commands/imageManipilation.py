@@ -78,7 +78,6 @@ class ImageManipulation(Cog):
         if isinstance(error, FileTooLarge):
             return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ", error=error))
 
-        raise error
 
     @command(name='ascii', description='Переводит картинку в ascii текст')
     async def ascii_prefix(self, ctx: Context, img_url: str = None):
