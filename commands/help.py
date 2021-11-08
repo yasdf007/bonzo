@@ -126,7 +126,7 @@ class helping(Cog):
 
         for i in range(0, len(allCommands), 10):
             embed = Embed(
-                title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
+                title='**legacy-Команды бота:** \n (/help_slash для slash-команд)',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
 
             # i // 10 + 1:
@@ -160,7 +160,7 @@ class helping(Cog):
 
         for i in range(0, len(allCommands), 10):
             embed = Embed(
-                title='**Команды бота:**',  # title - головная часть, colour - hex-код цвета полоски
+                title='**slash-Команды бота:** \n (b/help для legacy-команд)',  # title - головная часть, colour - hex-код цвета полоски
                 color=randint(0, 0xFFFFFF))
 
             # i // 10 + 1:
