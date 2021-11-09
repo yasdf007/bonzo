@@ -36,7 +36,7 @@ class info(Cog):
         embed.add_field(name='**Название:**',
                         value=f'{server.name}', inline=False)
 
-        embed.add_field(name='**Сервак создан:**',
+        embed.add_field(name='**Сервер создан:**',
                         value=server.created_at.strftime('%d %B %Y %R UTC'), inline=False)
 
         embed.add_field(name='**Количество участников:**',
