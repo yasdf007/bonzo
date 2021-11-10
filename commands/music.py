@@ -28,7 +28,7 @@ from colorama import Fore, Back, Style
 from config import guilds
 from random import shuffle
 
-from .resources.AutomatedMessages import automata 
+from .resources.AutomatedMessages import automata
 from .resources.equalizers import equalizers
 from .resources.music.bonzoPlayer import BonzoPlayer
 from .resources.music.filters import *
@@ -126,7 +126,7 @@ class Music(commands.Cog):
             print(f"/\n{Fore.RED}ERROR WHILE CONNECTING TO LAVALINK SERVER \nPASSWORD IS NOT SPECIFIED\nMUSIC UNLOADING... {Style.RESET_ALL}")
             self.bot.unload_extension('commands.music')
             return
-            
+
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
         node = await self.bot.wavelink.initiate_node(host='java',
@@ -227,7 +227,6 @@ class Music(commands.Cog):
         if isinstance(error, BadArgument):
             return await ctx.send(embed=automata.generateEmbErr('Неправильный запрос', error=error))
 
-
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.bot:
@@ -255,28 +254,18 @@ class Music(commands.Cog):
 
         await player.destroy()
 
-
-    @commands.command(name='connect', description='Подрубается к войсу')
-    async def connect_prefix(self, ctx: Context,  channel: discord.VoiceChannel = None):
-        try:
-            await self.connect(ctx, channel)
-        except:
-            raise
-
-    @cog_ext.cog_slash(name='connect', description='Подрубается к войсу')
-    async def connect_slash(self, ctx: SlashContext, channel: discord.VoiceChannel = None):
-        try:
-            await self.connect(ctx, channel)
-        except:
-            raise
-
-    async def connect(self, ctx, channel: discord.VoiceChannel = None):
+    async def connect(self, ctx, channel: discord.VoiceChannel):
         """Connect to a valid voice channel."""
         if not channel:
             try:
                 channel = ctx.author.voice.channel
             except AttributeError:
                 raise NotInVoice
+
+        if not isinstance(channel, discord.VoiceChannel):
+            raise IncorrectChannelError(
+                f'Указанный канал не является голосовым')
+
         try:
             guild_id = ctx.guild_id
         except AttributeError:
@@ -323,10 +312,8 @@ class Music(commands.Cog):
                 vc = self.bot.get_channel(player.channel_id)
                 await self.checkIsSameVoice(ctx, vc)
             else:
-                if isinstance(ctx, Context):
-                    await ctx.invoke(self.connect_prefix)
-                if isinstance(ctx, SlashContext):
-                    await ctx.invoke(self.connect_slash, ctx, ctx.author.voice.channel)
+                await self.connect(ctx, ctx.author.voice.channel)
+
         except AttributeError:
             raise NotInVoice
 
@@ -562,7 +549,7 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
-            return
+            return await ctx.send('Я не в войсе')
 
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
@@ -603,7 +590,7 @@ class Music(commands.Cog):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
-            return
+            return await ctx.send('Я не в войсе')
 
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
