@@ -42,6 +42,7 @@ class Bot(bonzoBot):
         self.game = Game(f'{prefix}init | stacknox2 INDEV')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
+
         super().__init__(command_prefix=when_mentioned_or(prefix),
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
 
@@ -50,8 +51,8 @@ class Bot(bonzoBot):
         for filename in listdir('./commands'):
             if filename.endswith('.py'):
                 if filename.startswith('music'):
-                        print(
-                            f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
+                    print(
+                        f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
                 self.load_extension(f'commands.{filename[:-3]}')
 
                 curr += 1
@@ -65,15 +66,9 @@ class Bot(bonzoBot):
 
     @Cog.listener()
     async def on_ready(self):
-        try:
-            self.pool = await db.connectToDB()
-        except Exception as err:
-            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
-            print(err)
-
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        
+
         self.togetherControl = await DiscordTogether(getenv('TOKEN'))
 
         self.scheduler.start()

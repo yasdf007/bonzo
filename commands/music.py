@@ -112,6 +112,7 @@ class Music(commands.Cog):
         self.bot = bot
         self.controllers = {}
         self.eqs = equalizers
+        self.password = getenv('LAVAPASS')
 
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
@@ -120,22 +121,25 @@ class Music(commands.Cog):
 
     async def start_nodes(self):
         await self.bot.wait_until_ready()
-        try:
-            if getenv('LAVAPASS') == None:
-                raise NameError("No password Specified")
-            password = getenv('LAVAPASS')
-        except:
-            print(f'/ \n {Fore.GREEN} Music: {Style.RESET_ALL} {Fore.RED} NO LAVALINK NODE PASSWORD SPECIFIED. MUSIC UNLOADING. {Style.RESET_ALL} \n /')
-            self.cog_unload()
+
+        if self.password == None:
+            print(f"/\n{Fore.RED}ERROR WHILE CONNECTING TO LAVALINK SERVER \nPASSWORD IS NOT SPECIFIED\nMUSIC UNLOADING... {Style.RESET_ALL}")
+            self.bot.unload_extension('commands.music')
+            return
+            
         # Initiate our nodes. For this example we will use one server.
         # Region should be a discord.py guild.region e.g sydney or us_central (Though this is not technically required)
         node = await self.bot.wavelink.initiate_node(host='java',
                                                      port=2333,
                                                      rest_uri='http://java:2333',
-                                                     password=password,
+                                                     password=self.password,
                                                      identifier='TEST',
                                                      region='eu')
 
+        if not node.is_available:
+            print(f"/ \n {Fore.RED}ERROR WHILE CONNECTING TO LAVALINK SERVER \nLAVALINK SERVER IS DOWN/NOT RUNNING\nMUSIC UNLOADING... {Style.RESET_ALL}")
+            self.bot.unload_extension('commands.music')
+            return
         # Set our node hook callback
         node.set_hook(self.on_event_hook)
 
