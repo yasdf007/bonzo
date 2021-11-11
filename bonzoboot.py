@@ -5,12 +5,14 @@
 from sys import dont_write_bytecode
 dont_write_bytecode = True # убирает генерацию машинного кода python
 
+from discord.ext import tasks
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 from discord_slash import SlashCommand
 from discord_together import DiscordTogether
 
 from config import OWNER_IDS, prefix
+from database import db
 
 from colorama import Fore, Back, Style
 from dotenv import load_dotenv
@@ -45,6 +47,17 @@ class Bot(bonzoBot):
 
         super().__init__(command_prefix=when_mentioned_or(prefix),
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
+        self.db_conn.start()
+
+    @tasks.loop(count=1)
+    async def db_conn(self):
+        try:
+            self.pool = await db.connectToDB()
+        except Exception as err:
+            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
+            print(err)
+            self.bot.unload_extension(f'commands.xpSystem')
+            self.bot.unload_extension(f'commands.freeGames')
 
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 1

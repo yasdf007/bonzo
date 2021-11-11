@@ -7,9 +7,6 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from config import guilds
 from discord_slash import SlashContext, cog_ext
-from discord.ext import tasks
-import database.db
-from colorama import Fore, Back, Style
 
 
 class AddXP(Cog):
@@ -18,16 +15,6 @@ class AddXP(Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.db_conn.start()
-
-    @tasks.loop(count=1)
-    async def db_conn(self):
-        try:
-            self.bot.pool = await database.db.connectToDB()
-        except Exception as err:
-            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
-            print(err)
-            self.bot.unload_extension(f'commands.xpSystem')
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
