@@ -1,3 +1,4 @@
+from sys import prefix
 import discord
 from discord import Embed
 from discord.ext.commands import Cog, command
@@ -25,10 +26,9 @@ class Inita(Cog):
         title='**Начало работы с bonzo**',
         color=discord.Color.random()
         )
-
+        prefix = (await self.bot.get_prefix(ctx.message))[-1]
         embed.set_thumbnail(url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
-
-        embed.add_field(name='**Для использования legacy-команд:**', value='b/help')
+        embed.add_field(name='**Для использования legacy-команд:**', value=f'{prefix}help')
         embed.add_field(name='**Для использования slash-команд:**', value='/help_slash')
         embed.add_field(name='**Для связи с разработчиками:**', 
             value=f'[Перейдите на сервер (нажмите сюда)]({supportserver})')
