@@ -113,6 +113,7 @@ class Music(commands.Cog):
         self.controllers = {}
         self.eqs = equalizers
         self.password = getenv('LAVAPASS')
+        self.dc_flag = {}
 
         if not hasattr(bot, 'wavelink'):
             self.bot.wavelink = wavelink.Client(bot=self.bot)
@@ -229,6 +230,28 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
+        if member.id == self.bot.user.id:
+            # перемещение бота по каналам
+            if (before.channel and after.channel) and before.channel != after.channel:
+                # в новом канале нет людей
+                if len([user for user in after.channel.members if not user.bot]) < 1:
+                    self.dc_flag[member.guild.id] = True
+
+                    await self.teardown(member.guild.id)
+                    return
+                else:
+                    # ставится новый канал проигрывания музыки
+                    player = self.bot.wavelink.get_player(
+                        member.guild.id, cls=BonzoPlayer)
+                    player.channel_id = after.channel.id
+                    return
+
+            # дисконнект из войса кнопкой в дискорде
+            if not self.dc_flag[member.guild.id] and (before.channel and (after.channel == None)):
+                self.dc_flag[member.guild.id] = False
+                await self.teardown(member.guild.id)
+                return
+
         if member.bot:
             return
 
@@ -237,7 +260,11 @@ class Music(commands.Cog):
 
         # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
-            if len([user for user in before.channel.members if not user.bot]) < 1:
+            player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
+            if len([user for user in self.bot.get_channel(player.channel_id).members if not user.bot]) < 1:
+
+                self.dc_flag[member.guild.id] = True
+
                 await self.teardown(member.guild.id)
 
     async def checkIsSameVoice(self, ctx, voiceChannel):
@@ -250,6 +277,7 @@ class Music(commands.Cog):
 
         await self.controllers[guild_id].stop()
 
+        del self.dc_flag[guild_id]
         del self.controllers[guild_id]
 
         await player.destroy()
@@ -305,6 +333,8 @@ class Music(commands.Cog):
             guild_id = ctx.guild_id
         except AttributeError:
             guild_id = ctx.guild.id
+
+        self.dc_flag[ctx.guild.id] = False
 
         player = self.bot.wavelink.get_player(guild_id, cls=BonzoPlayer)
         try:
@@ -554,6 +584,7 @@ class Music(commands.Cog):
         vc = self.bot.get_channel(player.channel_id)
         await self.checkIsSameVoice(ctx, vc)
 
+        self.dc_flag[ctx.guild.id] = True
         await self.teardown(ctx.guild.id)
 
         await ctx.send('Отключился и удалил очередь')
