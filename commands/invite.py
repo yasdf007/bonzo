@@ -24,11 +24,11 @@ class invite(Cog):
 
     async def invite(self, ctx):
         embedd = Embed(
-            title='**зовём /bonzo/ на ваш сервер...**', colour=0xb84000)
+            title='**Зовём /bonzo/ на Ваш сервер...**', colour=0xb84000)
         embedd.set_thumbnail(
             url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
         embedd.add_field(
-            name='кликните вот', value=f'[сюда]({invlink})')
+            name='Спасибо за поддержку!', value=f'**-->** [Нажмите сюда!]({invlink}) **<--**')
         embedd.set_footer(text="/by bonzo/ for @" + ctx.author.name)
         await ctx.send(embed=embedd)
 
