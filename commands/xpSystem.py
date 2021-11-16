@@ -222,11 +222,11 @@ class AddXP(Cog):
         await ctx.send(embed=embed)
 
     @guild_only()
-    @command(name='rank', description='Показывает топ 10 по опыту')
+    @command(name='rank', description='Показывает персональную карточку с уровнем')
     async def rank_prefix(self, ctx: Context):
         await self.rank(ctx)
 
-    @cog_ext.cog_slash(name='rank', description='Показывает топ 10 по опыту')
+    @cog_ext.cog_slash(name='rank', description='Показывает персональную карточку с уровнем')
     async def rank_slash(self, ctx: SlashContext):
         if not ctx.guild:
             raise NoPrivateMessage
