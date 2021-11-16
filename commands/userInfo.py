@@ -1,13 +1,20 @@
 from discord import Embed, Spotify, CustomActivity
-from discord.ext.commands import Cog, command, MemberNotFound
+from discord.ext.commands import Cog, command, MemberNotFound, CommandError
 from discord.ext.commands.context import Context
 from discord.member import Member
 from discord_slash import SlashContext, cog_ext
 from discord.ext.commands.core import guild_only
 from config import guilds
+from .resources.AutomatedMessages import automata
+from discord_slash.error import SlashCommandError
+from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 
 name = 'info'
 description = 'Выдаёт информацию о пользователе'
+
+
+class NoPrivateMessage(CommandError, SlashCommandError):
+    pass
 
 
 class Info(Cog):
@@ -18,6 +25,14 @@ class Info(Cog):
         if isinstance(error, MemberNotFound):
             await ctx.message.reply(f'{error.argument} не найден')
 
+        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
     @guild_only()
     @command(name=name, description=description)
     async def info_prefix(self, ctx: Context, member: Member = None):
@@ -25,6 +40,8 @@ class Info(Cog):
 
     @cog_ext.cog_slash(name=name, description=description)
     async def info_slash(self, ctx: SlashContext, member: Member = None):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.info(ctx, member)
 
     async def info(self, ctx, member: Member = None):

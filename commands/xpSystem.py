@@ -1,5 +1,6 @@
 from discord.channel import DMChannel
-from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType, guild_only
+from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType, guild_only, CommandError
+from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from discord.ext.commands.context import Context
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
@@ -7,6 +8,12 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from config import guilds
 from discord_slash import SlashContext, cog_ext
+from discord_slash.error import SlashCommandError
+from .resources.AutomatedMessages import automata
+
+
+class NoPrivateMessage(CommandError, SlashCommandError):
+    pass
 
 
 class AddXP(Cog):
@@ -18,7 +25,15 @@ class AddXP(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(error)
+            return await ctx.message.reply(error)
+
+        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
 
     async def calculateLevel(self, exp):
         return int((exp/60) ** 0.5)
@@ -176,6 +191,8 @@ class AddXP(Cog):
 
     @cog_ext.cog_slash(name='top', description='Показывает топ 10 по опыту')
     async def leaderboard_slash(self, ctx: SlashContext):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.leaderboard(ctx)
 
     async def leaderboard(self, ctx):
@@ -211,6 +228,8 @@ class AddXP(Cog):
 
     @cog_ext.cog_slash(name='rank', description='Показывает топ 10 по опыту')
     async def rank_slash(self, ctx: SlashContext):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.rank(ctx)
 
     async def rank(self, ctx):
