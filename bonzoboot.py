@@ -37,10 +37,10 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-
 class Bot(bonzoBot):
     def __init__(self):
-        intents = Intents.all()
+        intents = Intents.default()
+        intents.members = True
         self.game = Game(f'{prefix}init | stacknox2 INDEV')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
@@ -56,8 +56,8 @@ class Bot(bonzoBot):
         except Exception as err:
             print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
             print(err)
-            self.bot.unload_extension(f'commands.xpSystem')
-            self.bot.unload_extension(f'commands.freeGames')
+            self.unload_extension(f'commands.xpSystem')
+            self.unload_extension(f'commands.freeGames')
 
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 1
