@@ -63,11 +63,11 @@ class Dvach(Cog):
 
     #     await ctx.send(res)
 
-    @command(name='crypto_listings', description='Показывает топ 10 криптовалюты по цене (INDEV)')
+    @command(name='crypto_listings', description='Показывает топ 10 криптовалют по капитализации')
     async def get_crypto_listings_prefix(self, ctx: Context):
         await self.get_crypto_listings(ctx)
 
-    @cog_ext.cog_slash(name='crypto_listings', description='Показывает топ 10 криптовалют по цене (INDEV)')
+    @cog_ext.cog_slash(name='crypto_listings', description='Показывает топ 10 криптовалют по капитализации')
     async def get_crypto_listings_slash(self, ctx: SlashContext):
         await self.get_crypto_listings(ctx)
 
