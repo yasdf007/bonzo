@@ -5,6 +5,7 @@ from discord_slash import SlashContext, cog_ext
 from discord_slash.error import SlashCommandError
 from aiohttp import ClientSession
 from config import guilds
+from .resources.AutomatedMessages import automata
 
 name = 'nasapict'
 description = 'Картинка дня от NASA'
@@ -20,12 +21,12 @@ class Nasa(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, NoPhotoFound):
-            return await ctx.send('Не удалось получить картинку дня')
+            return await ctx.send(automata.generateEmbErr('Не удалось получить картинку дня', error=error))
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, NoPhotoFound):
-            return await ctx.send('Не удалось получить картинку дня')
+            return await ctx.send(automata.generateEmbErr('Не удалось получить картинку дня', error=error))
 
     @command(name=name, description=description)
     async def nasapict_prefix(self, ctx: Context):

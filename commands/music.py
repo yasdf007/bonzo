@@ -274,8 +274,7 @@ class Music(commands.Cog):
 
     async def checkIsSameVoice(self, ctx, voiceChannel):
         if ctx.author not in voiceChannel.members:
-            raise IncorrectChannelError(
-                f'{ctx.author}, ты должен быть в `{voiceChannel.name}` для использования музыки')
+            raise IncorrectChannelError(automata.generateEmbErr('f{ctx.author}, Вы должен быть подключены к `{voiceChannel.name}` для использования музыкальных команд', error=IncorrectChannelError))
 
     async def teardown(self, guild_id):
         player = self.bot.wavelink.get_player(guild_id, cls=BonzoPlayer)
@@ -295,8 +294,7 @@ class Music(commands.Cog):
                 raise NotInVoice
 
         if not isinstance(channel, discord.VoiceChannel):
-            raise IncorrectChannelError(
-                f'Указанный канал не является голосовым')
+            raise IncorrectChannelError(automata.generateEmbErr(f'Указанный канал не является голосовым', error=IncorrectChannelError))
 
         try:
             guild_id = ctx.guild_id
