@@ -44,8 +44,9 @@ class Bot(bonzoBot):
         self.game = Game(f'{prefix}init | stacknox2 INDEV')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-
-        super().__init__(command_prefix=when_mentioned_or(prefix),
+        self.custom_prefix = {}
+        
+        super().__init__(command_prefix=self._get_prefix,
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
         self.db_conn.start()
 
@@ -53,6 +54,9 @@ class Bot(bonzoBot):
     async def db_conn(self):
         try:
             self.pool = await db.connectToDB()
+            res = await db.getPrefixes(self.pool)
+            for row in res:
+                self.custom_prefix[int(row['server_id'])] = row['prefix']
         except Exception as err:
             print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
             print(err)
@@ -70,6 +74,15 @@ class Bot(bonzoBot):
 
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
+                
+    def _get_prefix(self, bot, message):
+        if not message.guild:
+            return when_mentioned_or(prefix)(bot, message)
+
+        if message.guild.id in self.custom_prefix:
+            return when_mentioned_or(self.custom_prefix[message.guild.id])(bot, message)
+
+        return when_mentioned_or(prefix)(bot, message)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
