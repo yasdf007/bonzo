@@ -234,6 +234,10 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
+        player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
+        if not player.is_connected:
+            return
+            
         if member.id == self.bot.user.id:
             # перемещение бота по каналам
             if (before.channel and after.channel) and before.channel != after.channel:
@@ -245,8 +249,6 @@ class Music(commands.Cog):
                     return
                 else:
                     # ставится новый канал проигрывания музыки
-                    player = self.bot.wavelink.get_player(
-                        member.guild.id, cls=BonzoPlayer)
                     player.channel_id = after.channel.id
                     return
 
@@ -264,8 +266,6 @@ class Music(commands.Cog):
 
         # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
-            player = self.bot.wavelink.get_player(
-                member.guild.id, cls=BonzoPlayer)
             if len([user for user in self.bot.get_channel(player.channel_id).members if not user.bot]) < 1:
 
                 self.dc_flag[member.guild.id] = True
