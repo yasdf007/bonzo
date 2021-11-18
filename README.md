@@ -6,11 +6,13 @@
 </div>
 <div> 
     <p>На данный момент <a href="/LICENSE">лицензия</a> запрещает любое использование исходного кода bonzo в иных проектах. Мы планируем изменение лицензии на более свободную в последующих обновлениях. Подробные новости о разработке bonzo предоставляются посредством соответствующих каналов в <a href="https://discord.gg/XDZWus5">AloneClub.</a></p>
-    
+</div>
+<div>    
     <h4>Полезные ссылки:</h4>
     <p>&nbsp; Пригласить bonzo на свой сервер: <a href="https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&amp;permissions=8&amp;scope=bot" target="_blank">тык!</a></p>
     <p>&nbsp; Сервер поддержки и новостей о bonzo (AloneClub): <a href="https://discord.gg/XDZWus5">тык!</a></p>
-    
+</div>
+<div>
     <h4>Запуск собственной инстанции:</h4>
     <p>I. PREREQUISITE</p>
     <p>&nbsp;&nbsp; Клон репозитория bonzo в удобной директории (без кириллических символов в пути)</p>
@@ -35,8 +37,11 @@
     </blockquote>
     <p>&nbsp;&nbsp; <strong>Используя нативные инструменты:</strong></p>
     <p>TBA</p>
+</div>
+<div>
     <p>Запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульном режиме.</p>
-    
+</div>
+<div>
     <h3>powered by <a href="https://github.com/Rapptz/discord.py">discord.py</a> and <a href="https://github.com/discord-py-slash-commands/discord-py-interactions">discord-interactions</a></h3>
     <h5>остальные используемые библиотеки описаны в <a href="/requirements.txt">requirements.txt</a></h5>
 </div>
