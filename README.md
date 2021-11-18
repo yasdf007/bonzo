@@ -4,7 +4,7 @@
     <h2>made by /bonzoTeam & others</h2>
     <h3>Модульный Discord-бот с открытым исходным кодом.</h3>
 </div>
-      
+<div> 
     <p>На данный момент <a href="/LICENSE">лицензия</a> запрещает любое использование исходного кода bonzo в иных проектах. Мы планируем изменение лицензии на более свободную в последующих обновлениях. Подробные новости о разработке bonzo предоставляются посредством соответствующих каналов в <a href="https://discord.gg/XDZWus5">AloneClub.</a></p>
     
     <h4>Полезные ссылки:</h4>
@@ -39,3 +39,4 @@
     
     <h3>powered by <a href="https://github.com/Rapptz/discord.py">discord.py</a> and <a href="https://github.com/discord-py-slash-commands/discord-py-interactions">discord-interactions</a></h3>
     <h5>остальные используемые библиотеки описаны в <a href="/requirements.txt">requirements.txt</a></h5>
+</div>
