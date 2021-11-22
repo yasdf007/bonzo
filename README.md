@@ -6,11 +6,11 @@
 
 На данный момент [лицензия](LICENSE) запрещает любое использование исходного кода bonzo в иных проектах. Мы планируем изменение лицензии на более свободную в последующих обновлениях. Подробные новости о разработке bonzo предоставляются посредством соответствующих каналов в [AloneClub.](https://discord.gg/XDZWus5)
 
-#### Полезные ссылки:
+### Полезные ссылки:
    Пригласить bonzo на свой сервер: [тык!](https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&amp;permissions=8&amp;scope=bot)\
    Сервер поддержки и новостей о bonzo (AloneClub): [тык!](https://discord.gg/XDZWus5)
 
-#### Запуск собственной инстанции:
+### Запуск собственной инстанции:
 I. PREREQUISITE
    1. Клон репозитория bonzo в удобной директории (без кириллических символов в пути)
    2. Приложение с токеном на [Discord Developer Portal](https://discord.com/developers/applications)
@@ -30,7 +30,7 @@ II. CONFIGURATION
 - Используя образец конфигурационного файла .env.example, создайте и заполните конфигурационный файл .env в корневой папке.
 - Скопировать `Lavalink.jar` и `application.yml` в папку `lavalink`
 
-III. RUNNING NODE \
+III. RUNNING NODE
 
 **Используя Docker**:
 - >$ docker-compose up
