@@ -235,9 +235,9 @@ class Music(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.id == self.bot.user.id:
-            # перемещение бота по каналам
             player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
 
+            # перемещение бота по каналам
             if (before.channel and after.channel) and before.channel != after.channel:
                 # в новом канале нет людей
                 if len([user for user in after.channel.members if not user.bot]) < 1:
