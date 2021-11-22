@@ -234,16 +234,14 @@ class Music(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
-        if not player.is_connected:
-            return
-            
         if member.id == self.bot.user.id:
             # перемещение бота по каналам
+            player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
+
             if (before.channel and after.channel) and before.channel != after.channel:
                 # в новом канале нет людей
                 if len([user for user in after.channel.members if not user.bot]) < 1:
-                    self.dc_flag[member.guild.id] = True
+                    del self.dc_flag[member.guild.id]
 
                     await self.teardown(member.guild.id)
                     return
@@ -253,8 +251,9 @@ class Music(commands.Cog):
                     return
 
             # дисконнект из войса кнопкой в дискорде
-            if not self.dc_flag[member.guild.id] and (before.channel and (after.channel == None)):
-                self.dc_flag[member.guild.id] = False
+            if not self.dc_flag[member.guild.id] and before.channel and not after.channel:
+                del self.dc_flag[member.guild.id]
+
                 await self.teardown(member.guild.id)
                 return
 
@@ -264,11 +263,13 @@ class Music(commands.Cog):
         if not member.guild.id in self.controllers:
             return
 
+        player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
+        if not player.is_connected:
+            return
         # Вышел из войса с ботом или поменял канал
         if (before.channel and not after.channel) or ((before.channel and after.channel) and before.channel != after.channel):
             if len([user for user in self.bot.get_channel(player.channel_id).members if not user.bot]) < 1:
-
-                self.dc_flag[member.guild.id] = True
+                del self.dc_flag[member.guild.id]
 
                 await self.teardown(member.guild.id)
 
