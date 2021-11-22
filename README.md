@@ -1,6 +1,6 @@
 <img align="right" src="static/bonzo.png" width="160" height="160">
 
-## bonzo stacknox2 WIP
+## bonzo v1.13.1 stacknox2
 ## made by /bonzoTeam & others
 ### Модульный Discord-бот с открытым исходным кодом.
 
@@ -20,25 +20,28 @@ I. PREREQUISITE
       - [Java 13+](https://www.oracle.com/java/technologies/downloads/) (для музыки)
       - [Postgresql](https://www.postgresql.org/download/) (для опыта и настроек)
   
-   4. Или
+      <div align='center'> ИЛИ </div>
+      
       - [Docker](https://docs.docker.com/get-docker/) и [docker compose](https://docs.docker.com/compose/install/)
 
-   5. [Lavalink](https://github.com/freyacodes/Lavalink) (для музыки)
+   4. [Lavalink](https://github.com/freyacodes/Lavalink) (для музыки)
 
 II. CONFIGURATION
 - Используя образец конфигурационного файла .env.example, создайте и заполните конфигурационный файл .env в корневой папке.
 - Скопировать `Lavalink.jar` и `application.yml` в папку `lavalink`
 
 III. RUNNING NODE \
+
 **Используя Docker**:
->$ docker-compose up
+- >$ docker-compose up
 
 
 **Используя нативные инструменты:**
 * TBA
 
 
-Запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульном режиме.
+Запуск собственной инстанции на данный момент рекомендуется только разработчикам. Помощь по запуску инстанции можно запросить на сервере поддержки.
 
 powered by [discord.py](https://github.com/Rapptz/discord.py) and [discord-interactions](https://github.com/discord-py-slash-commands/discord-py-interactions) 
+
 остальные используемые библиотеки описаны в [requirements.txt](/requirements.txt)
