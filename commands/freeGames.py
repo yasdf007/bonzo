@@ -12,6 +12,7 @@ from discord import Embed
 from discord import Colour
 from .resources.AutomatedMessages import automata
 
+
 class FreeGames(Cog):
     link = 'https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU'
 
@@ -39,16 +40,21 @@ class FreeGames(Cog):
 
         try:
             async with self.bot.pool.acquire() as con:
-                selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
+                selectQuery = f'select free_games_channel_id from server_settings where server_id={ctx.message.guild.id}'
                 res = await con.fetchrow(selectQuery)
-                if res:
-                    channel = self.bot.get_channel(res['channel_id'])
+
+                if res != None and res['free_games_channel_id'] != None:
+                    channel = self.bot.get_channel(
+                        res['free_games_channel_id'])
                     msg = await ctx.send(f'На этом сервере уже указан канал для бесплатных игр {channel.mention}(удаление через 3с)')
                     await sleep(3)
                     await msg.delete()
                     return
 
-                insertQuery = f'insert into free_games_channel(server_id,channel_id) values({ctx.message.guild.id},{ctx.message.channel.id});'
+                insertQuery = f"""
+                insert into server_settings(server_id, free_games_channel_id) values({ctx.message.guild.id},{ctx.message.channel.id})
+                ON CONFLICT (server_id) DO UPDATE SET free_games_channel_id={ctx.message.channel.id};
+                """
                 await con.execute(insertQuery)
 
                 msg = await ctx.send('Этот канал будет использоваться для рассылки бесплатных игр (удаление через 3с)')
@@ -67,16 +73,16 @@ class FreeGames(Cog):
     async def removeFromFreeGames(self, ctx):
         await ctx.message.delete()
         async with self.bot.pool.acquire() as con:
-            selectQuery = f'select channel_id from free_games_channel where server_id={ctx.message.guild.id}'
+            selectQuery = f'select free_games_channel_id from server_settings where server_id={ctx.message.guild.id};'
             res = await con.fetchrow(selectQuery)
 
-            if not res:
+            if res == None or res['free_games_channel_id'] == None:
                 msg = await ctx.send('На этом сервере не был указан канал для бесплатных игр (удаление через 3с)')
                 await sleep(3)
                 await msg.delete()
                 return
 
-            deleteQuery = f'delete from free_games_channel where server_id={ctx.message.guild.id}'
+            deleteQuery = f'update server_settings set free_games_channel_id = null where server_id={ctx.message.guild.id}'
             await con.execute(deleteQuery)
 
             msg = await ctx.send('Рассылки игр больше не будет (удаление через 3с)')
@@ -84,7 +90,7 @@ class FreeGames(Cog):
             await msg.delete()
 
     async def getChannels(self):
-        selectQuery = f'select channel_id from free_games_channel'
+        selectQuery = f'select free_games_channel_id from server_settings;'
         async with self.bot.pool.acquire() as con:
             res = await con.fetch(selectQuery)
 
@@ -139,11 +145,11 @@ class FreeGames(Cog):
             msgs.append(embedd)
         return msgs
 
-    @command(name="run_free_games",description="Ручной запуск бесплатных игр (только для создателей)")
+    @command(name="run_free_games", description="Ручной запуск бесплатных игр (только для создателей)")
     @is_owner()
-    async def runFreeGanes(self,ctx):
+    async def runFreeGanes(self, ctx):
         await self.freeGames()
-        
+
     async def freeGames(self):
         channels = await self.getChannels()
         if len(channels) < 1:
@@ -151,7 +157,7 @@ class FreeGames(Cog):
         msgs = await self.getMessages()
 
         for channel in channels:
-            channel = self.bot.get_channel(channel['channel_id']) 
+            channel = self.bot.get_channel(channel['free_games_channel_id'])
             for msg in msgs:
                 announcement = await channel.send(embed=msg)
 

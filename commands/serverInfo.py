@@ -1,18 +1,34 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, CommandError
 from discord.ext.commands.context import Context
 from discord_slash import SlashContext, cog_ext
 from discord.ext.commands.core import guild_only
 from config import guilds
+from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
+from .resources.AutomatedMessages import automata
+from discord_slash.error import SlashCommandError
 
 
 name = 'serverinfo'
 description = 'Показывает информацию о сервере'
 
 
+class NoPrivateMessage(CommandError, SlashCommandError):
+    pass
+
+
 class info(Cog):
     def __init__(self, bot):
         self.bot = bot
+
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
 
     @guild_only()
     @command(name=name, description=description)
@@ -21,6 +37,8 @@ class info(Cog):
 
     @cog_ext.cog_slash(name=name, description=description)
     async def serverinfo_slash(self, ctx: SlashContext):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.serverinfo(ctx)
 
     # функция, отправляющая информацию о сервере
@@ -36,7 +54,7 @@ class info(Cog):
         embed.add_field(name='**Название:**',
                         value=f'{server.name}', inline=False)
 
-        embed.add_field(name='**Сервак создан:**',
+        embed.add_field(name='**Сервер создан:**',
                         value=server.created_at.strftime('%d %B %Y %R UTC'), inline=False)
 
         embed.add_field(name='**Количество участников:**',

@@ -4,6 +4,7 @@ from discord.ext.commands.errors import NoPrivateMessage
 from .resources.blackjack.Blackjack import Blackjack
 from discord_slash import SlashContext, cog_ext
 from config import guilds
+from .resources.AutomatedMessages import automata
 
 
 class gameBlackjack(Cog):
@@ -12,7 +13,16 @@ class gameBlackjack(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @cog_ext.cog_subcommand(base='blackjack', name='start', description='Начать игру blackjack')
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
+        await ctx.send('Произошла ошибка во время игры.')
+        self.games.pop(str(ctx.guild.id))
+        raise error
+
+    @guild_only()
+    @group(name='blackjack', description='Начать игру blackjack', invoke_without_command=True)
     async def gameBlackjack(self, ctx):
         if ctx.author.bot:
             return
@@ -44,7 +54,8 @@ class gameBlackjack(Cog):
 
             self.games[str(ctx.guild.id)][1] = False
 
-    @cog_ext.cog_subcommand(base='blackjack', name='join', description='Присоединиться к игре blackjack')
+    @guild_only()
+    @gameBlackjack.command(name='join', description='Присоединиться к игре blackjack')
     async def join(self, ctx):
         if ctx.author.bot:
             return
@@ -64,7 +75,8 @@ class gameBlackjack(Cog):
         self.games[str(ctx.guild.id)][0].append(str(ctx.author.id))
         await ctx.send(f'Добавил {ctx.message.author}')
 
-    @cog_ext.cog_subcommand(base='blackjack', name='stop', description='Остановить blackjack')
+    @guild_only()
+    @gameBlackjack.command(name='stop', description='Остановить blackjack')
     async def stop(self, ctx):
         if ctx.author.bot:
             return
@@ -80,7 +92,7 @@ class gameBlackjack(Cog):
         self.games.pop(str(ctx.guild.id))
         await ctx.send('Игра остановлена')
 
-    @cog_ext.cog_subcommand(base='blackjack', name='leave', description='Выйти из blackjack')
+    @gameBlackjack.command(name='leave', description='Выйти из blackjack')
     async def leave(self, ctx):
         if ctx.author.bot:
             return

@@ -5,12 +5,14 @@
 from sys import dont_write_bytecode
 dont_write_bytecode = True # убирает генерацию машинного кода python
 
+from discord.ext import tasks
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
 from discord import Intents, Game, Status
 from discord_slash import SlashCommand
 from discord_together import DiscordTogether
 
 from config import OWNER_IDS, prefix
+from database import db
 
 from colorama import Fore, Back, Style
 from dotenv import load_dotenv
@@ -35,27 +37,52 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-
 class Bot(bonzoBot):
     def __init__(self):
-        intents = Intents.all()
-        self.game = Game(f'{prefix}help | v1.12.2 crypnox')
+        intents = Intents.default()
+        intents.members = True
+        self.game = Game(f'{prefix}init | stacknox2 INDEV')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-        super().__init__(command_prefix=when_mentioned_or(prefix),
+        self.custom_prefix = {}
+        
+        super().__init__(command_prefix=self._get_prefix,
                          help_command=None, intents=intents, owner_ids=OWNER_IDS)
+        self.db_conn.start()
+
+    @tasks.loop(count=1)
+    async def db_conn(self):
+        try:
+            self.pool = await db.connectToDB()
+            res = await db.getPrefixes(self.pool)
+            for row in res:
+                self.custom_prefix[int(row['server_id'])] = row['prefix']
+        except Exception as err:
+            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
+            print(err)
+            self.unload_extension(f'commands.xpSystem')
+            self.unload_extension(f'commands.freeGames')
 
     def cogsLoad(self):
         curr, total = 0, len(listdir('./commands')) - 1
         for filename in listdir('./commands'):
             if filename.endswith('.py'):
                 if filename.startswith('music'):
-                        print(
-                            f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
+                    print(
+                        f'/ \n {Fore.GREEN}MUSIC MODULE HAS BEEN SUCCESFULLY INITIALIZED. {Style.RESET_ALL} \n{curr}/{total} \n/')
                 self.load_extension(f'commands.{filename[:-3]}')
 
                 curr += 1
                 print(f'loaded {filename}, {curr}/{total}')
+                
+    def _get_prefix(self, bot, message):
+        if not message.guild:
+            return when_mentioned_or(prefix)(bot, message)
+
+        if message.guild.id in self.custom_prefix:
+            return when_mentioned_or(self.custom_prefix[message.guild.id])(bot, message)
+
+        return when_mentioned_or(prefix)(bot, message)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
@@ -65,15 +92,9 @@ class Bot(bonzoBot):
 
     @Cog.listener()
     async def on_ready(self):
-        try:
-            self.pool = await db.connectToDB()
-        except Exception as err:
-            print(f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}")
-            print(err)
-
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-        
+
         self.togetherControl = await DiscordTogether(getenv('TOKEN'))
 
         self.scheduler.start()

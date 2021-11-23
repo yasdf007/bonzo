@@ -1,11 +1,18 @@
 from discord.ext.commands.core import group, guild_only
 from discord_slash.context import SlashContext
 from commands.resources.hangman.Hangman import Hangman
-from discord.ext.commands import Cog, command, group
+from discord.ext.commands import Cog, command, group, CommandError
 from discord.ext.commands.context import Context
 import asyncio
 from discord_slash import SlashContext, cog_ext
 from config import guilds
+from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
+from .resources.AutomatedMessages import automata
+from discord_slash.error import SlashCommandError
+
+
+class NoPrivateMessage(CommandError, SlashCommandError):
+    pass
 
 
 class GameHangman(Cog):
@@ -14,6 +21,15 @@ class GameHangman(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    async def cog_command_error(self, ctx, error):
+        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
+    @Cog.listener()
+    async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, NoPrivateMessage):
+            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+
     @guild_only()
     @group(name='hangman', description='Начать игру виселица', invoke_without_command=True)
     async def gameHangman_prefix(self, ctx: Context):
@@ -21,6 +37,8 @@ class GameHangman(Cog):
 
     @cog_ext.cog_subcommand(base='hangman', name='start', description='Начать игру виселица')
     async def gameHangman_slash(self, ctx: SlashContext):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.gameHangman(ctx)
 
     async def gameHangman(self, ctx):
@@ -70,6 +88,8 @@ class GameHangman(Cog):
 
     @cog_ext.cog_subcommand(base='hangman', name='stop', description='Остановить игру виселица')
     async def stop_slash_(self, ctx: SlashContext):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.stop(ctx)
 
     async def stop(self, ctx):

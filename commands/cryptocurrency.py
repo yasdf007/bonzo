@@ -63,11 +63,11 @@ class Dvach(Cog):
 
     #     await ctx.send(res)
 
-    @command(name='crypto_listings', description='Показывает топ 10 криптовалюты по цене')
+    @command(name='crypto_listings', description='Показывает топ 10 криптовалют по капитализации')
     async def get_crypto_listings_prefix(self, ctx: Context):
         await self.get_crypto_listings(ctx)
 
-    @cog_ext.cog_slash(name='crypto_listings', description='Показывает топ 10 криптовалюты по цене')
+    @cog_ext.cog_slash(name='crypto_listings', description='Показывает топ 10 криптовалют по капитализации')
     async def get_crypto_listings_slash(self, ctx: SlashContext):
         await self.get_crypto_listings(ctx)
 
@@ -80,14 +80,22 @@ class Dvach(Cog):
         async with ClientSession(headers=self.HEADERS) as session:
             async with session.get(self.LISTINGS_URL, params=params) as response:
                 res = (await response.json())['data']
-        embed = Embed(title='Топ 10 криптовалюты')
+        embed = Embed(title='10 крупнейших криптовалют по капитализации')
 
         embed.set_footer(text=f'Обновлено в ' +
                          datetime.fromisoformat(res[0]['last_updated'][:-1]).strftime('%Hh %Mm %Ss - %d %h %Y UTC'))
 
         for crypto in res:
+            finprice = float(crypto['quote']['USD']['price'])
+            if finprice > 99.9:
+                finprice=str(int(round(finprice, 1)))
+            elif finprice > 0.0099:
+                finprice=str(round(finprice, 2))
+            else:
+                finprice = str(round(finprice, 6))
+            
             embed.add_field(
-                name=f"{crypto['name']}|{crypto['symbol']}", value=f"Цена: ${crypto['quote']['USD']['price']:.6f}")
+                name=f"{crypto['name']} | {crypto['symbol']}", value=f"Цена: ${finprice}")
         await ctx.send(embed=embed)
 
 
