@@ -158,6 +158,9 @@ class FreeGames(Cog):
 
         for channel in channels:
             channel = self.bot.get_channel(channel['free_games_channel_id'])
+            if not channel:
+                continue 
+
             for msg in msgs:
                 announcement = await channel.send(embed=msg)
 
