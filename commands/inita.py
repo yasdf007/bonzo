@@ -26,11 +26,16 @@ class Inita(Cog):
         color=discord.Color.random()
         )
 
-        prefix = (await self.bot.get_prefix(ctx.message))[-1]
+        if ctx.guild.id in self.bot.custom_prefix:
+            prefix = self.bot.custom_prefix[ctx.guild.id]
+        else:
+            prefix = 'b/'
+
         embed.set_thumbnail(url='https://i.ibb.co/Xk7qTy4/BOnzo-1.png')
 
-        embed.add_field(name='**Для использования legacy-команд:**', value=f'{prefix}')
+        embed.add_field(name='**Для использования legacy-команд:**', value=f'{prefix}help')
         embed.add_field(name='**Для использования slash-команд:**', value='/help_slash')
+        embed.add_field(name='**Для изменения префикса:**', value='@Bonzo set_prefix [ваш префикс]')
         embed.add_field(name='**Для связи с разработчиками:**', 
             value=f'[Перейдите на сервер (нажмите сюда)]({supportserver})')
 
