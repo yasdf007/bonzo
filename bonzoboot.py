@@ -41,7 +41,7 @@ class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.default()
         intents.members = True
-        self.game = Game(f'{prefix}init | stacknox2 INDEV')
+        self.game = Game(f'@Bonzo init | stacknox2')
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
         self.custom_prefix = {}
