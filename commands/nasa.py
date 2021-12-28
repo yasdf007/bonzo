@@ -7,8 +7,8 @@ from aiohttp import ClientSession
 from config import guilds
 from .resources.AutomatedMessages import automata
 
-name = 'nasapict'
-description = 'Картинка дня от NASA'
+name = "nasapict"
+description = "Картинка дня от NASA"
 
 
 class NoPhotoFound(CommandError, SlashCommandError):
@@ -21,12 +21,16 @@ class Nasa(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, NoPhotoFound):
-            return await ctx.send(automata.generateEmbErr('Не удалось получить картинку дня', error=error))
+            return await ctx.send(
+                automata.generateEmbErr("Не удалось получить картинку дня", error=error)
+            )
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, NoPhotoFound):
-            return await ctx.send(automata.generateEmbErr('Не удалось получить картинку дня', error=error))
+            return await ctx.send(
+                automata.generateEmbErr("Не удалось получить картинку дня", error=error)
+            )
 
     @command(name=name, description=description)
     async def nasapict_prefix(self, ctx: Context):
@@ -37,15 +41,15 @@ class Nasa(Cog):
         await self.nasapict(ctx)
 
     async def nasapict(self, ctx):
-        embed = Embed(title='Картинка дня от NASA', color=0x0000ff)
+        embed = Embed(title="Картинка дня от NASA", color=0x0000FF)
 
-        query = 'https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY'
+        query = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"
         async with ClientSession() as session:
             async with session.get(query) as response:
                 res = await response.json()
         try:
-            image = res['hdurl']
-            title = res['title']
+            image = res["hdurl"]
+            title = res["title"]
 
             embed.set_image(url=image)
             embed.set_footer(text=title)

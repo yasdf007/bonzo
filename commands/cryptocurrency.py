@@ -7,8 +7,8 @@ from discord_slash.error import SlashCommandError
 from datetime import datetime
 from os import getenv
 
-name = 'crypto'
-description = 'Выводит информацию о криптовалюте (INDEV)'
+name = "crypto"
+description = "Выводит информацию о криптовалюте (INDEV)"
 
 
 class RequestNetworkError(CommandError, SlashCommandError):
@@ -24,27 +24,31 @@ class Dvach(Cog):
 
     def __init__(self, bot):
         self.bot = bot
-        self.key = getenv('COINMARKETCAP_API_KEY')
+        self.key = getenv("COINMARKETCAP_API_KEY")
 
         self.HEADERS = {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-            'Accept-Encoding': 'deflate, gzip',
-            "X-CMC_PRO_API_KEY": str(self.key)
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Accept-Encoding": "deflate, gzip",
+            "X-CMC_PRO_API_KEY": str(self.key),
         }
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, RequestNetworkError):
-            return await ctx.send(embed=automata.generateEmbErr('Ошибка при запросе'))
+            return await ctx.send(embed=automata.generateEmbErr("Ошибка при запросе"))
         if isinstance(error, CurrencyDoesNotExist):
-            return await ctx.send(embed=automata.generateEmbErr('Такой валюты не найдено'))
+            return await ctx.send(
+                embed=automata.generateEmbErr("Такой валюты не найдено")
+            )
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, RequestNetworkError):
-            return await ctx.send(embed=automata.generateEmbErr('Ошибка при запросе'))
+            return await ctx.send(embed=automata.generateEmbErr("Ошибка при запросе"))
         if isinstance(error, CurrencyDoesNotExist):
-            return await ctx.send(embed=automata.generateEmbErr('Такой валюты не найдено'))
+            return await ctx.send(
+                embed=automata.generateEmbErr("Такой валюты не найдено")
+            )
 
     # @command(name=name, description=description)
     # async def get_crypto_info_prefix(self, ctx: Context, currency: str):
@@ -63,39 +67,47 @@ class Dvach(Cog):
 
     #     await ctx.send(res)
 
-    @command(name='crypto_listings', description='Показывает топ 10 криптовалют по капитализации')
+    @command(
+        name="crypto_listings",
+        description="Показывает топ 10 криптовалют по капитализации",
+    )
     async def get_crypto_listings_prefix(self, ctx: Context):
         await self.get_crypto_listings(ctx)
 
-    @cog_ext.cog_slash(name='crypto_listings', description='Показывает топ 10 криптовалют по капитализации')
+    @cog_ext.cog_slash(
+        name="crypto_listings",
+        description="Показывает топ 10 криптовалют по капитализации",
+    )
     async def get_crypto_listings_slash(self, ctx: SlashContext):
         await self.get_crypto_listings(ctx)
 
     async def get_crypto_listings(self, ctx):
-        params = {
-            "start": "1",
-            "limit": "10",
-            "convert": "USD"
-        }
+        params = {"start": "1", "limit": "10", "convert": "USD"}
         async with ClientSession(headers=self.HEADERS) as session:
             async with session.get(self.LISTINGS_URL, params=params) as response:
-                res = (await response.json())['data']
-        embed = Embed(title='10 крупнейших криптовалют по капитализации')
+                res = (await response.json())["data"]
+        embed = Embed(title="10 крупнейших криптовалют по капитализации")
 
-        embed.set_footer(text=f'Обновлено в ' +
-                         datetime.fromisoformat(res[0]['last_updated'][:-1]).strftime('%Hh %Mm %Ss - %d %h %Y UTC'))
+        embed.set_footer(
+            text=f"Обновлено в "
+            + datetime.fromisoformat(res[0]["last_updated"][:-1]).strftime(
+                "%Hh %Mm %Ss - %d %h %Y UTC"
+            )
+        )
 
         for crypto in res:
-            finprice = float(crypto['quote']['USD']['price'])
+            finprice = float(crypto["quote"]["USD"]["price"])
             if finprice > 99.9:
-                finprice=str(int(round(finprice, 1)))
+                finprice = str(int(round(finprice, 1)))
             elif finprice > 0.0099:
-                finprice=str(round(finprice, 2))
+                finprice = str(round(finprice, 2))
             else:
                 finprice = str(round(finprice, 6))
-            
+
             embed.add_field(
-                name=f"{crypto['name']} | {crypto['symbol']}", value=f"Цена: ${finprice}")
+                name=f"{crypto['name']} | {crypto['symbol']}",
+                value=f"Цена: ${finprice}",
+            )
         await ctx.send(embed=embed)
 
 

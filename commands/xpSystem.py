@@ -1,5 +1,13 @@
 from discord.channel import DMChannel
-from discord.ext.commands import Cog, command, CommandOnCooldown, cooldown, BucketType, guild_only, CommandError
+from discord.ext.commands import (
+    Cog,
+    command,
+    CommandOnCooldown,
+    cooldown,
+    BucketType,
+    guild_only,
+    CommandError,
+)
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from discord.ext.commands.context import Context
 from discord import Embed, File, Asset
@@ -28,37 +36,45 @@ class AddXP(Cog):
             return await ctx.message.reply(error)
 
         if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
-            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+            return await ctx.send(
+                embed=automata.generateEmbErr(
+                    "Эту команду нельзя использовать в ЛС.", error=error
+                )
+            )
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
         if isinstance(error, NoPrivateMessage):
-            return await ctx.send(embed=automata.generateEmbErr('Эту команду нельзя использовать в ЛС.', error=error))
+            return await ctx.send(
+                embed=automata.generateEmbErr(
+                    "Эту команду нельзя использовать в ЛС.", error=error
+                )
+            )
 
     async def calculateLevel(self, exp):
-        return int((exp/60) ** 0.5)
+        return int((exp / 60) ** 0.5)
 
     async def calculateXp(self, lvl):
-        return int(60*lvl**2)
+        return int(60 * lvl ** 2)
 
     async def percentsToLvlUp(self, currentXp, currentLVL):
         xpToGetCurrentLVL = await self.calculateXp(currentLVL)
-        xpToGetNextLVL = await self.calculateXp(currentLVL+1)
+        xpToGetNextLVL = await self.calculateXp(currentLVL + 1)
 
         devinded = currentXp - xpToGetCurrentLVL
         devider = xpToGetNextLVL - xpToGetCurrentLVL
 
-        return round((devinded/devider)*100, 2)
+        return round((devinded / devider) * 100, 2)
 
     async def executeQuery(self, query: str, type_: str):
         async with self.bot.pool.acquire() as con:
-            if type_ == 'fetch':
+            if type_ == "fetch":
                 result = await con.fetch(query)
 
-            if type_ == 'fetchrow':
+            if type_ == "fetchrow":
                 result = await con.fetchrow(query)
 
-            if type_ == 'execute':
+            if type_ == "execute":
                 result = await con.execute(query)
 
         return result
@@ -74,39 +90,37 @@ class AddXP(Cog):
 
     async def checkAfter(self, channel):
         # Массив из людей в войсе без ботов
-        membersInVoice = list(
-            filter(lambda x: x.bot == False, channel.members)
-        )
+        membersInVoice = list(filter(lambda x: x.bot == False, channel.members))
 
         # Если больше одного, то для каждого генерим опыт,
         # если уже нет таска для опыта
         if len(membersInVoice) >= 2:
 
             for member in membersInVoice:
-                if self.bot.scheduler.get_job(f'{member.id}') is None:
+                if self.bot.scheduler.get_job(f"{member.id}") is None:
                     await self.addVoiceJob(member)
 
     async def checkBefore(self, channel):
-        membersInVoice = list(
-            filter(lambda x: x.bot == False, channel.members)
-        )
+        membersInVoice = list(filter(lambda x: x.bot == False, channel.members))
 
         if len(membersInVoice) == 1:
             for member in membersInVoice:
-                self.bot.scheduler.remove_job(f'{member.id}')
+                self.bot.scheduler.remove_job(f"{member.id}")
 
     async def checkBeforeAndAfter(self, before, after):
         await self.checkBefore(before)
         await self.checkAfter(after)
 
     async def checkAfkOrDeaf(self, member):
-        job = self.bot.scheduler.get_job(f'{member.id}')
+        job = self.bot.scheduler.get_job(f"{member.id}")
 
         if job:
-            if (member.voice.channel.name == member.guild.afk_channel) or member.voice.self_deaf == True:
-                self.bot.scheduler.pause_job(f'{member.id}')
+            if (
+                member.voice.channel.name == member.guild.afk_channel
+            ) or member.voice.self_deaf == True:
+                self.bot.scheduler.pause_job(f"{member.id}")
             else:
-                self.bot.scheduler.resume_job(f'{member.id}')
+                self.bot.scheduler.resume_job(f"{member.id}")
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -119,16 +133,16 @@ class AddXP(Cog):
 
         # Выход
         if before.channel and not after.channel:
-            if self.bot.scheduler.get_job(f'{member.id}'):
-                self.bot.scheduler.remove_job(f'{member.id}')
+            if self.bot.scheduler.get_job(f"{member.id}"):
+                self.bot.scheduler.remove_job(f"{member.id}")
 
             await self.checkBefore(before.channel)
 
         # Перемещение по каналам
         if before.channel and after.channel:
             if before.channel != after.channel:
-                if self.bot.scheduler.get_job(f'{member.id}'):
-                    self.bot.scheduler.remove_job(f'{member.id}')
+                if self.bot.scheduler.get_job(f"{member.id}"):
+                    self.bot.scheduler.remove_job(f"{member.id}")
 
                 await self.checkBeforeAndAfter(before.channel, after.channel)
 
@@ -136,80 +150,81 @@ class AddXP(Cog):
 
     async def addVoiceJob(self, member):
         self.bot.scheduler.add_job(
-            self.addVoiceXp, 'interval', minutes=1, id=f'{member.id}', args=[member])
+            self.addVoiceXp, "interval", minutes=1, id=f"{member.id}", args=[member]
+        )
 
     async def addMessageXp(self, member):
-        selectQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                    select xp,nexttextxpat from xpinfo where xpinfo.id = (select res.id from res);'
+        selectQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                    select xp,nexttextxpat from xpinfo where xpinfo.id = (select res.id from res);"
 
-        xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
+        xpInfo = await self.executeQuery(selectQuery, "fetchrow")
 
         if xpInfo is None:
-            insertQuery = f'with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id) \
-                        insert into xpinfo (id) select res.id from res;'
-            await self.executeQuery(insertQuery, 'execute')
+            insertQuery = f"with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id) \
+                        insert into xpinfo (id) select res.id from res;"
+            await self.executeQuery(insertQuery, "execute")
             return
 
-        xp = xpInfo['xp']
-        nextMessageXpAt = xpInfo['nexttextxpat']
+        xp = xpInfo["xp"]
+        nextMessageXpAt = xpInfo["nexttextxpat"]
 
         if datetime.now() > nextMessageXpAt:
             newXp = xp + self.messageXP
             newLvl = await self.calculateLevel(newXp)
-            nextXpAt = datetime.now()+timedelta(seconds=60)
+            nextXpAt = datetime.now() + timedelta(seconds=60)
 
             updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
                             update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = '{nextXpAt}' \
                             where xpinfo.id = (select res.id from res);"
 
-            await self.executeQuery(updateQuery, 'execute')
+            await self.executeQuery(updateQuery, "execute")
 
     async def addVoiceXp(self, member):
-        selectQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                    select xp from xpinfo where xpinfo.id = (select res.id from res);'
+        selectQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                    select xp from xpinfo where xpinfo.id = (select res.id from res);"
 
-        xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
+        xpInfo = await self.executeQuery(selectQuery, "fetchrow")
 
         if xpInfo is None:
-            insertQuery = f'with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id)\
-                        insert into xpinfo (id) select res.id from res;'
-            await self.executeQuery(insertQuery, 'execute')
+            insertQuery = f"with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id)\
+                        insert into xpinfo (id) select res.id from res;"
+            await self.executeQuery(insertQuery, "execute")
             return
 
-        newXp = xpInfo['xp'] + self.voiceXP
+        newXp = xpInfo["xp"] + self.voiceXP
         newLvl = await self.calculateLevel(newXp)
 
-        updateQuery = f'with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                        update xpinfo set xp={newXp}, LVL={newLvl}  where xpinfo.id = (select res.id from res);'
+        updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
+                        update xpinfo set xp={newXp}, LVL={newLvl}  where xpinfo.id = (select res.id from res);"
 
-        await self.executeQuery(updateQuery, 'execute')
+        await self.executeQuery(updateQuery, "execute")
 
     @guild_only()
-    @command(name='top', description='Показывает топ 10 по опыту')
+    @command(name="top", description="Показывает топ 10 по опыту")
     async def leaderboard_prefix(self, ctx: Context):
         await self.leaderboard(ctx)
 
-    @cog_ext.cog_slash(name='top', description='Показывает топ 10 по опыту')
+    @cog_ext.cog_slash(name="top", description="Показывает топ 10 по опыту")
     async def leaderboard_slash(self, ctx: SlashContext):
         if not ctx.guild:
             raise NoPrivateMessage
         await self.leaderboard(ctx)
 
     async def leaderboard(self, ctx):
-        selectQuery = f'select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
-        where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;'
+        selectQuery = f"select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
+        where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;"
 
-        result = await self.executeQuery(selectQuery, 'fetch')
+        result = await self.executeQuery(selectQuery, "fetch")
 
         if result is None:
-            await ctx.message.reply('Значения не найдены')
+            await ctx.message.reply("Значения не найдены")
             return
 
-        embed = Embed(
-            title='TOP 10 участников по опыту', color=ctx.author.color)
+        embed = Embed(title="TOP 10 участников по опыту", color=ctx.author.color)
 
         embed.set_footer(
-            text=f'/by bonzo/ for {ctx.author}', icon_url=ctx.author.avatar_url)
+            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.avatar_url
+        )
         embed.set_thumbnail(url=ctx.guild.icon_url)
 
         guild = self.bot.get_guild(ctx.guild.id)
@@ -217,59 +232,67 @@ class AddXP(Cog):
         for id_, exp, lvl in result:
             member = guild.get_member(id_)
             embed.add_field(
-                name=f'`{member.display_name}`', value=f'LVL: {lvl}\nEXP: {exp}', inline=False)
+                name=f"`{member.display_name}`",
+                value=f"LVL: {lvl}\nEXP: {exp}",
+                inline=False,
+            )
 
         await ctx.send(embed=embed)
 
     @guild_only()
-    @command(name='rank', description='Показывает персональную карточку с уровнем')
+    @command(name="rank", description="Показывает персональную карточку с уровнем")
     async def rank_prefix(self, ctx: Context):
         await self.rank(ctx)
 
-    @cog_ext.cog_slash(name='rank', description='Показывает персональную карточку с уровнем')
+    @cog_ext.cog_slash(
+        name="rank", description="Показывает персональную карточку с уровнем"
+    )
     async def rank_slash(self, ctx: SlashContext):
         if not ctx.guild:
             raise NoPrivateMessage
         await self.rank(ctx)
 
     async def rank(self, ctx):
-        selectQuery = f'select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
+        selectQuery = f"select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
                         join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \
-                        join (select count(distinct id) as overall from user_server where serverid={ctx.guild.id}) as p on x.userid={ctx.author.id};'
+                        join (select count(distinct id) as overall from user_server where serverid={ctx.guild.id}) as p on x.userid={ctx.author.id};"
         try:
-            xpInfo = await self.executeQuery(selectQuery, 'fetchrow')
+            xpInfo = await self.executeQuery(selectQuery, "fetchrow")
 
-            xp = xpInfo['xp']
-            lvl = xpInfo['lvl']
-            rank = xpInfo['rank']
-            maxRank = xpInfo['overall']
+            xp = xpInfo["xp"]
+            lvl = xpInfo["lvl"]
+            rank = xpInfo["rank"]
+            maxRank = xpInfo["overall"]
 
         except TypeError:
-            await ctx.message.reply('Тебя нет в базе данных, добавляю...')
-            insertQuery = f'with res as (insert into user_server (userid, serverid) values ({ctx.author.id}, {ctx.guild.id}) returning id)\
-                        insert into xpinfo (id) select res.id from res;'
+            await ctx.message.reply("Тебя нет в базе данных, добавляю...")
+            insertQuery = f"with res as (insert into user_server (userid, serverid) values ({ctx.author.id}, {ctx.guild.id}) returning id)\
+                        insert into xpinfo (id) select res.id from res;"
 
-            await self.executeQuery(insertQuery, 'execute')
+            await self.executeQuery(insertQuery, "execute")
 
-        await (await self.bot.loop.run_in_executor(None, self.asyncRankCard, ctx, xp, lvl, rank, maxRank))
+        await (
+            await self.bot.loop.run_in_executor(
+                None, self.asyncRankCard, ctx, xp, lvl, rank, maxRank
+            )
+        )
 
     async def createMask(self, photo):
-        with Image.new('L', photo.size, 0) as mask:
+        with Image.new("L", photo.size, 0) as mask:
             drawMask = ImageDraw.Draw(mask)
-            drawMask.ellipse(
-                (0, 0) + photo.size, fill=255)
+            drawMask.ellipse((0, 0) + photo.size, fill=255)
 
             return mask
 
     async def asyncRankCard(self, ctx, xp, lvl, rank, maxRank):
         fullBlack = (0, 0, 0)
-        reqImage = await Asset.read(ctx.author.avatar_url_as(static_format='png'))
+        reqImage = await Asset.read(ctx.author.avatar_url_as(static_format="png"))
 
         with Image.open(BytesIO(reqImage)) as userProfilePhoto:
-            with Image.open('./static/rankTemplate.png') as template:
-                with Image.open('./static/progressBar.png') as bar:
+            with Image.open("./static/rankTemplate.png") as template:
+                with Image.open("./static/progressBar.png") as bar:
                     draw = ImageDraw.Draw(template)
-                    font = ImageFont.truetype('./static/arial.ttf', 14)
+                    font = ImageFont.truetype("./static/arial.ttf", 14)
 
                     mask = await self.createMask(userProfilePhoto)
 
@@ -279,36 +302,53 @@ class AddXP(Cog):
                     mask = mask.resize(avatarSize)
 
                     percents = await self.percentsToLvlUp(xp, lvl)
-                    xpToNextLVL = await self.calculateXp(lvl+1)
+                    xpToNextLVL = await self.calculateXp(lvl + 1)
 
                     barWidth = bar.size[0]
-                    croppedBar = bar.crop((0, 0, barWidth*(percents)/100, 45))
+                    croppedBar = bar.crop((0, 0, barWidth * (percents) / 100, 45))
 
                     template.paste(rezised, (15, 15), mask)
                     template.paste(croppedBar, (100, 255), croppedBar)
 
-                    percentsText = f'{percents}%'
+                    percentsText = f"{percents}%"
                     textWidth = font.getsize(percentsText)[0]
 
-                    draw.text(((650-textWidth)/2, 270), percentsText, fullBlack,
-                              font=font, align='right')
+                    draw.text(
+                        ((650 - textWidth) / 2, 270),
+                        percentsText,
+                        fullBlack,
+                        font=font,
+                        align="right",
+                    )
 
-                    draw.text((130, 12), f'{ctx.author}', fullBlack,
-                              font=font, align='center')
+                    draw.text(
+                        (130, 12), f"{ctx.author}", fullBlack, font=font, align="center"
+                    )
 
-                    draw.text((130, 43), f'RANK:{rank}/{maxRank}', fullBlack,
-                              font=font, align='center')
+                    draw.text(
+                        (130, 43),
+                        f"RANK:{rank}/{maxRank}",
+                        fullBlack,
+                        font=font,
+                        align="center",
+                    )
 
-                    draw.text((130, 73), f'EXP: {xp}/{xpToNextLVL}', fullBlack,
-                              font=font, align='center')
+                    draw.text(
+                        (130, 73),
+                        f"EXP: {xp}/{xpToNextLVL}",
+                        fullBlack,
+                        font=font,
+                        align="center",
+                    )
 
-                    draw.text((130, 102), f'LVL: {lvl}', fullBlack,
-                              font=font, align='center')
+                    draw.text(
+                        (130, 102), f"LVL: {lvl}", fullBlack, font=font, align="center"
+                    )
 
                     with BytesIO() as temp:
-                        template.save(temp, 'png')
+                        template.save(temp, "png")
                         temp.seek(0)
-                        await ctx.send(file=File(fp=temp, filename='now.png'))
+                        await ctx.send(file=File(fp=temp, filename="now.png"))
 
 
 def setup(bot):

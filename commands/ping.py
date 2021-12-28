@@ -3,8 +3,8 @@ from discord.ext.commands.context import Context
 from config import guilds
 from discord_slash import SlashContext, cog_ext
 
-name = 'ping'
-description = 'Понг!'
+name = "ping"
+description = "Понг!"
 
 
 class ping(Cog):
@@ -18,11 +18,12 @@ class ping(Cog):
     @cog_ext.cog_slash(name=name, description=description)
     async def ping_slash(self, ctx: SlashContext):
         await self.ping(ctx)
+
     # Задержка
 
     async def ping(self, ctx):
         botLatency = round(ctx.bot.latency * 1000, 2)
-        await ctx.send(f'Pong! {str(botLatency)}ms (задержка)')
+        await ctx.send(f"Pong! {str(botLatency)}ms (задержка)")
 
 
 def setup(bot):

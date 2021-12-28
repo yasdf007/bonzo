@@ -5,12 +5,12 @@ from string import ascii_lowercase, digits
 from discord_slash import SlashContext, cog_ext
 from config import guilds
 
-name = 'pict'
-description = 'Отправляет случайное изображение из prnt.sc :o'
+name = "pict"
+description = "Отправляет случайное изображение из prnt.sc :o"
 
 
 class pict(Cog):
-    url = 'https://prnt.sc/'
+    url = "https://prnt.sc/"
 
     def __init__(self, bot):
         self.bot = bot
@@ -33,7 +33,7 @@ class pict(Cog):
     # Функция, генерирующая ссылку
     async def makePictUrl(self):
         # делаем случайную строку из 6 символов
-        symbolsStr = ''.join(choices(ascii_lowercase + digits, k=6))
+        symbolsStr = "".join(choices(ascii_lowercase + digits, k=6))
         # соединяем строку с ссылкой url
         result = self.url + symbolsStr
         return result
