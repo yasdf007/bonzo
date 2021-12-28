@@ -40,5 +40,12 @@ III. RUNNING NODE \
 
 Запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульном режиме.
 
+**Donations:**
+*Using TON (Prefferable):*
+> EQAcPIGWfiW-CFQFzQpjzYOicIu8zV2flffRmfAEq8BE_vSU
+*Using RUB:*
+[QIWI](https://qiwi.com/n/OTTIC882)
+
+
 powered by [discord.py](https://github.com/Rapptz/discord.py) and [discord-interactions](https://github.com/discord-py-slash-commands/discord-py-interactions) 
 остальные используемые библиотеки описаны в [requirements.txt](/requirements.txt)
