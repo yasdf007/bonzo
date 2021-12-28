@@ -43,6 +43,7 @@ III. RUNNING NODE \
 **Donations:**
 *Using TON (Prefferable):*
 > EQAcPIGWfiW-CFQFzQpjzYOicIu8zV2flffRmfAEq8BE_vSU
+
 *Using RUB:*
 [QIWI](https://qiwi.com/n/OTTIC882)
 
