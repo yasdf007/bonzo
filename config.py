@@ -6,15 +6,15 @@ load_dotenv()
 
 guilds = None
 try:
-    OWNER_IDS = [int(id) for id in getenv('OWNER_IDS').split(',')]
+    OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",")]
 except:
     OWNER_IDS = None
-    print(f'{Fore.GREEN} Config: {Style.RESET_ALL} Owners unspecified.')
+    print(f"{Fore.GREEN} Config: {Style.RESET_ALL} Owners unspecified.")
 
-try:
-    if getenv('PREFIX') == None:
-        raise NameError("No Specified")
-    prefix = getenv('PREFIX')
-except:
-    prefix ="b/"
-    print(f'{Fore.GREEN} Config: {Style.RESET_ALL} Prefix unspecified. Using default prefix {prefix}.')
+if not len(getenv("PREFIX")) == 0:
+    prefix = getenv("PREFIX")
+else:
+    prefix = "b/"
+    print(
+        f"{Fore.GREEN} Config: {Style.RESET_ALL} Prefix unspecified. Using default prefix {prefix}."
+    )
