@@ -1,6 +1,6 @@
 <img align="right" src="static/bonzo.png" width="160" height="160">
 
-## bonzo 1.13.1b stacknox2
+## bonzo 1.13.2 stacknox2
 ## made by /bonzoTeam & others
 ### Модульный Discord-бот с открытым исходным кодом.
 
