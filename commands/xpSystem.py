@@ -1,4 +1,3 @@
-from types import NoneType
 from discord.channel import DMChannel
 from discord.ext.commands import (
     Cog,
@@ -232,7 +231,7 @@ class AddXP(Cog):
 
         for id_, exp, lvl in result:
             member = guild.get_member(id_)
-            if type(member) == NoneType:
+            if not member:
                 embed.add_field(
                     name=f"*Пользователя нет на сервере*",
                     value=f"LVL: {lvl}\nEXP: {exp}",
