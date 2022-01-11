@@ -231,11 +231,18 @@ class AddXP(Cog):
 
         for id_, exp, lvl in result:
             member = guild.get_member(id_)
-            embed.add_field(
-                name=f"`{member.display_name}`",
-                value=f"LVL: {lvl}\nEXP: {exp}",
-                inline=False,
-            )
+            if member.display_name == None:
+                embed.add_field(
+                    name=f"*Пользователя нет на сервере*",
+                    value=f"LVL: {lvl}\nEXP: {exp}",
+                    inline=False,
+                )
+            else:
+                embed.add_field(
+                    name=f"`{member.display_name}`",
+                    value=f"LVL: {lvl}\nEXP: {exp}",
+                    inline=False,
+                )
 
         await ctx.send(embed=embed)
 
