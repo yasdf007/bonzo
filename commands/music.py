@@ -283,6 +283,12 @@ class Music(commands.Cog):
                 embed=automata.generateEmbErr("Неправильный запрос", error=error)
             )
 
+    async def rm_flag(self, guild_id: int):
+        try:
+            del self.dc_flag[guild_id]
+        except:
+            pass
+
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.id == self.bot.user.id:
@@ -292,7 +298,7 @@ class Music(commands.Cog):
             if (before.channel and after.channel) and before.channel != after.channel:
                 # в новом канале нет людей
                 if len([user for user in after.channel.members if not user.bot]) < 1:
-                    del self.dc_flag[member.guild.id]
+                    await self.rm_flag(member.guild.id)
 
                     await self.teardown(member.guild.id)
                     return
@@ -307,7 +313,8 @@ class Music(commands.Cog):
                 and before.channel
                 and not after.channel
             ):
-                del self.dc_flag[member.guild.id]
+                await self.rm_flag(member.guild.id)
+
 
                 await self.teardown(member.guild.id)
                 return
@@ -335,7 +342,7 @@ class Music(commands.Cog):
                 )
                 < 1
             ):
-                del self.dc_flag[member.guild.id]
+                await self.rm_flag(member.guild.id)
 
                 await self.teardown(member.guild.id)
 
