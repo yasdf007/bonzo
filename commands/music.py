@@ -350,7 +350,7 @@ class Music(commands.Cog):
         if ctx.author not in voiceChannel.members:
             raise IncorrectChannelError(
                 automata.generateEmbErr(
-                    "f{ctx.author}, Вы должен быть подключены к `{voiceChannel.name}` для использования музыкальных команд",
+                    f"{ctx.author}, Вы должен быть подключены к `{voiceChannel.name}` для использования музыкальных команд",
                     error=IncorrectChannelError,
                 )
             )
