@@ -75,7 +75,7 @@ class MusicController:
         player = self.bot.wavelink.get_player(self.guild_id, cls=BonzoPlayer)
 
         while True:
-            if self.now_playing:
+            if self.now_playing and not self.loop:
                 await self.now_playing.delete()
 
             self.next.clear()
