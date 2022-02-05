@@ -23,7 +23,7 @@ I. PREREQUISITE
    4. Или
       - [Docker](https://docs.docker.com/get-docker/) и [docker compose](https://docs.docker.com/compose/install/)
 
-   5. [Lavalink](https://github.com/freyacodes/Lavalink) (для музыки)
+   5. [Lavalink](https://github.com/melike2d/lavalink) и [application.yml](https://github.com/freyacodes/Lavalink/blob/master/LavalinkServer/application.yml.example) (для музыки)
 
 II. CONFIGURATION
 - Используя образец конфигурационного файла .env.example, создайте и заполните конфигурационный файл .env в корневой папке.
