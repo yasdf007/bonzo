@@ -75,7 +75,7 @@ class MusicController:
         player = self.bot.wavelink.get_player(self.guild_id, cls=BonzoPlayer)
 
         while True:
-            if self.now_playing:
+            if self.now_playing and not self.loop:
                 await self.now_playing.delete()
 
             self.next.clear()
@@ -83,9 +83,11 @@ class MusicController:
             song = self.toLoop if (self.loop) else (await self.queue.get())
 
             await player.play(song, replace=False)
-            self.now_playing = await self.channel.send(
-                embed=await self.nowPlayingEmbed(player=player)
-            )
+
+            if not self.loop:
+                self.now_playing = await self.channel.send(
+                    embed=await self.nowPlayingEmbed(player=player)
+                )
             await self.next.wait()
 
     async def stop(self):
@@ -213,7 +215,8 @@ class Music(commands.Cog):
 
         if isinstance(error, MissingRequiredArgument):
             return await ctx.send(
-                embed=automata.generateEmbErr("Нужно указать запрос", error=error)
+                embed=automata.generateEmbErr(
+                    "Нужно указать запрос", error=error)
             )
 
         if isinstance(error, QueueTooShort):
@@ -232,7 +235,8 @@ class Music(commands.Cog):
 
         if isinstance(error, BadArgument):
             return await ctx.send(
-                embed=automata.generateEmbErr("Неправильный запрос", error=error)
+                embed=automata.generateEmbErr(
+                    "Неправильный запрос", error=error)
             )
 
         raise error
@@ -261,7 +265,8 @@ class Music(commands.Cog):
 
         if isinstance(error, MissingRequiredArgument):
             return await ctx.send(
-                embed=automata.generateEmbErr("Нужно указать запрос", error=error)
+                embed=automata.generateEmbErr(
+                    "Нужно указать запрос", error=error)
             )
 
         if isinstance(error, QueueTooShort):
@@ -280,19 +285,27 @@ class Music(commands.Cog):
 
         if isinstance(error, BadArgument):
             return await ctx.send(
-                embed=automata.generateEmbErr("Неправильный запрос", error=error)
+                embed=automata.generateEmbErr(
+                    "Неправильный запрос", error=error)
             )
+
+    async def rm_flag(self, guild_id: int):
+        try:
+            del self.dc_flag[guild_id]
+        except:
+            pass
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.id == self.bot.user.id:
-            player = self.bot.wavelink.get_player(member.guild.id, cls=BonzoPlayer)
+            player = self.bot.wavelink.get_player(
+                member.guild.id, cls=BonzoPlayer)
 
             # перемещение бота по каналам
             if (before.channel and after.channel) and before.channel != after.channel:
                 # в новом канале нет людей
                 if len([user for user in after.channel.members if not user.bot]) < 1:
-                    del self.dc_flag[member.guild.id]
+                    await self.rm_flag(member.guild.id)
 
                     await self.teardown(member.guild.id)
                     return
@@ -307,7 +320,7 @@ class Music(commands.Cog):
                 and before.channel
                 and not after.channel
             ):
-                del self.dc_flag[member.guild.id]
+                await self.rm_flag(member.guild.id)
 
                 await self.teardown(member.guild.id)
                 return
@@ -335,7 +348,7 @@ class Music(commands.Cog):
                 )
                 < 1
             ):
-                del self.dc_flag[member.guild.id]
+                await self.rm_flag(member.guild.id)
 
                 await self.teardown(member.guild.id)
 
@@ -343,7 +356,7 @@ class Music(commands.Cog):
         if ctx.author not in voiceChannel.members:
             raise IncorrectChannelError(
                 automata.generateEmbErr(
-                    "f{ctx.author}, Вы должен быть подключены к `{voiceChannel.name}` для использования музыкальных команд",
+                    f"{ctx.author}, Вы должен быть подключены к `{voiceChannel.name}` для использования музыкальных команд",
                     error=IncorrectChannelError,
                 )
             )
@@ -466,7 +479,8 @@ class Music(commands.Cog):
 
             embed.set_thumbnail(url=track.thumb)
 
-            embed.add_field(name="Название", value=f"[{track.title}]({track.uri})")
+            embed.add_field(name="Название",
+                            value=f"[{track.title}]({track.uri})")
 
             embed.add_field(name="Автор", value=f"{track.author}")
 
@@ -475,8 +489,8 @@ class Music(commands.Cog):
             embed.add_field(
                 name="Позиция в очереди", value=f"{controller.queue.qsize()}"
             )
-
-        await ctx.send(embed=embed, delete_after=15)
+        if not controller.loop:
+            await ctx.send(embed=embed, delete_after=15)
 
     @commands.command(name="pause", description="Останавливает музыку")
     async def pause_prefix(self, ctx: Context):
