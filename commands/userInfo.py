@@ -17,13 +17,17 @@ class NoPrivateMessage(CommandError, SlashCommandError):
     pass
 
 
+class SlashMissingUser(CommandError, SlashCommandError):
+    pass
+
+
 class Info(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MemberNotFound):
-            await ctx.message.reply(f"{error.argument} не найден")
+            await ctx.message.reply(embed=automata.generateEmbErr(f"Пользователь {error.argument} не найден", error=error))
 
         if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
             return await ctx.send(
@@ -34,6 +38,9 @@ class Info(Cog):
 
     @Cog.listener()
     async def on_slash_command_error(self, ctx, error):
+        if isinstance(error, SlashMissingUser):
+            return await ctx.send(embed=automata.generateEmbErr(f'Запрашиваемый пользователь не найден.', error=error))
+
         if isinstance(error, NoPrivateMessage):
             return await ctx.send(
                 embed=automata.generateEmbErr(
@@ -44,12 +51,16 @@ class Info(Cog):
     @guild_only()
     @command(name=name, description=description)
     async def info_prefix(self, ctx: Context, member: Member = None):
+        if not ctx.guild:
+            raise NoPrivateMessage
         await self.info(ctx, member)
 
     @cog_ext.cog_slash(name=name, description=description)
     async def info_slash(self, ctx: SlashContext, member: Member = None):
         if not ctx.guild:
             raise NoPrivateMessage
+        if not member in ctx.guild.members:
+            raise SlashMissingUser
         await self.info(ctx, member)
 
     async def info(self, ctx, member: Member = None):
