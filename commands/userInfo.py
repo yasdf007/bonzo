@@ -53,18 +53,21 @@ class Info(Cog):
     async def info_prefix(self, ctx: Context, member: Member = None):
         if not ctx.guild:
             raise NoPrivateMessage
+        if not member:
+            member = ctx.author
         await self.info(ctx, member)
 
     @cog_ext.cog_slash(name=name, description=description)
     async def info_slash(self, ctx: SlashContext, member: Member = None):
         if not ctx.guild:
             raise NoPrivateMessage
+        if not member:
+            member = ctx.author
         if not member in ctx.guild.members:
             raise SlashMissingUser
         await self.info(ctx, member)
 
-    async def info(self, ctx, member: Member = None):
-        member = member or ctx.author
+    async def info(self, ctx, member: Member):
         embed = Embed(
             title=f"Информация о {member.display_name}", color=member.top_role.colour
         )
