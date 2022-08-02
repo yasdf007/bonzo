@@ -8,7 +8,7 @@
 
 #### Полезные ссылки:
    Пригласить bonzo на свой сервер: [тык!](https://discordapp.com/api/oauth2/authorize?client_id=680132907859443790&amp;permissions=8&amp;scope=bot)\
-   Сервер поддержки и новостей о bonzo (AloneClub): [тык!](https://discord.gg/XDZWus5)
+   Сервер поддержки и новостей о bonzo (Bonzo: reloaded): [тык!](https://discord.gg/kjUdcUGw)
 
 #### Запуск собственной инстанции:
 I. PREREQUISITE
