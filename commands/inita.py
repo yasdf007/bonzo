@@ -6,7 +6,7 @@ from discord_slash import SlashContext, cog_ext
 
 name = "init"
 description = "Краткая информация об использовании бота / How to start?"
-supportserver = "https://discord.gg/XDZWus5"
+supportserver = "https://discord.gg/kjUdcUGw"
 
 
 class Inita(Cog):
