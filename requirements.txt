@@ -1,6 +1,6 @@
 discord.py==2.2.2
 python-dotenv==0.19.2
-Pillow==9.0.1
+Pillow==9.3.0
 google-api-python-client==2.31.0
 apscheduler==3.8.1
 asyncpg==0.25.0
