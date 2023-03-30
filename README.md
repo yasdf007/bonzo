@@ -48,5 +48,5 @@ III. RUNNING NODE \
 [QIWI](https://qiwi.com/n/OTTIC882)
 
 
-powered by [discord.py](https://github.com/Rapptz/discord.py) and [discord-interactions](https://github.com/discord-py-slash-commands/discord-py-interactions) 
+powered by [discord.py](https://github.com/Rapptz/discord.py)
 остальные используемые библиотеки описаны в [requirements.txt](/requirements.txt)
