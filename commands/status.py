@@ -1,11 +1,9 @@
 import os
 import discord
 from discord import Embed
-from discord.ext.commands import Cog, command, CommandError
+from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
-from discord_slash import SlashContext, cog_ext
 from .resources.AutomatedMessages import automata
-from discord_slash.error import SlashCommandError
 from discord.ext.commands import Bot
 from config import guilds
 
@@ -18,17 +16,8 @@ class Status(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
-    async def status_prefix(self, ctx: Context):
-        await self.status(ctx)   
-
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def status_slash(self, ctx: SlashContext):
-        await self.status(ctx)
-
         #статус бота
-
+    @hybrid_command(name=name, description=description)
     async def status(self, ctx):
         embed = Embed(title="**Информация**", color=0x1fcf48)
 
@@ -57,5 +46,5 @@ class Status(Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(Status(bot))
+async def setup(bot):
+    await bot.add_cog(Status(bot))

@@ -1,8 +1,7 @@
-from discord.ext.commands import Cog, group, guild_only
+from discord.ext.commands import Cog, group, guild_only, hybrid_group
 import asyncio
 from discord.ext.commands.errors import NoPrivateMessage
 from .resources.blackjack.Blackjack import Blackjack
-from discord_slash import SlashContext, cog_ext
 from config import guilds
 from .resources.AutomatedMessages import automata
 
@@ -26,7 +25,7 @@ class gameBlackjack(Cog):
         raise error
 
     @guild_only()
-    @group(
+    @hybrid_group(
         name="blackjack",
         description="Начать игру blackjack",
         invoke_without_command=True,
@@ -118,5 +117,5 @@ class gameBlackjack(Cog):
             await ctx.send(f"Удалил {ctx.author}")
 
 
-def setup(bot):
-    bot.add_cog(gameBlackjack(bot))
+async def setup(bot):
+    await bot.add_cog(gameBlackjack(bot))

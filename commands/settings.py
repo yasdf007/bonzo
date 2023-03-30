@@ -12,6 +12,7 @@ from discord.ext.commands import (
     command,
     has_permissions,
     cooldown,
+    hybrid_command
 )
 from discord.ext.commands.context import Context
 from commands.resources.AutomatedMessages import automata
@@ -94,9 +95,9 @@ class Settings(Cog):
     @guild_only()
     @cooldown(rate=4, per=120, type=BucketType.guild)
     @has_permissions(administrator=True)
-    @command(
+    @hybrid_command(
         name="set_prefix",
-        description="Устанавливает пользовательский префикс для бота (только для админов, макс. 5 символов, без двойных кавечек)",
+        description="Устанавливает серверный префикс для бота (только для админов, макс. 5 символов, без двойных кавечек)",
     )
     async def set_prefix(self, ctx: Context, prefix: str):
         if not ctx.message.guild:
@@ -120,5 +121,5 @@ class Settings(Cog):
         await ctx.send(f"Установил префикс {prefix} для {ctx.message.guild.name}!")
 
 
-def setup(bot):
-    bot.add_cog(Settings(bot))
+async def setup(bot):
+    await bot.add_cog(Settings(bot))

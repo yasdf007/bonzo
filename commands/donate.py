@@ -1,8 +1,7 @@
 import discord
 from discord import Embed
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, hybrid_command
 from discord.ext.commands.context import Context
-from discord_slash import SlashContext, cog_ext
 
 name = "donate"
 description = "Пожертвования разработчикам bonzo"
@@ -14,14 +13,8 @@ class Donate(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
-    async def donate_prefix(self, ctx: Context):
-        await self.donate(ctx)
 
-    @cog_ext.cog_slash(name=name, description=description)
-    async def donate_slash(self, ctx: SlashContext):
-        await self.donate(ctx)
-
+    @hybrid_command(name=name, description=description)
     async def donate(self, ctx):
         embed = Embed(
             title="**Способы пожертвований средств разработчикам Bonzo**",
@@ -44,5 +37,5 @@ class Donate(Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(Donate(bot))
+async def setup(bot):
+    await bot.add_cog(Donate(bot))

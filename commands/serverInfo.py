@@ -1,20 +1,15 @@
 from discord import Embed
-from discord.ext.commands import Cog, command, CommandError
+from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
-from discord_slash import SlashContext, cog_ext
 from discord.ext.commands.core import guild_only
 from config import guilds
-from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
+from discord.ext.commands import NoPrivateMessage
 from .resources.AutomatedMessages import automata
-from discord_slash.error import SlashCommandError
 
 
 name = "serverinfo"
 description = "Показывает информацию о сервере"
 
-
-class NoPrivateMessage(CommandError, SlashCommandError):
-    pass
 
 
 class info(Cog):
@@ -22,39 +17,22 @@ class info(Cog):
         self.bot = bot
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
-
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
         if isinstance(error, NoPrivateMessage):
             return await ctx.send(
                 embed=automata.generateEmbErr(
                     "Эту команду нельзя использовать в ЛС.", error=error
                 )
             )
-
-    @guild_only()
-    @command(name=name, description=description)
-    async def serverinfo_prefix(self, ctx: Context):
-        await self.serverinfo(ctx)
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def serverinfo_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.serverinfo(ctx)
+        raise error
 
     # функция, отправляющая информацию о сервере
-    async def serverinfo(self, ctx):
+    @guild_only()
+    @hybrid_command(name=name, description=description)
+    async def serverinfo(self, ctx: Context):
         server = ctx.guild
         embed = Embed(title="**Информация о сервере:**", colour=0x7D07DE)
 
-        embed.set_thumbnail(url=server.icon_url)
+        embed.set_thumbnail(url=server.icon.with_format("png") if server.icon else server.icon)
 
         embed.add_field(name="**Название:**", value=f"{server.name}", inline=False)
 
@@ -99,11 +77,11 @@ class info(Cog):
         )
 
         embed.set_footer(
-            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.avatar_url
+            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.avatar.with_format("png")
         )
 
         await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(info(bot))
+async def setup(bot):
+    await bot.add_cog(info(bot))

@@ -1,13 +1,15 @@
 from .Deck import Deck
 from .Hand import Hand
-from discord import Embed
+from discord import Embed, ActionRow
+from discord.ext.commands import Context
+from discord.ui.button import Button, ButtonStyle
+from discord.ui import View
+from discord import Interaction
+
 import asyncio
-from discord_slash.utils.manage_components import create_button, create_actionrow
-from discord_slash.model import ButtonStyle
-from discord_slash.utils.manage_components import wait_for_component
 
 class Blackjack:
-    def __init__(self, ctx, players):
+    def __init__(self, ctx: Context, players):
         self.deck = Deck()
         self.players = players
         self.dealer = None
@@ -158,13 +160,12 @@ class Blackjack:
                 await self.printGame()
                 playerProfile = self.ctx.guild.get_member(int(player))
                 msg = f'Ход {playerProfile.mention} (15s)'
-                
-                buttons.append(create_button(
+                buttons.append(Button(
                         style=ButtonStyle.green,
                         label="(HIT) Взять карту",
                         custom_id='h'
                     ))
-                buttons.append(create_button(
+                buttons.append(Button(
                         style=ButtonStyle.red,
                         label="(STAND) Не брать",
                         custom_id='s'
@@ -174,29 +175,37 @@ class Blackjack:
                     if len(self.game[player][0].cards) == 2:
                         if await self.checkForDoubleDown(score):
                             doubleDown = True
-                            buttons.append(create_button(
+                            buttons.append(Button(
                                 style=ButtonStyle.gray,
                                 label="(Double Down) Возможен double down",
                                 custom_id='dd'
                             ))
                         if await self.checkForSplit(self.game[player][0].cards):
                             split_ = True
-                            buttons.append(create_button(
-                                style=ButtonStyle.blue,
+                            buttons.append(Button(
+                                style=ButtonStyle.blurple,
                                 label="(SPLIT) Возможен split",
                                 custom_id='sp'
                             ))
                 else:
                     msg += f'\n`Рука {handPos+1}`'
 
-                action_row = create_actionrow(*buttons)
-                msg = await self.ctx.send(msg,components=[action_row])
+
+                view = View(timeout=15)
+                for btn in  buttons:
+                    view.add_item(btn)
+
+                msg = await self.ctx.send(msg, view=view)
+
                 await asyncio.sleep(0.25)
 
                 try:
-                    decicion = await wait_for_component(
-                        self.ctx.bot, check=lambda msg: msg.author.id == int(player) and msg.channel.id == self.ctx.channel.id, timeout=15,components=action_row)
-                    await decicion.edit_origin(content=f'{playerProfile.display_name} {decicion.component["label"]}')
+                    decicion: Interaction = await self.ctx.bot.wait_for('interaction', check=lambda interaction: interaction.user.id == int(player) and interaction.channel_id == self.ctx.channel.id, timeout=15)
+                    for item in view.children:
+                        if item.custom_id == decicion.data['custom_id']:
+                            await decicion.response.edit_message(content=f'{playerProfile.display_name} ВЫБРАЛ {item.label}', view=None)
+                            # await msg.edit(content=f'{playerProfile.display_name} ВЫБРАЛ {item.label}')
+
                 except asyncio.TimeoutError:
                     self.game[player][1]['stop'] == True
                     await self.ctx.send(f'{playerProfile.mention} ничего не выбрал')
@@ -204,7 +213,7 @@ class Blackjack:
                     break
 
                 if not self.game[player][1]['split']:
-                    if decicion.component['custom_id'] == 'h':
+                    if decicion.data['custom_id'] == 'h':
                         await self.game[player][0].drawCard(await self.deck.draw())
                         score = await self.game[player][0].getScore()
 
@@ -214,22 +223,22 @@ class Blackjack:
                         if await self.checkOver21(score):
                             self.game[player][1]['stop'] = True
 
-                    if decicion.component['custom_id'] == 's':
+                    if decicion.data['custom_id'] == 's':
                         self.game[player][1]['stop'] = True
 
-                    if doubleDown and decicion.component['custom_id'] == 'dd':
+                    if doubleDown and decicion.data['custom_id'] == 'dd':
                         await self.game[player][0].drawCard(await self.deck.draw())
                         self.game[player][1]['stop'] = True
                         await self.game[player][0].getScore()
 
-                    if split_ and decicion.component['custom_id'] == 'sp':
+                    if split_ and decicion.data['custom_id'] == 'sp':
                         self.game[player][1]['split'] = True
                         self.game[player][1]['win'] = [-1, -1]
                         await self.splitHand(player)
                         handPos = 0
 
                 if self.game[player][1]['split']:
-                    if decicion.component['custom_id'] == 'h':
+                    if decicion.data['custom_id'] == 'h':
                         await self.game[player][0][handPos].drawCard(await self.deck.draw())
                         score = await self.game[player][0][handPos].getScore()
 
@@ -243,7 +252,7 @@ class Blackjack:
                                 self.game[player][1]['stop'] = True
                             handPos = 1
 
-                    if decicion.component['custom_id'] == 's':
+                    if decicion.data['custom_id'] == 's':
                         if handPos == 1:
                             self.game[player][1]['stop'] = True
                         handPos = 1

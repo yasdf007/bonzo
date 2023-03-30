@@ -1,8 +1,7 @@
 import discord
 from discord import Embed
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
-from discord_slash import SlashContext, cog_ext
 
 name = "init"
 description = "Краткая информация об использовании бота / How to start?"
@@ -13,14 +12,8 @@ class Inita(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
-    async def inita_prefix(self, ctx: Context):
-        await self.inita(ctx)
 
-    @cog_ext.cog_slash(name=name, description=description)
-    async def invite_slash(self, ctx: SlashContext):
-        await self.inita(ctx)
-
+    @hybrid_command(name=name, description=description)
     async def inita(self, ctx):
         embed = Embed(title="**Начало работы с bonzo**", color=discord.Color.random())
 
@@ -48,5 +41,5 @@ class Inita(Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(Inita(bot))
+async def setup(bot):
+    await bot.add_cog(Inita(bot))

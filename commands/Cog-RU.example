@@ -3,11 +3,9 @@
 # ВЫ МОЖЕТЕ ИСПОЛЬЗОВАТЬ ЭТОТ ФАЙЛ В КАЧЕСТВЕ __МИНИМАЛЬНОГО__ ШАБЛОНА ПРИ СОЗДАНИИ СВОИХ МОДУЛЕЙ.
 
 # ИМПОРТИМ ВСЁ НЕОБХОДИМОЕ
-from discord.ext.commands import Cog, command, CommandError
+from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
 
-from discord_slash import SlashContext, cog_ext
-from discord_slash.error import SlashCommandError
 
 # НАЗЫВАЕМ ФУНКЦИЮ 
 name = 'YOURNAME'
@@ -15,10 +13,10 @@ description = 'YOUR_BEAUTIFUL_DESCRIPTION'
 
 # ОБЪЯВЛЯЕМ ОШИБКИ
 
-class YourError1(CommandError, SlashCommandError):
+class YourError1(CommandError):
     pass
 
-class YourError2(CommandError, SlashCommandError):
+class YourError2(CommandError):
     pass
 
 # ОБЪЯВЛЯЕМ КЛАСС-КОГ ВАШЕЙ ФУНКЦИИ
@@ -34,26 +32,8 @@ class YourName(Cog):
         if isinstance(error, YourError2):
             return await ctx.send('ПОЛЬЗОВАТЕЛЬСКИЙ ВЫВОД ПРИ ОШИБКЕ 2')
 
-    # ЛОВИМ ОШИБКИ ДЛЯ СЛЭШ КОМАНДЫ
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, YourError1):
-            return await ctx.send('ПОЛЬЗОВАТЕЛЬСКИЙ ВЫВОД ПРИ ОШИБКЕ 1')
-
-        if isinstance(error, YourError2):
-            return await ctx.send('ПОЛЬЗОВАТЕЛЬСКИЙ ВЫВОД ПРИ ОШИБКЕ 2')
-
-    # ПРЕФИКСНАЯ КОМАНДА (ЛЕГАСИ)
-    @command(name=name, description=description)
-    async def yourFunction_prefix(self, ctx: Context):
-        await self.yourFunction(ctx)
-
-    # СЛЭШ КОМАНДА
-    @cog_ext.cog_slash(name=name, description=description)
-    async def yourFunction_slash(self, ctx: SlashContext):
-        await self.yourFunction(ctx)
-
     # ДЕЙСТВИЯ ПРИ ВЫЗОВЕ КОМАНДЫ
+    @hybrid_command(name=name, description=description)
     async def yourFunction(self, ctx):
         ''' ОПИСАНИЕ ДЕЙСТВИЙ ВМЕСТО ЭТОГО
         МНОГОСТРОЧНОГО
@@ -62,5 +42,5 @@ class YourName(Cog):
         await ctx.send('ВАШ ВЫВОД ВМЕСТО ЭТОЙ СТРОКИ')
 
 # ПОДКЛЮЧАЕМ КОГ К БОТУ
-def setup(bot):
-    bot.add_cog(YourName(bot))
+async def setup(bot):
+    await bot.add_cog(YourName(bot))

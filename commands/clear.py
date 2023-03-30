@@ -1,6 +1,6 @@
 from commands.resources.AutomatedMessages import automata
 from discord import TextChannel
-from discord.ext.commands import Cog, has_permissions, command, bot_has_permissions
+from discord.ext.commands import Cog, has_permissions, command, bot_has_permissions, hybrid_command, Context
 from asyncio import sleep
 from discord.ext.commands.errors import (
     BadArgument,
@@ -49,13 +49,12 @@ class Clear(Cog):
     # функция, удаляющая X сообщений из чата
     @has_permissions(manage_messages=True)
     @bot_has_permissions(manage_messages=True)
-    @command(name=name, description=description)
-    async def clear(self, ctx, count: int):
+    @hybrid_command(name=name, description=description)
+    async def clear(self, ctx: Context, count: int):
         # удаляем запрошенное кол-во сообщений!
         await TextChannel.purge(ctx.message.channel, limit=count + 1, bulk=True)
         # отправляем отчёт и удаляем его через 5 секунд
         msg = await ctx.send(f"Очистил {count} сообщений!", delete_after=5)
 
-
-def setup(bot):
-    bot.add_cog(Clear(bot))
+async def setup(bot):
+    await bot.add_cog(Clear(bot))

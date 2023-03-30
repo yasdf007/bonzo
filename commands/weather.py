@@ -1,8 +1,6 @@
 from discord import Embed
 from discord.ext.commands.context import Context
-from discord.ext.commands import Cog, command, CommandError
-from discord_slash.error import SlashCommandError
-from discord_slash import SlashContext, cog_ext
+from discord.ext.commands import Cog, command, CommandError, MissingRequiredArgument, hybrid_command
 from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
@@ -15,10 +13,10 @@ name = 'weather'
 description = 'Погода по запрашиваемому городу'
 
 
-class CityNotFound(CommandError, SlashCommandError):
+class CityNotFound(CommandError):
     pass
 
-class BlankCityName(CommandError, SlashCommandError):
+class BlankCityName(CommandError):
     pass
 
 class weather(Cog):
@@ -26,30 +24,16 @@ class weather(Cog):
         self.bot = bot
 
     async def cog_command_error(self, ctx, error):
+        if isinstance(error, MissingRequiredArgument):
+            return await ctx.send(embed=automata.generateEmbErr('Город не указан', error=error))
         if isinstance(error, CityNotFound):
             return await ctx.send(embed=automata.generateEmbErr('Запрашиваемый город не найден', error=error))
         if isinstance(error, BlankCityName):
             return await ctx.send(embed=automata.generateEmbErr('Город не указан', error=error))
+        raise error
 
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, CityNotFound):
-            return await ctx.send(embed=automata.generateEmbErr('Запрашиваемый город не найден', error=error))
-        if isinstance(error, BlankCityName):
-            return await ctx.send(embed=automata.generateEmbErr('Город не указан', error=error))
-
-    @command(name=name, description=description)
-    async def getWeather_prefix(self, ctx: Context, *city: str):
-        if not city:
-            raise BlankCityName
-        await self.getWeather(ctx, ' '.join(city))
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def getWeather_slash(self, ctx: SlashContext, city: str):
-        if not city:
-            raise BlankCityName
-        await self.getWeather(ctx, city)
-
+ 
+    @hybrid_command(name=name, description=description)
     async def getWeather(self, ctx, city):
         # Получаем токен
         weatherToken = getenv('WEATHER_TOKEN')
@@ -129,5 +113,5 @@ class weather(Cog):
         return possibleDirections[value % 16]
 
 
-def setup(bot):
-    bot.add_cog(weather(bot))
+async def setup(bot):
+    await bot.add_cog(weather(bot))

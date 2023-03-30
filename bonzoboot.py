@@ -8,9 +8,7 @@ dont_write_bytecode = True  # убирает генерацию машинног
 
 from discord.ext import tasks
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
-from discord import Intents, Game, Status
-from discord_slash import SlashCommand
-from discord_together import DiscordTogether
+from discord import Intents, Game, Status, Object
 
 from config import OWNER_IDS, prefix
 from database import db
@@ -25,6 +23,8 @@ from platform import platform
 from os import listdir, getenv
 import logging
 
+from discord import app_commands
+
 load_dotenv()  # загружает файл env
 
 logger = logging.getLogger("discord")
@@ -36,15 +36,13 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
+MY_GUILD = Object(id=707576013449592848)  
 
 class Bot(bonzoBot):
     def __init__(self):
         intents = Intents.default()
         intents.members = True
-        self.game = Game(f"@Bonzo init | stacknox2")
-        self.scheduler = AsyncIOScheduler()
-        self.startTime = None
-        self.custom_prefix = {}
+        intents.message_content = True
 
         super().__init__(
             command_prefix=self._get_prefix,
@@ -52,10 +50,18 @@ class Bot(bonzoBot):
             intents=intents,
             owner_ids=OWNER_IDS,
         )
-        self.db_conn.start()
 
-    @tasks.loop(count=1)
-    async def db_conn(self):
+        self.game = Game(f"@Bonzo init | stacknox2")
+        self.scheduler = AsyncIOScheduler()
+        self.startTime = None
+        self.custom_prefix = {}
+
+    
+    async def setup_hook(self):
+        await self.cogsLoad()
+        self.tree.copy_global_to(guild=MY_GUILD)
+        await self.tree.sync(guild=MY_GUILD)
+   
         try:
             self.pool = await db.connectToDB()
             res = await db.getPrefixes(self.pool)
@@ -66,14 +72,14 @@ class Bot(bonzoBot):
                 f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}"
             )
             print(err)
-            self.unload_extension(f"commands.xpSystem")
-            self.unload_extension(f"commands.freeGames")
+            await self.unload_extension(f"commands.xpSystem")
+            await self.unload_extension(f"commands.freeGames")
 
-    def cogsLoad(self):
+    async def cogsLoad(self):
         curr, total = 0, len(listdir("./commands")) - 4
         for filename in listdir("./commands"):
             if filename.endswith(".py"):
-                self.load_extension(f"commands.{filename[:-3]}")
+                await self.load_extension(f"commands.{filename[:-3]}")
 
                 curr += 1
                 print(f"loaded {filename}, {curr}/{total}")
@@ -94,15 +100,12 @@ class Bot(bonzoBot):
             "initialization file has been successfully read. starting up bonzo...",
             sep="\n",
         )
-        self.cogsLoad()
         super().run(getenv("TOKEN"))  # берёт переменную TOKEN из .env
 
     @Cog.listener()
     async def on_ready(self):
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
-
-        self.togetherControl = await DiscordTogether(getenv("TOKEN"))
 
         self.scheduler.start()
         endTime = time() - self.startTime
@@ -113,13 +116,5 @@ class Bot(bonzoBot):
 
 
 if __name__ == "__main__":
-    try:
-        bot = Bot()
-        slash = SlashCommand(bot, sync_commands=True)
-        bot.slash = slash
-        bot.run()
-    except Exception as error:
-        print(
-            "FATAL ERROR. \n THIS ERROR CAN OCCUR EITHER IF MAIN BOT EXECUTABLE IS CORRUPTED OR IF FRAMEWORK IS BROKEN."
-        )
-        print(error)
+    bot = Bot()
+    bot.run()

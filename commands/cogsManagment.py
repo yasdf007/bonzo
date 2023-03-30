@@ -1,6 +1,6 @@
-from discord.ext.commands import Cog, command, is_owner
+from discord.ext.commands import Cog, command, is_owner, hybrid_command
 from discord.ext.commands.errors import MissingPermissions
-
+import traceback
 
 class CogsManagment(Cog):
     def __init__(self, bot):
@@ -12,36 +12,36 @@ class CogsManagment(Cog):
         raise error
 
     @is_owner()
-    @command(name="load", description="Загружает ког")
+    @hybrid_command(name="load", description="Загружает ког")
     async def load_cog(self, ctx, cog: str):
         try:
-            self.bot.load_extension("commands." + cog)
-        except:
-            return await ctx.send("Невозможно загрузить ког")
+            await self.bot.load_extension("commands." + cog)
+        except Exception as e:
+            return await ctx.send(f"Невозможно загрузить ког: {traceback.format_exc()}")
 
         await ctx.send(f"Ког {cog} загружен")
 
     @is_owner()
-    @command(name="unload", description="Выгружает ког")
+    @hybrid_command(name="unload", description="Выгружает ког")
     async def unload_cog(self, ctx, cog: str):
         try:
-            self.bot.unload_extension("commands." + cog)
-        except:
-            return await ctx.send("Невозможно выгрузить ког")
+            await self.bot.unload_extension("commands." + cog)
+        except Exception as e:
+            return await ctx.send(f"Невозможно выгрузить ког: {traceback.format_exc()}")
 
         await ctx.send(f"Ког {cog} выгружен")
 
     @is_owner()
-    @command(name="reload", description="Перезагружает ког")
+    @hybrid_command(name="reload", description="Перезагружает ког")
     async def reload_reload(self, ctx, cog: str):
         try:
-            self.bot.unload_extension("commands." + cog)
-            self.bot.load_extension("commands." + cog)
-        except:
-            return await ctx.send("Невозможно перезагрузить ког")
+            await self.bot.unload_extension("commands." + cog)
+            await self.bot.load_extension("commands." + cog)
+        except Exception as e:
+            return await ctx.send(f"Невозможно перезагрузить ког {traceback.format_exc()}")
 
         await ctx.send(f"Ког {cog} перезагружен")
 
 
-def setup(bot):
-    bot.add_cog(CogsManagment(bot))
+async def setup(bot):
+    await bot.add_cog(CogsManagment(bot))

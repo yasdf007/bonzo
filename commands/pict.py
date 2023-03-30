@@ -1,8 +1,7 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
 from random import choices
 from string import ascii_lowercase, digits
-from discord_slash import SlashContext, cog_ext
 from config import guilds
 
 name = "pict"
@@ -15,14 +14,7 @@ class pict(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
-    async def pict_prefix(self, ctx: Context, num: int = 1):
-        await self.pict(ctx, num)
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def pict_slash(self, ctx: SlashContext, num: int = 1):
-        await self.pict(ctx, num)
-
+    @hybrid_command(name=name, description=description)
     async def pict(self, ctx, num: int = 1):
         if int(num) > 2:
             num = 2
@@ -39,5 +31,5 @@ class pict(Cog):
         return result
 
 
-def setup(bot):
-    bot.add_cog(pict(bot))
+async def setup(bot):
+    await bot.add_cog(pict(bot))

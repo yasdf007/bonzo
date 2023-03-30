@@ -11,6 +11,8 @@ except:
     OWNER_IDS = None
     print(f"{Fore.GREEN} Config: {Style.RESET_ALL} Owners unspecified.")
 
+prefix = "b/"
+
 if not len(getenv("PREFIX")) == 0:
     prefix = getenv("PREFIX")
 else:

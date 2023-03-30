@@ -21,5 +21,5 @@ class memberJoinRemove(Cog):
         await self.bot.pool.execute(deleteQuery)
 
 
-def setup(bot):
-    bot.add_cog(memberJoinRemove(bot))
+async def setup(bot):
+    await bot.add_cog(memberJoinRemove(bot))

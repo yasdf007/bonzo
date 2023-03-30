@@ -1,23 +1,21 @@
 from discord import Embed, Spotify, CustomActivity
-from discord.ext.commands import Cog, command, MemberNotFound, CommandError
+from discord.ext.commands import Cog, command, MemberNotFound, CommandError, hybrid_command
 from discord.ext.commands.context import Context
 from discord.member import Member
-from discord_slash import SlashContext, cog_ext
 from discord.ext.commands.core import guild_only
 from config import guilds
 from .resources.AutomatedMessages import automata
-from discord_slash.error import SlashCommandError
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 
 name = "info"
 description = "Выдаёт информацию о пользователе"
 
 
-class NoPrivateMessage(CommandError, SlashCommandError):
+class NoPrivateMessage(CommandError):
     pass
 
 
-class SlashMissingUser(CommandError, SlashCommandError):
+class SlashMissingUser(CommandError):
     pass
 
 
@@ -35,44 +33,18 @@ class Info(Cog):
                     "Эту команду нельзя использовать в ЛС.", error=error
                 )
             )
-
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, SlashMissingUser):
-            return await ctx.send(embed=automata.generateEmbErr(f'Запрашиваемый пользователь не найден.', error=error))
-
-        if isinstance(error, NoPrivateMessage):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
+        raise error
 
     @guild_only()
-    @command(name=name, description=description)
-    async def info_prefix(self, ctx: Context, member: Member = None):
-        if not ctx.guild:
-            raise NoPrivateMessage
+    @hybrid_command(name=name, description=description)
+    async def info(self, ctx, member: Member = None):
         if not member:
             member = ctx.author
-        await self.info(ctx, member)
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def info_slash(self, ctx: SlashContext, member: Member = None):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        if not member:
-            member = ctx.author
-        if not member in ctx.guild.members:
-            raise SlashMissingUser
-        await self.info(ctx, member)
-
-    async def info(self, ctx, member: Member):
         embed = Embed(
             title=f"Информация о {member.display_name}", color=member.top_role.colour
         )
 
-        embed.set_thumbnail(url=member.avatar_url_as(static_format="png"))
+        embed.set_thumbnail(url=member.avatar.with_static_format("png"))
 
         embed.add_field(
             name="Учетная запись:",
@@ -147,5 +119,5 @@ class Info(Cog):
         await ctx.send(embed=embed)
 
 
-def setup(bot):
-    bot.add_cog(Info(bot))
+async def setup(bot):
+    await bot.add_cog(Info(bot))

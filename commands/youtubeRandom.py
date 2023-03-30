@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
 
 from googleapiclient.discovery import build
@@ -7,11 +7,10 @@ from dotenv import load_dotenv
 import json
 from random import choice
 from string import digits, ascii_uppercase
-from discord_slash import SlashContext, cog_ext
 
 load_dotenv()
 
-name = "randomVideo"
+name = "randomvideo"
 description = "Рандомный видос из ютуба (BETA)"
 
 
@@ -24,15 +23,10 @@ class YoutubeRandom(Cog):
     API_VERSION = "v3"
     videoNameStart = ["IMG_"]
     videoNameEnd = [".mp4"]
-
-    @command(name=name, description=description, aliases=["randvid", "video"])
-    async def randomVideo_prefix(self, ctx: Context):
-        await self.randomVideo(ctx)
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def randomVideo_slash(self, ctx: SlashContext):
-        await self.randomVideo(ctx)
-
+    async def cog_command_error(self, ctx, error):
+        raise error
+        
+    @hybrid_command(name=name, description=description, aliases=["randvid", "video"])
     async def randomVideo(self, ctx):
         # Делаем рандомное название запроса из 4 символов и цифр
         query2 = "".join(choice(ascii_uppercase + digits) for _ in range(4))
@@ -59,5 +53,5 @@ class YoutubeRandom(Cog):
         await ctx.send(f"https://www.youtube.com/watch?v={youtubeVideoId}")
 
 
-def setup(bot):
-    bot.add_cog(YoutubeRandom(bot))
+async def setup(bot):
+    await bot.add_cog(YoutubeRandom(bot))

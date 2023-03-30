@@ -1,7 +1,6 @@
 from discord import Embed
-from discord.ext.commands import Cog, command
+from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
-from discord_slash import SlashContext, cog_ext
 from config import guilds
 
 name = "invite"
@@ -13,16 +12,8 @@ class invite(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name=name, description=description)
-    async def invite_prefix(self, ctx: Context):
-        await self.invite(ctx)
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def invite_slash(self, ctx: SlashContext):
-        await self.invite(ctx)
-
     # функция, отправляющая инвайт-ссылку бота в чат
-
+    @hybrid_command(name=name, description=description)
     async def invite(self, ctx):
         embedd = Embed(title="**Зовём /bonzo/ на Ваш сервер...**", colour=0xB84000)
         embedd.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
@@ -34,5 +25,5 @@ class invite(Cog):
         await ctx.send(embed=embedd)
 
 
-def setup(bot):
-    bot.add_cog(invite(bot))
+async def setup(bot):
+    await bot.add_cog(invite(bot))

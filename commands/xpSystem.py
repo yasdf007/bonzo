@@ -7,6 +7,7 @@ from discord.ext.commands import (
     BucketType,
     guild_only,
     CommandError,
+    hybrid_command
 )
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from discord.ext.commands.context import Context
@@ -15,12 +16,10 @@ from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from config import guilds
-from discord_slash import SlashContext, cog_ext
-from discord_slash.error import SlashCommandError
 from .resources.AutomatedMessages import automata
 
 
-class NoPrivateMessage(CommandError, SlashCommandError):
+class NoPrivateMessage(CommandError):
     pass
 
 
@@ -36,15 +35,6 @@ class AddXP(Cog):
             return await ctx.message.reply(error)
 
         if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
-
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, NoPrivateMessage):
             return await ctx.send(
                 embed=automata.generateEmbErr(
                     "Эту команду нельзя использовать в ЛС.", error=error
@@ -199,17 +189,9 @@ class AddXP(Cog):
 
         await self.executeQuery(updateQuery, "execute")
 
+
     @guild_only()
-    @command(name="top", description="Показывает топ 10 по опыту")
-    async def leaderboard_prefix(self, ctx: Context):
-        await self.leaderboard(ctx)
-
-    @cog_ext.cog_slash(name="top", description="Показывает топ 10 по опыту")
-    async def leaderboard_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.leaderboard(ctx)
-
+    @hybrid_command(name="top", description="Показывает топ 10 по опыту")
     async def leaderboard(self, ctx):
         selectQuery = f"select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
         where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;"
@@ -246,19 +228,9 @@ class AddXP(Cog):
 
         await ctx.send(embed=embed)
 
+
     @guild_only()
-    @command(name="rank", description="Показывает персональную карточку с уровнем")
-    async def rank_prefix(self, ctx: Context):
-        await self.rank(ctx)
-
-    @cog_ext.cog_slash(
-        name="rank", description="Показывает персональную карточку с уровнем"
-    )
-    async def rank_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.rank(ctx)
-
+    @hybrid_command(name="rank", description="Показывает персональную карточку с уровнем")
     async def rank(self, ctx):
         selectQuery = f"select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
                         join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \
@@ -358,5 +330,5 @@ class AddXP(Cog):
                         await ctx.send(file=File(fp=temp, filename="now.png"))
 
 
-def setup(bot):
-    bot.add_cog(AddXP(bot))
+async def setup(bot):
+    await bot.add_cog(AddXP(bot))

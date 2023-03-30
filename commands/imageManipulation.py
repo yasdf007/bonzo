@@ -1,9 +1,7 @@
 from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog
 from discord.ext.commands.errors import MissingRequiredArgument
-from discord_slash import SlashContext, cog_ext
-from discord_slash.error import SlashCommandError
-from discord.ext.commands import Cog, command, CommandError
+from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
 from discord import File
 
@@ -15,23 +13,23 @@ from re import compile
 from config import guilds
 
 
-class NoUrlFound(CommandError, SlashCommandError):
+class NoUrlFound(CommandError):
     pass
 
 
-class InvalidFileType(CommandError, SlashCommandError):
+class InvalidFileType(CommandError):
     pass
 
 
-class RequestNetworkError(CommandError, SlashCommandError):
+class RequestNetworkError(CommandError):
     pass
 
 
-class TooManySymblos(CommandError, SlashCommandError):
+class TooManySymblos(CommandError):
     pass
 
 
-class FileTooLarge(CommandError, SlashCommandError):
+class FileTooLarge(CommandError):
     pass
 
 
@@ -61,35 +59,8 @@ class ImageManipulation(Cog):
 
         raise error
 
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
-            return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена", error=error))
-
-        if isinstance(error, InvalidFileType):
-            return await ctx.send(embed=automata.generateEmbErr("Неподдерживаемый формат файла - доступны png, jpeg и jpg", error=error))
-
-        if isinstance(error, RequestNetworkError):
-            return await ctx.send(embed=automata.generateEmbErr("Не удалось открыть файл", error=error))
-
-        if isinstance(error, TooManySymblos):
-            return await ctx.send(embed=automata.generateEmbErr("Команда поддерживает не более 25 символов", error=error))
-
-        if isinstance(error, FileTooLarge):
-            return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ", error=error))
-
-
-    @command(name='ascii', description='Переводит картинку в ascii текст')
-    async def ascii_prefix(self, ctx: Context, img_url: str = None):
-        img_url = img_url or (ctx.message.attachments[0].url if len(
-            ctx.message.attachments) > 0 else '')
-        await self.ascii(ctx, img_url)
-
-    @cog_ext.cog_slash(name='ascii', description='Переводит картинку в ascii текст')
-    async def ascii_slash(self, ctx: SlashContext, img_url: str):
-        await self.ascii(ctx, img_url)
-
-    async def ascii(self, ctx, img_url) -> None:
+    @hybrid_command(name='ascii', description='Переводит картинку в ascii текст')
+    async def ascii(self, ctx, img_url: str):
 
         if not self.urlValid.match(img_url):
             raise NoUrlFound
@@ -132,15 +103,7 @@ class ImageManipulation(Cog):
                 txt.seek(0)
                 await ctx.send(file=File(fp=txt, filename="now.txt"))
 
-    @command(name='demotivator', description='Как в мемах. Нужна ссылка')
-    async def demotivator_prefix(self, ctx: Context, img_url: str, *text: str):
-        text = ' '.join(text)
-        await self.demotivator(ctx, img_url, text)
-
-    @cog_ext.cog_slash(name='demotivator', description='Как в мемах. Нужна ссылка')
-    async def demotivator_slash(self, ctx: SlashContext, image_url: str,  text: str):
-        await self.demotivator(ctx, image_url, text)
-
+    @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
     async def demotivator(self, ctx, image_url, text):
         if not self.urlValid.match(image_url):
             raise NoUrlFound
@@ -187,16 +150,8 @@ class ImageManipulation(Cog):
             temp.seek(0)
             await ctx.send(file=File(fp=temp, filename='now.png'))
 
-    @command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
-    async def shakalizator_prefix(self, ctx: Context, img_url: str = None):
-        img_url = img_url or (ctx.message.attachments[0].url if len(
-            ctx.message.attachments) > 0 else '')
-        await self.shakalizator(ctx, img_url)
 
-    @cog_ext.cog_slash(name='shakalizator', description='Надо прикрепить фотку или гиф.')
-    async def shakalizator_slash(self, ctx: SlashContext, image_url: str):
-        await self.shakalizator(ctx, image_url)
-
+    @hybrid_command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, image_url: str):
         if not self.urlValid.match(image_url):
             raise NoUrlFound
@@ -263,5 +218,5 @@ class ImageManipulation(Cog):
                 await ctx.send(file=File(fp=image_binary, filename='now.jpeg'))
 
 
-def setup(bot):
-    bot.add_cog(ImageManipulation(bot))
+async def setup(bot):
+    await bot.add_cog(ImageManipulation(bot))

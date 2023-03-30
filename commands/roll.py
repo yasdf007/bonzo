@@ -1,8 +1,6 @@
 from discord import Embed
 from discord.ext.commands.context import Context
-from discord.ext.commands import Cog, command, CommandError
-from discord_slash.error import SlashCommandError
-from discord_slash import SlashContext, cog_ext
+from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from random import randint
 from typing import Optional
 from config import guilds
@@ -12,7 +10,7 @@ name = "roll"
 description = "Ролит как в доте или между двумя числами"
 
 
-class NumberTooLarge(CommandError, SlashCommandError):
+class NumberTooLarge(CommandError):
     pass
 
 
@@ -27,33 +25,13 @@ class Roll(Cog):
                     "Числа больше 10^6 (миллион) не поддерживаются"
                 )
             )
+        raise error
 
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, NumberTooLarge):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Числа больше 10^6 (миллион) не поддерживаются"
-                )
-            )
-
-    @command(name=name, description=description)
-    async def roll_prefix(
-        self,
-        ctx: Context,
-        number_from: Optional[int] = 100,
-        *,
-        number_to: Optional[int],
-    ):
-        await self.roll(ctx, number_from, number_to)
-
-    @cog_ext.cog_slash(name=name, description=description)
-    async def roll_slash(self, ctx: SlashContext, number_from: int, number_to: int):
-        await self.roll(ctx, number_from, number_to)
 
     # dota 2 roll
 
-    async def roll(self, ctx, number_from: int, number_to: int):
+    @hybrid_command(name=name, description=description)
+    async def roll(self, ctx, number_from: int = 1, number_to: int = 100):
         oneMillon = 10 ** 6
 
         try:
@@ -92,5 +70,5 @@ class Roll(Cog):
             return
 
 
-def setup(bot):
-    bot.add_cog(Roll(bot))
+async def setup(bot):
+    await bot.add_cog(Roll(bot))

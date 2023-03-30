@@ -11,7 +11,7 @@ from discord.ext.commands import (
 from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
-from discord.ext.commands import command
+from discord.ext.commands import command, hybrid_group, hybrid_command
 from discord.ext.commands.core import is_owner
 from discord.ext.commands.errors import (
     CommandInvokeError,
@@ -60,7 +60,7 @@ class FreeGames(Cog):
     @cooldown(rate=2, per=600, type=BucketType.guild)
     @has_permissions(administrator=True)
     @bot_has_permissions(send_messages=True)
-    @group(
+    @hybrid_group(
         name="freegames",
         description="Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала",
         aliases=["free", "freeGames"],
@@ -167,27 +167,32 @@ class FreeGames(Cog):
 
             game_name = game["title"]
 
-            slug = game["urlSlug"]
+            slug = game["catalogNs"]['mappings'][0]['pageSlug']
 
             link = "https://www.epicgames.com/store/ru/p/" + slug
+
+            game_photo_url = game['keyImages'][0]['url']
+
+            price_before = game['price']['totalPrice']['fmtPrice']['originalPrice']
 
             embedd = Embed(
                 title="**Бесплатная игра недели (Epic Games)**", colour=Colour.random()
             )
-            embedd.set_thumbnail(
-                url="https://www.dsogaming.com/wp-content/uploads/2020/04/epicgames.jpg"
+            embedd.set_image(
+                url=game_photo_url
             )
-            embedd.add_field(name=f"**{game_name}**", value=f"**{link}**")
+            embedd.add_field(name=f"**{game_name}**", value=f"**{link}**", inline=False)
+            embedd.add_field(name="**Цена до раздачи: **", value=f"{price_before}")
             embedd.add_field(name="**Действует до: **", value=f"{due_date}")
 
             msgs.append(embedd)
         return msgs
 
-    @command(
+    @is_owner()
+    @hybrid_command(
         name="run_free_games",
         description="Ручной запуск бесплатных игр (только для создателей)",
     )
-    @is_owner()
     async def runFreeGanes(self, ctx):
         await self.freeGames()
 
@@ -198,7 +203,7 @@ class FreeGames(Cog):
         msgs = await self.getMessages()
 
         for channel in channels:
-            channel = self.bot.get_channel(channel["free_games_channel_id"])
+            channel = self.bot.get_channel(channel)
             if not channel:
                 continue
 
@@ -211,5 +216,5 @@ class FreeGames(Cog):
                 await sleep(1)
 
 
-def setup(bot):
-    bot.add_cog(FreeGames(bot))
+async def setup(bot):
+    await bot.add_cog(FreeGames(bot))

@@ -13,16 +13,13 @@ from os import getenv
 import discord
 import re
 from discord.ext.commands.context import Context
-from discord.ext.commands import MissingRequiredArgument, BadArgument
+from discord.ext.commands import MissingRequiredArgument, BadArgument, hybrid_command
 import wavelink
 from discord.ext import commands
 from discord import Embed
 from typing import Union
 from datetime import timedelta
 
-from discord_slash import SlashContext, cog_ext
-from discord_slash.error import SlashCommandError
-from discord_slash.utils.manage_commands import create_choice
 
 from colorama import Fore, Back, Style
 from config import guilds
@@ -37,19 +34,17 @@ RURL = re.compile("https?:\/\/(?:www\.)?.+")
 TIME_REGEX = re.compile("([0-9]{1,2})m:([0-9]{1,2})s")
 
 
-class IncorrectChannelError(commands.CommandError, SlashCommandError):
+class IncorrectChannelError(commands.CommandError):
+    pass
+class NotInVoice(commands.CommandError):
     pass
 
 
-class NotInVoice(commands.CommandError, SlashCommandError):
+class QueueTooShort(commands.CommandError):
     pass
 
 
-class QueueTooShort(commands.CommandError, SlashCommandError):
-    pass
-
-
-class NoPrivateMessage(commands.CommandError, SlashCommandError):
+class NoPrivateMessage(commands.CommandError):
     pass
 
 
@@ -134,7 +129,7 @@ class Music(commands.Cog):
             print(
                 f"/\n{Fore.RED}ERROR WHILE CONNECTING TO LAVALINK SERVER \nPASSWORD IS NOT SPECIFIED\nMUSIC UNLOADING... {Style.RESET_ALL}"
             )
-            self.bot.unload_extension("commands.music")
+            await self.bot.unload_extension("commands.music")
             print(f"/\n{Fore.RED}DONE{Style.RESET_ALL}\n/")
             return
 
@@ -153,7 +148,7 @@ class Music(commands.Cog):
             print(
                 f"/ \n {Fore.RED}ERROR WHILE CONNECTING TO LAVALINK SERVER \nLAVALINK SERVER IS DOWN/NOT RUNNING\nMUSIC UNLOADING... {Style.RESET_ALL}"
             )
-            self.bot.unload_extension("commands.music")
+            await self.bot.unload_extension("commands.music")
             print(f"/\n{Fore.RED}DONE{Style.RESET_ALL}\n/")
             return
         # Set our node hook callback
@@ -240,54 +235,6 @@ class Music(commands.Cog):
             )
 
         raise error
-
-    @commands.Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, NoPrivateMessage):
-            try:
-                return await ctx.send(
-                    embed=automata.generateEmbErr(
-                        "Эту команду нельзя использовать в ЛС.", error=error
-                    )
-                )
-            except discord.HTTPException:
-                pass
-
-        if isinstance(error, IncorrectChannelError):
-            return await ctx.send(error)
-
-        if isinstance(error, NotInVoice):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Для использования комманды нужно быть в войсе", error=error
-                )
-            )
-
-        if isinstance(error, MissingRequiredArgument):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Нужно указать запрос", error=error)
-            )
-
-        if isinstance(error, QueueTooShort):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Очередь слишком маленькая для перемешивания", error=error
-                )
-            )
-
-        if isinstance(error, FilterInvalidArgument):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Значение должно быть больше нуля", error=error
-                )
-            )
-
-        if isinstance(error, BadArgument):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Неправильный запрос", error=error)
-            )
 
     async def rm_flag(self, guild_id: int):
         try:
@@ -406,27 +353,8 @@ class Music(commands.Cog):
         controller = self.get_controller(ctx)
         controller.channel = ctx.channel
 
-    @commands.command(
-        name="play", description="Играет музыку по ссылке или по названию"
-    )
-    async def play_prefix(self, ctx: Context, *query):
-        try:
-            query = " ".join(query)
-            await self.play(ctx, query)
-        except:
-            raise
 
-    @cog_ext.cog_slash(
-        name="play", description="Играет музыку по ссылке или по названию"
-    )
-    async def play_slash(self, ctx: SlashContext, query: str):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        try:
-            await self.play(ctx, query)
-        except:
-            raise
-
+    @hybrid_command(name="play", description="Играет музыку по ссылке или по названию")
     async def play(self, ctx, query: str):
         if len(query) < 1:
             raise MissingRequiredArgument(ctx.author)
@@ -492,16 +420,7 @@ class Music(commands.Cog):
         if not controller.loop:
             await ctx.send(embed=embed, delete_after=15)
 
-    @commands.command(name="pause", description="Останавливает музыку")
-    async def pause_prefix(self, ctx: Context):
-        await self.pause(ctx)
-
-    @cog_ext.cog_slash(name="pause", description="Останавливает музыку")
-    async def pause_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.pause(ctx)
-
+    @hybrid_command(name="pause", description="Останавливает музыку")
     async def pause(self, ctx):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -521,16 +440,8 @@ class Music(commands.Cog):
         await ctx.send("Останавливаю проигрывание", delete_after=15)
         await player.set_pause(True)
 
-    @commands.command(name="resume", description="Возобновляет музыку")
-    async def resume_prefix(self, ctx: Context):
-        await self.resume(ctx)
 
-    @cog_ext.cog_slash(name="resume", description="Возобновляет музыку")
-    async def resume_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.resume(ctx)
-
+    @hybrid_command(name="resume", description="Возобновляет музыку")
     async def resume(self, ctx):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -550,16 +461,8 @@ class Music(commands.Cog):
         await ctx.send("Возобновляю проигрывание", delete_after=15)
         await player.set_pause(False)
 
-    @commands.command(name="skip", description="Пропускает играющую музыку")
-    async def skip_prefix(self, ctx: Context):
-        await self.skip(ctx)
 
-    @cog_ext.cog_slash(name="skip", description="Пропускает играющую музыку")
-    async def skip_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.skip(ctx)
-
+    @hybrid_command(name="skip", description="Пропускает играющую музыку")
     async def skip(self, ctx):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -581,18 +484,8 @@ class Music(commands.Cog):
         await ctx.send(embed=embed, delete_after=15)
         await player.stop()
 
-    @commands.command(
-        name="volume", description="Устанавливает громкость плеера", aliases=["vol"]
-    )
-    async def volume_prefix(self, ctx: Context, vol: int):
-        await self.volume(ctx, vol)
 
-    @cog_ext.cog_slash(name="volume", description="Устанавливает громкость плеера")
-    async def volume_slash(self, ctx: SlashContext, vol: int):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.volume(ctx, vol)
-
+    @hybrid_command(name="volume", description="Устанавливает громкость плеера")
     async def volume(self, ctx, vol: int):
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -613,20 +506,8 @@ class Music(commands.Cog):
 
         await player.set_volume(vol)
 
-    @commands.command(
-        name="now_playing",
-        description="Показывает текущий трек",
-        aliases=["np", "current", "nowplaying"],
-    )
-    async def now_playing_prefix(self, ctx: Context):
-        await self.now_playing(ctx)
 
-    @cog_ext.cog_slash(name="now_playing", description="Показывает текущий трек")
-    async def now_playing_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.now_playing(ctx)
-
+    @hybrid_command(name="now_playing", description="Показывает текущий трек")
     async def now_playing(self, ctx):
         """Retrieve the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -647,22 +528,7 @@ class Music(commands.Cog):
             embed=await controller.nowPlayingEmbed(player)
         )
 
-    @commands.command(
-        name="queue",
-        description="Показывает очередь из треков (первые 5)",
-        aliases=["q"],
-    )
-    async def queue_prefix(self, ctx: Context):
-        await self.queue(ctx)
-
-    @cog_ext.cog_slash(
-        name="queue", description="Показывает очередь из треков (первые 5)"
-    )
-    async def queue_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.queue(ctx)
-
+    @hybrid_command(name="queue", description="Показывает очередь из треков (первые 5)")
     async def queue(self, ctx):
         """Retrieve information on the next 5 songs from the queue."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -687,20 +553,7 @@ class Music(commands.Cog):
             )
         await ctx.send(embed=embed, delete_after=15)
 
-    @commands.command(
-        name="stop",
-        description="Отключается и чистит очередь",
-        aliases=["disconnect", "dc"],
-    )
-    async def stop_prefix(self, ctx: Context):
-        await self.stop(ctx)
-
-    @cog_ext.cog_slash(name="stop", description="Отключается и чистит очередь")
-    async def stop_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.stop(ctx)
-
+    @hybrid_command(name="stop", description="Отключается и чистит очередь")
     async def stop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -716,33 +569,21 @@ class Music(commands.Cog):
 
         await ctx.send("Отключился и удалил очередь", delete_after=15)
 
-    @commands.command(
-        name="equalizer", description="Пресеты эквалайзера музыки", aliases=["eq"]
-    )
-    async def equalizer_prefix(self, ctx: Context, equalizer="None"):
-        await self.equalizer(ctx, equalizer)
 
-    @cog_ext.cog_slash(
-        name="equalizer",
-        description="Пресеты эквалайзера музыки",
-        options=[
-            {
-                "name": "equalizer",
-                "description": "Пресеты эквалайзера музыки",
-                "type": 3,
-                "required": "true",
-                "choices": [
-                    create_choice(name="bass", value="bass"),
-                    create_choice(name="default", value="default"),
-                ],
-            }
-        ],
-    )
-    async def equalizer_slash(self, ctx: SlashContext, equalizer="None"):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.equalizer(ctx, equalizer)
+        # options=[
+        #     {
+        #         "name": "equalizer",
+        #         "description": "Пресеты эквалайзера музыки",
+        #         "type": 3,
+        #         "required": "true",
+        #         "choices": [
+        #             create_choice(name="bass", value="bass"),
+        #             create_choice(name="default", value="default"),
+        #         ],
+        #     }
+        # ],
 
+    @hybrid_command(name="equalizer", description="Пресеты эквалайзера музыки", aliases=["eq"])
     async def equalizer(self, ctx, equalizer="None"):
         """Change the players equalizer."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -770,16 +611,7 @@ class Music(commands.Cog):
             delete_after=15,
         )
 
-    @commands.command(name="loop", description="Зацикливает, расцикливает трек")
-    async def loop_prefix(self, ctx: Context):
-        await self.loop(ctx)
-
-    @cog_ext.cog_slash(name="loop", description="Зацикливает, расцикливает трек")
-    async def loop_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.loop(ctx)
-
+    @hybrid_command(name="loop", description="Зацикливает, расцикливает трек")
     async def loop(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -806,18 +638,7 @@ class Music(commands.Cog):
 
         await ctx.send(embed=embed, delete_after=15)
 
-    @commands.command(
-        name="shuffle", description="Перемешивает треки в очереди", aliases=["mix"]
-    )
-    async def shuffle_prefix(self, ctx: Context):
-        await self.shuffle_(ctx)
-
-    @cog_ext.cog_slash(name="shuffle", description="Перемешивает треки в очереди")
-    async def shuffle_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.shuffle_(ctx)
-
+    @hybrid_command(name="shuffle", description="Перемешивает треки в очереди")
     async def shuffle_(self, ctx):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
@@ -836,22 +657,7 @@ class Music(commands.Cog):
         shuffle(controller.queue._queue)
         return await ctx.send("Очередь перемешана", delete_after=15)
 
-    @commands.command(
-        name="skip_to",
-        description="Пропускает до таймкода в треке (формат 0m:00s)",
-        aliases=["seek"],
-    )
-    async def skip_to_prefix(self, ctx: Context, time: str):
-        await self.skip_to(ctx, time)
-
-    @cog_ext.cog_slash(
-        name="skip_to", description="Пропускает до таймкода в треке (формат 0m:00s)"
-    )
-    async def skip_to_slash(self, ctx: SlashContext, time: str):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.skip_to(ctx, time)
-
+    @hybrid_command(name="skip_to", description="Пропускает до таймкода в треке (формат 0m:00s)")
     async def skip_to(self, ctx, time: str):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -874,16 +680,8 @@ class Music(commands.Cog):
 
         await ctx.send(f"Скипаю до {time}", delete_after=15)
 
-    @commands.command(name="speed", description="Ставит скорость проигрывания")
-    async def set_speed_prefix(self, ctx: Context, speed: float):
-        await self.set_speed(ctx, speed)
 
-    @cog_ext.cog_slash(name="speed", description="Ставит скорость проигрывания")
-    async def set_speed_slash(self, ctx: SlashContext, speed: float):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.set_speed(ctx, speed)
-
+    @hybrid_command(name="speed", description="Ставит скорость проигрывания")
     async def set_speed(self, ctx: Context, speed: float):
         if speed <= 0:
             raise FilterInvalidArgument
@@ -906,16 +704,7 @@ class Music(commands.Cog):
             delete_after=15,
         )
 
-    @commands.command(name="pitch", description="Ставит высоту проигрывания")
-    async def set_pitch_prefix(self, ctx: Context, pitch: float):
-        await self.set_pitch(ctx, pitch)
-
-    @cog_ext.cog_slash(name="pitch", description="Ставит высоту проигрывания")
-    async def set_pitch_slash(self, ctx: SlashContext, pitch: float):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.set_pitch(ctx, pitch)
-
+    @hybrid_command(name="pitch", description="Ставит высоту проигрывания")
     async def set_pitch(self, ctx: Context, pitch: float):
         if pitch <= 0:
             raise FilterInvalidArgument
@@ -938,16 +727,7 @@ class Music(commands.Cog):
             delete_after=15,
         )
 
-    @commands.command(name="reset_filters", description="Убирает фильтры")
-    async def reset_filters_prefix(self, ctx: Context, pitch: float):
-        await self.reset_filters(ctx, pitch)
-
-    @cog_ext.cog_slash(name="reset_filters", description="Убирает фильтры")
-    async def reset_filters_slash(self, ctx: SlashContext, pitch: float):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.reset_filters(ctx, pitch)
-
+    @hybrid_command(name="reset_filters", description="Убирает фильтры")
     async def reset_filters(self, ctx: Context):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -967,5 +747,5 @@ class Music(commands.Cog):
         )
 
 
-def setup(bot):
-    bot.add_cog(Music(bot))
+async def setup(bot):
+    await bot.add_cog(Music(bot))

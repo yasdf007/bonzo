@@ -1,17 +1,14 @@
 from discord.ext.commands.core import group, guild_only
-from discord_slash.context import SlashContext
 from commands.resources.hangman.Hangman import Hangman
-from discord.ext.commands import Cog, command, group, CommandError
+from discord.ext.commands import Cog, command, group, CommandError, hybrid_group
 from discord.ext.commands.context import Context
 import asyncio
-from discord_slash import SlashContext, cog_ext
 from config import guilds
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from .resources.AutomatedMessages import automata
-from discord_slash.error import SlashCommandError
 
 
-class NoPrivateMessage(CommandError, SlashCommandError):
+class NoPrivateMessage(CommandError):
     pass
 
 
@@ -29,38 +26,15 @@ class GameHangman(Cog):
                 )
             )
 
-    @Cog.listener()
-    async def on_slash_command_error(self, ctx, error):
-        if isinstance(error, NoPrivateMessage):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
-
     @guild_only()
-    @group(
+    @hybrid_group(
         name="hangman", description="Начать игру виселица", invoke_without_command=True
     )
-    async def gameHangman_prefix(self, ctx: Context):
-        await self.gameHangman(ctx)
-
-    @cog_ext.cog_subcommand(
-        base="hangman", name="start", description="Начать игру виселица"
-    )
-    async def gameHangman_slash(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.gameHangman(ctx)
-
-    async def gameHangman(self, ctx):
+    async def gameHangman(self, ctx: Context):
         if ctx.author.bot:
             return
 
-        if isinstance(ctx, Context):
-            guild_id = ctx.guild.id
-        if isinstance(ctx, SlashContext):
-            guild_id = ctx.guild_id
+        guild_id = ctx.guild.id
 
         if str(guild_id) in self.games:
             await ctx.send("Игра идет")
@@ -98,26 +72,12 @@ class GameHangman(Cog):
                 self.games.pop(str(guild_id))
 
     @guild_only()
-    @gameHangman_prefix.command(name="stop", description="Остановить игру виселица")
-    async def stop_prefix_(self, ctx: Context):
-        await self.stop(ctx)
-
-    @cog_ext.cog_subcommand(
-        base="hangman", name="stop", description="Остановить игру виселица"
-    )
-    async def stop_slash_(self, ctx: SlashContext):
-        if not ctx.guild:
-            raise NoPrivateMessage
-        await self.stop(ctx)
-
+    @gameHangman.command(name="stop", description="Остановить игру виселица")
     async def stop(self, ctx):
         if ctx.author.bot:
             return
 
-        if isinstance(ctx, Context):
-            guild_id = ctx.guild.id
-        if isinstance(ctx, SlashContext):
-            guild_id = ctx.guild_id
+        guild_id = ctx.guild.id
 
         if not str(guild_id) in self.games:
             await ctx.send("Игра не идет")
@@ -136,5 +96,5 @@ class GameHangman(Cog):
         await ctx.send("Игра остановлена")
 
 
-def setup(bot):
-    bot.add_cog(GameHangman(bot))
+async def setup(bot):
+    await bot.add_cog(GameHangman(bot))

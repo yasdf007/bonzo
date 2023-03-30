@@ -1,6 +1,6 @@
 from commands.resources.AutomatedMessages import automata
 from discord import TextChannel
-from discord.ext.commands import Cog, command, is_owner
+from discord.ext.commands import Cog, command, is_owner, hybrid_command
 from discord.ext.commands.errors import CommandInvokeError, NotOwner
 
 name = "evala"
@@ -27,7 +27,7 @@ class evala(Cog):
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)
     @is_owner()
-    @command(name=name, description=description)
+    @hybrid_command(name=name, description=description)
     async def evala(self, ctx, evcode: str):
         if not evcode:
             raise CommandInvokeError()
@@ -39,5 +39,5 @@ class evala(Cog):
         await execute
 
 
-def setup(bot):
-    bot.add_cog(evala(bot))
+async def setup(bot):
+    await bot.add_cog(evala(bot))
