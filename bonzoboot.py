@@ -36,7 +36,7 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-MY_GUILD = Object(id=707576013449592848)  
+MY_GUILD =  
 
 class Bot(bonzoBot):
     def __init__(self):
@@ -59,8 +59,9 @@ class Bot(bonzoBot):
     
     async def setup_hook(self):
         await self.cogsLoad()
-        self.tree.copy_global_to(guild=MY_GUILD)
-        await self.tree.sync(guild=MY_GUILD)
+        # self.tree.copy_global_to(guild=MY_GUILD)
+        # await self.tree.sync(guild=MY_GUILD)
+        await self.tree.sync()
    
         try:
             self.pool = await db.connectToDB()
