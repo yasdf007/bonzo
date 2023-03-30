@@ -36,7 +36,7 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-MY_GUILD =  
+MY_GUILD = None
 
 class Bot(bonzoBot):
     def __init__(self):
