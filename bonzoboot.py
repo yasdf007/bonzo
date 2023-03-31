@@ -28,6 +28,8 @@ from discord import app_commands
 from dependencies.all import Dependencies
 from dependencies.repository.prefix.memory import PrefixRepositoryMemory
 from dependencies.api.youtube_random.sdk import YoutubeRandomApiSDK
+from dependencies.api.weather.openweather import OpenWeatherMapAPI
+from dependencies.api.weather.wttr import WttrAPI
 
 load_dotenv()  # загружает файл env
 
@@ -61,7 +63,9 @@ class Bot(bonzoBot):
     async def setup_hook(self):
         self.dependency = Dependencies(
             prefix_repo=PrefixRepositoryMemory(),
-            youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY"))
+            youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY")),
+            openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
+            wttr_api=WttrAPI(),
         )
 
         await self.cogsLoad()
@@ -112,7 +116,6 @@ class Bot(bonzoBot):
     async def on_command_error(self, ctx, error):
         if isinstance(error, CommandNotFound):
             return
-        raise error
 
     @Cog.listener()
     async def on_ready(self):
