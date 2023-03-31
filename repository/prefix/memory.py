@@ -1,7 +1,7 @@
 from .abc import PrefixRepository
 
 class PrefixRepositoryMemory(PrefixRepository):
-    db = {707576013449592848: 't/'}
+    db = {}
 
     async def getAllPrefixes(self):
         return self.db
@@ -10,4 +10,4 @@ class PrefixRepositoryMemory(PrefixRepository):
         self.db[guild_id] = prefix
 
     async def prefix_for_guild(self, guild_id: int):
-        return self.db[guild_id]
+        return self.db.get(guild_id)
