@@ -7,7 +7,7 @@ from sys import dont_write_bytecode
 dont_write_bytecode = True  # убирает генерацию машинного кода python
 
 from discord.ext import tasks
-from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
+from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or, CommandNotFound
 from discord import Intents, Game, Status
 
 from config import OWNER_IDS, prefix, DEBUG_GUILD
@@ -104,6 +104,12 @@ class Bot(bonzoBot):
             sep="\n",
         )
         super().run(getenv("TOKEN"))  # берёт переменную TOKEN из .env
+
+    @Cog.listener()
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, CommandNotFound):
+            return
+        raise error
 
     @Cog.listener()
     async def on_ready(self):
