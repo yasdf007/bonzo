@@ -25,6 +25,9 @@ import logging
 
 from discord import app_commands
 
+from repository.all import Repositories
+from repository.prefix import PrefixRepositoryMemory
+
 load_dotenv()  # загружает файл env
 
 logger = logging.getLogger("discord")
@@ -53,10 +56,12 @@ class Bot(bonzoBot):
         self.game = Game(f"@Bonzo init | stacknox2")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
-        self.custom_prefix = {}
-
     
     async def setup_hook(self):
+        self.repos = Repositories(
+            prefix_repo=PrefixRepositoryMemory()
+        )
+
         await self.cogsLoad()
 
         if DEBUG_GUILD:
@@ -67,9 +72,6 @@ class Bot(bonzoBot):
    
         try:
             self.pool = await db.connectToDB()
-            res = await db.getPrefixes(self.pool)
-            for row in res:
-                self.custom_prefix[int(row["server_id"])] = row["prefix"]
         except Exception as err:
             print(
                 f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}"
@@ -87,14 +89,13 @@ class Bot(bonzoBot):
                 curr += 1
                 print(f"loaded {filename}, {curr}/{total}")
 
-    def _get_prefix(self, bot, message):
+    async def _get_prefix(self, bot, message):
         if not message.guild:
             return when_mentioned_or(prefix)(bot, message)
+        
+        guild_prefix = await self.repos.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or prefix
 
-        if message.guild.id in self.custom_prefix:
-            return when_mentioned_or(self.custom_prefix[message.guild.id])(bot, message)
-
-        return when_mentioned_or(prefix)(bot, message)
+        return when_mentioned_or(guild_prefix)(bot, message)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан

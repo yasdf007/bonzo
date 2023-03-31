@@ -18,6 +18,7 @@ from discord.ext.commands.context import Context
 from commands.resources.AutomatedMessages import automata
 from database import db
 
+from repository.prefix import PrefixRepository
 
 class PrefixTooLong(CommandError):
     pass
@@ -38,6 +39,7 @@ class NotASCII(CommandError):
 class Settings(Cog):
     def __init__(self, bot):
         self.bot = bot
+        self.prefix_repo: PrefixRepository = self.bot.repos.prefix_repo
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingPermissions):
@@ -102,7 +104,6 @@ class Settings(Cog):
     async def set_prefix(self, ctx: Context, prefix: str):
         if not ctx.message.guild:
             raise
-
         if len(prefix) < 1:
             raise PrefixTooShort
         if len(prefix) > 5:
@@ -116,8 +117,7 @@ class Settings(Cog):
         if prefix[-1] not in "[_.!#$%^&*()<>?/\|}{~:]'":
             raise NoSpecialSymbolFound
 
-        self.bot.custom_prefix[ctx.message.guild.id] = prefix
-        await db.insertPrefix(self.bot.pool, ctx.message.guild.id, prefix)
+        await self.prefix_repo.insertPrefix(guild_id=ctx.message.guild.id, prefix=prefix)
         await ctx.send(f"Установил префикс {prefix} для {ctx.message.guild.name}!")
 
 
