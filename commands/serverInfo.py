@@ -2,7 +2,6 @@ from discord import Embed
 from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
 from discord.ext.commands.core import guild_only
-from config import guilds
 from discord.ext.commands import NoPrivateMessage
 from .resources.AutomatedMessages import automata
 

@@ -15,7 +15,6 @@ from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
-from config import guilds
 from .resources.AutomatedMessages import automata
 
 

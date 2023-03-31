@@ -2,7 +2,6 @@ from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
 from random import choices
 from string import ascii_lowercase, digits
-from config import guilds
 
 name = "pict"
 description = "Отправляет случайное изображение из prnt.sc :o"

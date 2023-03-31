@@ -3,7 +3,6 @@ from discord.ext.commands import Cog, command, MemberNotFound, CommandError, hyb
 from discord.ext.commands.context import Context
 from discord.member import Member
 from discord.ext.commands.core import guild_only
-from config import guilds
 from .resources.AutomatedMessages import automata
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 

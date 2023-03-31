@@ -2,7 +2,6 @@ from discord import Embed
 from discord.ext.commands.context import Context
 from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from aiohttp import ClientSession
-from config import guilds
 from .resources.AutomatedMessages import automata
 
 name = "nasapict"

@@ -5,7 +5,6 @@ from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
 from .resources.AutomatedMessages import automata
 from discord.ext.commands import Bot
-from config import guilds
 
 name = "status"
 description = "Статус бота на данный момент"

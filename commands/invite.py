@@ -1,7 +1,6 @@
 from discord import Embed
 from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
-from config import guilds
 
 name = "invite"
 description = "Ссылка на приглашение бота"

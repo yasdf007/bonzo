@@ -1,6 +1,5 @@
 from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
-from config import guilds
 from random import sample
 from aiohttp import ClientSession
 

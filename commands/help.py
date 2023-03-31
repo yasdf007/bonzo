@@ -2,7 +2,6 @@ from discord import Embed, Member
 from discord.ext.commands import Cog, command, CommandError, Context, hybrid_command
 from random import randint
 from math import ceil
-from config import guilds
 from commands.resources.paginator import Paginator
 
 name = "help"

@@ -2,7 +2,6 @@ from discord.ext.commands import Cog, group, guild_only, hybrid_group
 import asyncio
 from discord.ext.commands.errors import NoPrivateMessage
 from .resources.blackjack.Blackjack import Blackjack
-from config import guilds
 from .resources.AutomatedMessages import automata
 
 

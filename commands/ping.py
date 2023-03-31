@@ -1,6 +1,5 @@
 from discord.ext.commands import Cog, hybrid_command
 from discord.ext.commands.context import Context
-from config import guilds
 
 name = "ping"
 description = "Понг!"

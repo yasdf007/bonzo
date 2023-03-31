@@ -4,7 +4,6 @@ from discord.ext.commands import Cog, command, CommandError, MissingRequiredArgu
 from os import getenv
 from dotenv import load_dotenv
 from aiohttp import ClientSession
-from config import guilds
 from .resources.AutomatedMessages import automata
 
 load_dotenv()

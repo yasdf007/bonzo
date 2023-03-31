@@ -22,7 +22,6 @@ from datetime import timedelta
 
 
 from colorama import Fore, Back, Style
-from config import guilds
 from random import shuffle
 
 from .resources.AutomatedMessages import automata

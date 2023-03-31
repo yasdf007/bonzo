@@ -3,7 +3,6 @@ from discord.ext.commands.context import Context
 from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from random import randint
 from typing import Optional
-from config import guilds
 from .resources.AutomatedMessages import automata
 
 name = "roll"

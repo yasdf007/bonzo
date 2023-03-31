@@ -10,7 +10,6 @@ from io import BytesIO, StringIO
 from aiohttp import ClientSession
 
 from re import compile
-from config import guilds
 
 
 class NoUrlFound(CommandError):

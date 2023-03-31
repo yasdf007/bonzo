@@ -1,7 +1,6 @@
 from discord.ext.commands import Cog, command, hybrid_command
 from discord.ext.commands.context import Context
 from random import randint
-from config import guilds
 
 name = "randomcat"
 description = "Отправляет случайного котика :3"

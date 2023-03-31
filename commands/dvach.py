@@ -2,7 +2,6 @@ from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog, command, CommandError, Context, hybrid_command
 from aiohttp import ClientSession
 from random import choice
-from config import guilds
 
 name = "2ch"
 description = "Рандомное видео с двача"

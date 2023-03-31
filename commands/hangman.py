@@ -3,7 +3,6 @@ from commands.resources.hangman.Hangman import Hangman
 from discord.ext.commands import Cog, command, group, CommandError, hybrid_group
 from discord.ext.commands.context import Context
 import asyncio
-from config import guilds
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from .resources.AutomatedMessages import automata
 
