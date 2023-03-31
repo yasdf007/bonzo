@@ -8,9 +8,9 @@ dont_write_bytecode = True  # убирает генерацию машинног
 
 from discord.ext import tasks
 from discord.ext.commands import Bot as bonzoBot, Cog, when_mentioned_or
-from discord import Intents, Game, Status, Object
+from discord import Intents, Game, Status
 
-from config import OWNER_IDS, prefix
+from config import OWNER_IDS, prefix, DEBUG_GUILD
 from database import db
 
 from colorama import Fore, Back, Style
@@ -36,7 +36,6 @@ handler.setFormatter(
 )
 logger.addHandler(handler)
 
-MY_GUILD = None
 
 class Bot(bonzoBot):
     def __init__(self):
@@ -59,9 +58,12 @@ class Bot(bonzoBot):
     
     async def setup_hook(self):
         await self.cogsLoad()
-        # self.tree.copy_global_to(guild=MY_GUILD)
-        # await self.tree.sync(guild=MY_GUILD)
-        await self.tree.sync()
+
+        if DEBUG_GUILD:
+            self.tree.copy_global_to(guild=DEBUG_GUILD)
+            await self.tree.sync(guild=DEBUG_GUILD)
+        else:
+            await self.tree.sync()
    
         try:
             self.pool = await db.connectToDB()

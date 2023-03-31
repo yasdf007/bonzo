@@ -1,10 +1,14 @@
 from os import getenv
 from dotenv import load_dotenv
 from colorama import Fore, Back, Style
+from discord import Object
 
 load_dotenv()
+DEBUG_GUILD = None
 
-guilds = None
+if getenv("DEBUG_GUILD"):
+    DEBUG_GUILD = Object(id=int(getenv("DEBUG_GUILD")))
+
 try:
     OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",")]
 except:
