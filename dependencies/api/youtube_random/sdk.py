@@ -1,10 +1,10 @@
-from .abc import YoutubeRandomRepository
+from .abc import YoutubeRandomApi
 import json
 from random import choice
 from string import digits, ascii_uppercase
 from googleapiclient.discovery import build
 
-class YoutubeRandomRepositorySDK(YoutubeRandomRepository):
+class YoutubeRandomApiSDK(YoutubeRandomApi):
     def __init__(self, YOUTUBE_API_KEY):
         YOUTUBE_API_KEY = YOUTUBE_API_KEY
         API_SERVICE_NAME = "youtube"

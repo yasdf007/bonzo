@@ -18,7 +18,7 @@ from discord.ext.commands.context import Context
 from commands.resources.AutomatedMessages import automata
 from database import db
 
-from repository.prefix.abc import PrefixRepository
+from dependencies.repository.prefix.abc import PrefixRepository
 
 class PrefixTooLong(CommandError):
     pass
@@ -39,7 +39,7 @@ class NotASCII(CommandError):
 class Settings(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.prefix_repo: PrefixRepository = self.bot.repos.prefix_repo
+        self.prefix_repo: PrefixRepository = self.bot.dependency.prefix_repo
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingPermissions):

@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class YoutubeRandomRepository(ABC):
+class YoutubeRandomApi(ABC):
     @abstractmethod
     async def get_video_id(self):
         raise NotImplementedError()

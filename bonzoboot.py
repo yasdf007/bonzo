@@ -25,9 +25,9 @@ import logging
 
 from discord import app_commands
 
-from repository.all import Repositories
-from repository.prefix.memory import PrefixRepositoryMemory
-from repository.youtube_random.sdk import YoutubeRandomRepositorySDK
+from dependencies.all import Dependencies
+from dependencies.repository.prefix.memory import PrefixRepositoryMemory
+from dependencies.api.youtube_random.sdk import YoutubeRandomApiSDK
 
 load_dotenv()  # загружает файл env
 
@@ -59,9 +59,9 @@ class Bot(bonzoBot):
         self.startTime = None
     
     async def setup_hook(self):
-        self.repos = Repositories(
+        self.dependency = Dependencies(
             prefix_repo=PrefixRepositoryMemory(),
-            youtube_random_repo=YoutubeRandomRepositorySDK(getenv("YOUTUBE_API_KEY"))
+            youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY"))
         )
 
         await self.cogsLoad()
@@ -95,7 +95,7 @@ class Bot(bonzoBot):
         if not message.guild:
             return when_mentioned_or(prefix)(bot, message)
         
-        guild_prefix = await self.repos.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or prefix
+        guild_prefix = await self.dependency.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or prefix
 
         return when_mentioned_or(guild_prefix)(bot, message)
 
