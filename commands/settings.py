@@ -18,7 +18,7 @@ from discord.ext.commands.context import Context
 from commands.resources.AutomatedMessages import automata
 from database import db
 
-from repository.prefix import PrefixRepository
+from repository.prefix.abc import PrefixRepository
 
 class PrefixTooLong(CommandError):
     pass

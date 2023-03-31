@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from .prefix import PrefixRepositoryMemory, PrefixRepository
+
+from .prefix.abc import PrefixRepository
 
 @dataclass
 class Repositories:

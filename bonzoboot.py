@@ -26,7 +26,7 @@ import logging
 from discord import app_commands
 
 from repository.all import Repositories
-from repository.prefix import PrefixRepositoryMemory
+from repository.prefix.memory import PrefixRepositoryMemory
 
 load_dotenv()  # загружает файл env
 
