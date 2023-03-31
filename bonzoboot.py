@@ -27,6 +27,7 @@ from discord import app_commands
 
 from repository.all import Repositories
 from repository.prefix.memory import PrefixRepositoryMemory
+from repository.youtube_random.sdk import YoutubeRandomRepositorySDK
 
 load_dotenv()  # загружает файл env
 
@@ -59,7 +60,8 @@ class Bot(bonzoBot):
     
     async def setup_hook(self):
         self.repos = Repositories(
-            prefix_repo=PrefixRepositoryMemory()
+            prefix_repo=PrefixRepositoryMemory(),
+            youtube_random_repo=YoutubeRandomRepositorySDK(getenv("YOUTUBE_API_KEY"))
         )
 
         await self.cogsLoad()
