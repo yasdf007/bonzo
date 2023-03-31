@@ -45,7 +45,7 @@ class weather(Cog):
         elif provider == 'wttr':
             res = await self.wttr_api.get_response(city)
         else:
-            raise 
+            raise InvalidProvider()
         if not res:
             raise CityNotFound()
 
