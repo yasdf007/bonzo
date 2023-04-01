@@ -34,6 +34,9 @@ from dependencies.api.nasa.nasa import NasaApi
 from dependencies.api.dvach.dvach import RandomtubeAPI
 from dependencies.api.crypto.coinmarketcap import CoinmarketcapAPI
 
+
+from database.memory.db import DictMemoryDb
+
 load_dotenv()  # загружает файл env
 
 logger = logging.getLogger("discord")
@@ -64,8 +67,11 @@ class Bot(bonzoBot):
         self.startTime = None
     
     async def setup_hook(self):
+        mem = DictMemoryDb
+        
         self.dependency = Dependencies(
-            prefix_repo=PrefixRepositoryMemory(),
+            prefix_repo=PrefixRepositoryMemory(mem),
+
             youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY")),
             openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
             wttr_api=WttrAPI(),
