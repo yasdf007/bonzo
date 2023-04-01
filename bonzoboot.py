@@ -31,6 +31,7 @@ from dependencies.api.youtube_random.sdk import YoutubeRandomApiSDK
 from dependencies.api.weather.openweather import OpenWeatherMapAPI
 from dependencies.api.weather.wttr import WttrAPI
 from dependencies.api.nasa.nasa import NasaApi
+from dependencies.api.dvach.dvach import RandomtubeAPI
 
 load_dotenv()  # загружает файл env
 
@@ -68,6 +69,7 @@ class Bot(bonzoBot):
             openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
             wttr_api=WttrAPI(),
             nasa_api=NasaApi(),
+            dvach_api=RandomtubeAPI(),
         )
 
         await self.cogsLoad()
