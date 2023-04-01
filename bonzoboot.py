@@ -30,6 +30,7 @@ from dependencies.repository.prefix.memory import PrefixRepositoryMemory
 from dependencies.api.youtube_random.sdk import YoutubeRandomApiSDK
 from dependencies.api.weather.openweather import OpenWeatherMapAPI
 from dependencies.api.weather.wttr import WttrAPI
+from dependencies.api.nasa.nasa import NasaApi
 
 load_dotenv()  # загружает файл env
 
@@ -66,6 +67,7 @@ class Bot(bonzoBot):
             youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY")),
             openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
             wttr_api=WttrAPI(),
+            nasa_api=NasaApi(),
         )
 
         await self.cogsLoad()
