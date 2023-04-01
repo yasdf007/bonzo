@@ -5,6 +5,7 @@ from .api.youtube_random.abc import  YoutubeRandomApi
 from .api.weather.abc import  WeatherAPI
 from .api.nasa.abc import NasaAPI
 from .api.dvach.abc import DvachAPI
+from .api.crypto.abc import CryptoAPI
 
 @dataclass
 class Dependencies:
@@ -14,3 +15,4 @@ class Dependencies:
     wttr_api: WeatherAPI
     nasa_api: NasaAPI
     dvach_api: DvachAPI
+    crypto_api: CryptoAPI

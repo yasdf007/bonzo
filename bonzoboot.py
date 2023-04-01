@@ -32,6 +32,7 @@ from dependencies.api.weather.openweather import OpenWeatherMapAPI
 from dependencies.api.weather.wttr import WttrAPI
 from dependencies.api.nasa.nasa import NasaApi
 from dependencies.api.dvach.dvach import RandomtubeAPI
+from dependencies.api.crypto.coinmarketcap import CoinmarketcapAPI
 
 load_dotenv()  # загружает файл env
 
@@ -70,6 +71,7 @@ class Bot(bonzoBot):
             wttr_api=WttrAPI(),
             nasa_api=NasaApi(),
             dvach_api=RandomtubeAPI(),
+            crypto_api=CoinmarketcapAPI(getenv('COINMARKETCAP_API_KEY')),
         )
 
         await self.cogsLoad()
