@@ -14,5 +14,5 @@ class Response:
     
 class WeatherAPI(ABC):
     @abstractmethod
-    async def get_response(self, city: str) -> Response:
+    async def get_weather_data(self, city: str) -> Response:
         raise NotImplementedError()

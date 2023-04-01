@@ -8,5 +8,5 @@ class Response:
     
 class DvachAPI(ABC):
     @abstractmethod
-    async def get_response(self) -> Response:
+    async def get_random_url(self) -> Response:
         raise NotImplementedError()

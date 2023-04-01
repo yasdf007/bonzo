@@ -16,7 +16,7 @@ class WttrAPI(WeatherAPI):
         # Возвращаем направление ветра в зависимости от градусов
         return possibleDirections[value % 16]
 
-    async def get_response(self, city) -> Response:
+    async def get_weather_data(self, city) -> Response:
         async with ClientSession() as session:
             async with session.get(f'{self.BASE_URL}/{city}', params={'format': 'j1'}) as response:
                 if(response.status == 404):

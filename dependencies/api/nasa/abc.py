@@ -9,5 +9,5 @@ class Response:
     
 class NasaAPI(ABC):
     @abstractmethod
-    async def get_response(self) -> Response:
+    async def get_image_of_the_day(self) -> Response:
         raise NotImplementedError()

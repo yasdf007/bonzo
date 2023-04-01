@@ -22,7 +22,7 @@ class Dvach(Cog):
     @hybrid_command(name=name, description=description)
     async def dvach(self, ctx):
         try:
-            link = await self.dvach_api.get_response()
+            link = await self.dvach_api.get_random_url()
             await ctx.send(link)
         except:
             raise RequestNetworkError

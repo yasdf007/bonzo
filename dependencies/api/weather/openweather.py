@@ -35,7 +35,7 @@ class OpenWeatherMapAPI(WeatherAPI):
         # Возвращаем направление ветра в зависимости от градусов
         return possibleDirections[value % 16]
 
-    async def get_response(self, city) -> Response:
+    async def get_weather_data(self, city) -> Response:
         async with ClientSession() as session:
             async with session.get(self.BASE_URL, params={'q': city}) as response:
                 if(response.status == 404):

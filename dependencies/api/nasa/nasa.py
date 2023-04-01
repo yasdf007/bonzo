@@ -4,7 +4,7 @@ from aiohttp import ClientSession
 class NasaApi(NasaAPI):
     BASE_URL = "https://api.nasa.gov/planetary/apod?api_key=DEMO_KEY"
 
-    async def get_response(self) -> Response:
+    async def get_image_of_the_day(self) -> Response:
         async with ClientSession() as session:
             async with session.get(self.BASE_URL) as response:
                 res = await response.json()

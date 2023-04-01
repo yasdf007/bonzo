@@ -11,7 +11,7 @@ class RandomtubeAPI(DvachAPI):
     URL = "https://api.randomtube.xyz/v1/videos"
     PARAMS = {"board": "b", "chan": "2ch.hk", "page": 1}
     
-    async def get_response(self) -> Response:
+    async def get_random_url(self) -> Response:
         async with ClientSession(headers=self.USERAGENT) as session:
             async with session.get(self.URL, params=self.PARAMS) as response:
                 res = await response.json()

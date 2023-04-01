@@ -41,9 +41,9 @@ class weather(Cog):
     @hybrid_command(name=name, description=description)
     async def getWeather(self, ctx, city, provider='openweather'):
         if provider == 'openweather':
-            res = await self.openweather_api.get_response(city)
+            res = await self.openweather_api.get_weather_data(city)
         elif provider == 'wttr':
-            res = await self.wttr_api.get_response(city)
+            res = await self.wttr_api.get_weather_data(city)
         else:
             raise InvalidProvider()
         if not res:
