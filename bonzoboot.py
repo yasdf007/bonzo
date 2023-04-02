@@ -120,7 +120,7 @@ class Bot(bonzoBot):
 
             if filename.endswith(".py"):
                 try: # load cog
-                    self.load_extension(f"commands.{filename[:-3]}")
+                    await self.load_extension(f"commands.{filename[:-3]}")
                     print(f"cog {filename} load, {curr}/{total}")
 
                 except Exception as error: # something in cog wrong
