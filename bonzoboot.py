@@ -37,6 +37,7 @@ from dependencies.all                           import Dependencies
 
 from dependencies.repository.prefix.memory      import PrefixRepositoryMemory
 from dependencies.repository.free_games.memory  import FreeGamesRepositoryMemory
+from dependencies.repository.member_info.memory     import MemberHandlerRepositoryMemory
 
 from dependencies.api.youtube_random.sdk        import YoutubeRandomApiSDK
 from dependencies.api.weather.openweather       import OpenWeatherMapAPI
@@ -95,6 +96,7 @@ class Bot(bonzoBot):
         self.dependency = Dependencies(
             prefix_repo=PrefixRepositoryMemory(mem),
             free_games_repo=FreeGamesRepositoryMemory(mem),
+            members_repo=MemberHandlerRepositoryMemory(mem),
             youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY")),
             openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
             crypto_api=CoinmarketcapAPI(getenv('COINMARKETCAP_API_KEY')),
