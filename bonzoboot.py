@@ -28,7 +28,8 @@ from time     import time
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from platform import platform
-from os       import listdir, getenv
+from os       import getenv
+from pathlib import Path
 
 import logging
 
@@ -121,20 +122,17 @@ class Bot(bonzoBot):
             await self.unload_extension(f"commands.xpSystem")
 
     async def cogsLoad(self):
-        curr, total = 1, len(listdir("./commands")) - 4 # cogs - folder
+        cmds = [x.stem for x in Path('./commands').iterdir() if x.suffix == '.py' and x.is_file()]
+        total = len(cmds)
 
-        for filename in listdir("./commands"):
+        for curr, cmd in enumerate(cmds, start=1):
+            try:
+                await self.load_extension(f"commands.{cmd}")
+                print(f"cog {cmd} load, {curr}/{total}")
 
-            if filename.endswith(".py"):
-                try: # load cog
-                    await self.load_extension(f"commands.{filename[:-3]}")
-                    print(f"cog {filename} load, {curr}/{total}")
-
-                except Exception as error: # something in cog wrong
-                    print(f"error in cog {filename}, {curr}/{total} | {error}")
-                    logging.error(f"cog filename not load: {error}")
-
-                curr += 1 # + 1 for current amount
+            except Exception as error: # something in cog wrong
+                print(f"error in cog {cmd}, {curr}/{total} | {error}")
+                logging.error(f"cog filename not load: {error}")
 
 
     async def _get_prefix(self, bot, message):
