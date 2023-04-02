@@ -18,6 +18,7 @@ from discord.ext.commands.errors import (
     CommandOnCooldown,
     MissingPermissions,
     NoPrivateMessage,
+    NotOwner
 )
 from datetime import datetime
 from discord.enums import ChannelType
@@ -43,6 +44,10 @@ class FreeGames(Cog):
                     "Только администратор может использовать эту команду", error=error
                 )
             )
+        
+        if isinstance(error, NotOwner):
+            pass
+        
         if isinstance(error, NoPrivateMessage):
             await ctx.send(
                 embed=automata.generateEmbErr("Только на серверах", error=error)

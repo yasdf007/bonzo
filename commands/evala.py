@@ -20,9 +20,7 @@ class evala(Cog):
             )
 
         if isinstance(error, NotOwner):
-            await ctx.send(
-                embed=automata.generateEmbErr("Только для разработчиков бота")
-            )
+            pass
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)

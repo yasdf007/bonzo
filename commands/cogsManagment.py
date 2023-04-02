@@ -1,5 +1,5 @@
 from discord.ext.commands import Cog, command, is_owner, hybrid_command
-from discord.ext.commands.errors import MissingPermissions
+from discord.ext.commands.errors import MissingPermissions, NotOwner
 import traceback
 
 class CogsManagment(Cog):
@@ -7,7 +7,7 @@ class CogsManagment(Cog):
         self.bot = bot
 
     async def cog_command_error(self, ctx, error):
-        if isinstance(error, MissingPermissions):
+        if isinstance(error, (MissingPermissions, NotOwner)):
             pass
         raise error
 

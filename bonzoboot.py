@@ -125,11 +125,6 @@ class Bot(bonzoBot):
         super().run(getenv("TOKEN"))  # берёт переменную TOKEN из .env
 
     @Cog.listener()
-    async def on_command_error(self, ctx, error):
-        if isinstance(error, CommandNotFound):
-            return
-
-    @Cog.listener()
     async def on_ready(self):
         # бот меняет свой статус именно благодаря этой команде (и "играет" в "игру")
         await self.change_presence(status=Status.online, activity=self.game)
