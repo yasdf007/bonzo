@@ -41,7 +41,7 @@ class FreeGames(Cog):
 
     async def cog_command_error(self, ctx, error):
         if isinstance(error, MissingPermissions):
-            await ctx.message.reply(
+            return await ctx.message.reply(
                 embed=automata.generateEmbErr(
                     "Только администратор может использовать эту команду", error=error
                 )
@@ -51,11 +51,11 @@ class FreeGames(Cog):
             pass
         
         if isinstance(error, NoPrivateMessage):
-            await ctx.send(
+            return await ctx.send(
                 embed=automata.generateEmbErr("Только на серверах", error=error)
             )
         if isinstance(error, CommandOnCooldown):
-            await ctx.message.reply(
+            return await ctx.message.reply(
                 embed=automata.generateEmbErr(
                     "Спам командами негативно влияет на общую производительность бота. Попробуйте позже.",
                     error=error,
