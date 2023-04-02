@@ -113,7 +113,7 @@ class Bot(bonzoBot):
             await self.unload_extension(f"commands.xpSystem")
             await self.unload_extension(f"commands.freeGames")
 
-    def cogsLoad(self):
+    async def cogsLoad(self):
         curr, total = 1, len(listdir("./commands")) - 4 # cogs - folder
 
         for filename in listdir("./commands"):
@@ -165,8 +165,8 @@ if __name__ == "__main__":
 
     try:
         bot.run()
-    except:
-        print(Fore.RED +  "-----------------------\nConnection failed\n-----------------------" + Style.RESET_ALL)
+    except Exception as exp:
+        print(Fore.RED +  f"-----------------------\nConnection failed: {exp}\n-----------------------" + Style.RESET_ALL)
     finally:
         print(Fore.YELLOW +  "-----------------------\nStopped\n-----------------------" + Style.RESET_ALL)
 
