@@ -20,18 +20,19 @@ from discord.ext.commands.errors import (
     NoPrivateMessage,
     NotOwner
 )
-from datetime import datetime
 from discord.enums import ChannelType
 from discord import Embed
 from discord import Colour
 from .resources.AutomatedMessages import automata
 
+from dependencies.api.free_games.abc import FreeGamesAPI
 
 class FreeGames(Cog):
     link = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU"
 
     def __init__(self, bot):
         self.bot = bot
+        self.free_games_api: FreeGamesAPI = self.bot.dependency.free_games_api
         self.bot.scheduler.add_job(
             self.freeGames,
             CronTrigger(day_of_week="thu", hour=19, minute=3, jitter=120),
@@ -138,57 +139,19 @@ class FreeGames(Cog):
         return res
 
     async def getMessages(self):
-        async with ClientSession() as session:
-            try:
-                async with session.get(self.link) as response:
-                    resultJson = await response.json()
-            except:
-                raise CommandInvokeError("Ошибка при запросе")
-
-        games = resultJson["data"]["Catalog"]["searchStore"]["elements"]
         msgs = []
+        games = await self.free_games_api.get_free_games()
 
         for game in games:
-            promotions = game["promotions"]
-
-            if not promotions:
-                continue
-
-            if len(promotions["promotionalOffers"]) == 0:
-                continue
-
-            freeDiscountSetting = promotions["promotionalOffers"][0][
-                "promotionalOffers"
-            ][0]["discountSetting"]["discountPercentage"]
-
-            if freeDiscountSetting != 0:
-                continue
-
-            due_date = datetime.fromisoformat(
-                promotions["promotionalOffers"][0]["promotionalOffers"][0]["endDate"][
-                    :-1
-                ]
-            ).strftime("%d/%m/%Y")
-
-            game_name = game["title"]
-
-            slug = game["catalogNs"]['mappings'][0]['pageSlug']
-
-            link = "https://www.epicgames.com/store/ru/p/" + slug
-
-            game_photo_url = game['keyImages'][0]['url']
-
-            price_before = game['price']['totalPrice']['fmtPrice']['originalPrice']
-
             embedd = Embed(
                 title="**Бесплатная игра недели (Epic Games)**", colour=Colour.random()
             )
             embedd.set_image(
-                url=game_photo_url
+                url=game.game_photo_url
             )
-            embedd.add_field(name=f"**{game_name}**", value=f"**{link}**", inline=False)
-            embedd.add_field(name="**Цена до раздачи: **", value=f"{price_before}")
-            embedd.add_field(name="**Действует до: **", value=f"{due_date}")
+            embedd.add_field(name=f"**{game.name}**", value=f"**{game.link_to_game}**", inline=False)
+            embedd.add_field(name="**Цена до раздачи: **", value=f"{game.price_before}")
+            embedd.add_field(name="**Действует до: **", value=f"{game.due_date}")
 
             msgs.append(embedd)
         return msgs

@@ -32,14 +32,15 @@ from os       import listdir, getenv
 
 import logging
 
-from dependencies.all                      import Dependencies
-from dependencies.repository.prefix.memory import PrefixRepositoryMemory
-from dependencies.api.youtube_random.sdk   import YoutubeRandomApiSDK
-from dependencies.api.weather.openweather  import OpenWeatherMapAPI
-from dependencies.api.weather.wttr         import WttrAPI
-from dependencies.api.nasa.nasa            import NasaApi
-from dependencies.api.dvach.dvach          import RandomtubeAPI
-from dependencies.api.crypto.coinmarketcap import CoinmarketcapAPI
+from dependencies.all                           import Dependencies
+from dependencies.repository.prefix.memory      import PrefixRepositoryMemory
+from dependencies.api.youtube_random.sdk        import YoutubeRandomApiSDK
+from dependencies.api.weather.openweather       import OpenWeatherMapAPI
+from dependencies.api.weather.wttr              import WttrAPI
+from dependencies.api.nasa.nasa                 import NasaApi
+from dependencies.api.dvach.dvach               import RandomtubeAPI
+from dependencies.api.crypto.coinmarketcap      import CoinmarketcapAPI
+from dependencies.api.free_games.epic_games     import EpicGamesApi
 
 from database.memory.db import DictMemoryDb
 
@@ -96,6 +97,7 @@ class Bot(bonzoBot):
             wttr_api=WttrAPI(),
             nasa_api=NasaApi(),
             dvach_api=RandomtubeAPI(),
+            free_games_api=EpicGamesApi(),
         )
 
         await self.cogsLoad()

@@ -6,6 +6,7 @@ from .api.weather.abc import  WeatherAPI
 from .api.nasa.abc import NasaAPI
 from .api.dvach.abc import DvachAPI
 from .api.crypto.abc import CryptoAPI
+from .api.free_games.abc import FreeGamesAPI
 
 @dataclass
 class Dependencies:
@@ -16,3 +17,4 @@ class Dependencies:
     nasa_api: NasaAPI
     dvach_api: DvachAPI
     crypto_api: CryptoAPI
+    free_games_api: FreeGamesAPI
