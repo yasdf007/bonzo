@@ -33,7 +33,10 @@ from os       import listdir, getenv
 import logging
 
 from dependencies.all                           import Dependencies
+
 from dependencies.repository.prefix.memory      import PrefixRepositoryMemory
+from dependencies.repository.free_games.memory  import FreeGamesRepositoryMemory
+
 from dependencies.api.youtube_random.sdk        import YoutubeRandomApiSDK
 from dependencies.api.weather.openweather       import OpenWeatherMapAPI
 from dependencies.api.weather.wttr              import WttrAPI
@@ -90,7 +93,7 @@ class Bot(bonzoBot):
         
         self.dependency = Dependencies(
             prefix_repo=PrefixRepositoryMemory(mem),
-
+            free_games_repo=FreeGamesRepositoryMemory(mem),
             youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY")),
             openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
             crypto_api=CoinmarketcapAPI(getenv('COINMARKETCAP_API_KEY')),
@@ -116,7 +119,6 @@ class Bot(bonzoBot):
             )
             print(err)
             await self.unload_extension(f"commands.xpSystem")
-            await self.unload_extension(f"commands.freeGames")
 
     async def cogsLoad(self):
         curr, total = 1, len(listdir("./commands")) - 4 # cogs - folder

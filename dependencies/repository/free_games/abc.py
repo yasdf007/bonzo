@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 
 class FreeGamesRepository(ABC):
     db = None
+
     @abstractmethod
-    async def get_channel(self, channel_id: int):
+    async def get_channel_by_guild(self, guild_id: int):
         raise NotImplementedError()
 
     async def get_channels(self):

@@ -26,11 +26,14 @@ from discord import Colour
 from .resources.AutomatedMessages import automata
 
 from dependencies.api.free_games.abc import FreeGamesAPI
+from dependencies.repository.free_games.abc import FreeGamesRepository
 
 class FreeGames(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.free_games_api: FreeGamesAPI = self.bot.dependency.free_games_api
+        self.free_games_repo: FreeGamesRepository = self.bot.dependency.free_games_repo
+
         self.bot.scheduler.add_job(
             self.freeGames,
             CronTrigger(day_of_week="thu", hour=19, minute=3, jitter=120),
@@ -73,35 +76,18 @@ class FreeGames(Cog):
     async def initFreeGames(self, ctx):
         await ctx.message.delete()
 
-        try:
-            async with self.bot.pool.acquire() as con:
-                selectQuery = f"select free_games_channel_id from server_settings where server_id={ctx.message.guild.id}"
-                res = await con.fetchrow(selectQuery)
+        channel = await self.free_games_repo.get_channel_by_guild(ctx.message.guild.id)
+        if channel:
+            guild_channel = self.bot.get_channel(channel)
+            await ctx.send(
+                f"На этом сервере уже указан канал для бесплатных игр {guild_channel.mention}(удаление через 3с)", delete_after=3
+            )
+            return
 
-                if res != None and res["free_games_channel_id"] != None:
-                    channel = self.bot.get_channel(res["free_games_channel_id"])
-                    msg = await ctx.send(
-                        f"На этом сервере уже указан канал для бесплатных игр {channel.mention}(удаление через 3с)"
-                    )
-                    await sleep(3)
-                    await msg.delete()
-                    return
-
-                insertQuery = f"""
-                insert into server_settings(server_id, free_games_channel_id) values({ctx.message.guild.id},{ctx.message.channel.id})
-                ON CONFLICT (server_id) DO UPDATE SET free_games_channel_id={ctx.message.channel.id};
-                """
-                await con.execute(insertQuery)
-
-                msg = await ctx.send(
-                    "Этот канал будет использоваться для рассылки бесплатных игр (удаление через 3с)"
-                )
-                await sleep(3)
-        except:
-            msg = await ctx.send("Ошибка при инициализации канала (удаление через 3с)")
-            await sleep(3)
-
-        await msg.delete()
+        await self.free_games_repo.insert_channel(ctx.message.guild.id, ctx.message.channel.id)
+        await ctx.send(
+            "Этот канал будет использоваться для рассылки бесплатных игр (удаление через 3с)", delete_after=3
+        )
 
     @guild_only()
     @cooldown(rate=2, per=600, type=BucketType.guild)
@@ -110,31 +96,17 @@ class FreeGames(Cog):
     @bot_has_permissions(send_messages=True)
     async def removeFromFreeGames(self, ctx):
         await ctx.message.delete()
-        async with self.bot.pool.acquire() as con:
-            selectQuery = f"select free_games_channel_id from server_settings where server_id={ctx.message.guild.id};"
-            res = await con.fetchrow(selectQuery)
 
-            if res == None or res["free_games_channel_id"] == None:
-                msg = await ctx.send(
-                    "На этом сервере не был указан канал для бесплатных игр (удаление через 3с)"
+        channel = await self.free_games_repo.get_channel_by_guild(ctx.message.guild.id)
+        if not channel:
+            await ctx.send(
+                    "На этом сервере не был указан канал для бесплатных игр (удаление через 3с)", delete_after=3
                 )
-                await sleep(3)
-                await msg.delete()
-                return
+            return
 
-            deleteQuery = f"update server_settings set free_games_channel_id = null where server_id={ctx.message.guild.id}"
-            await con.execute(deleteQuery)
+        await self.free_games_repo.delete_channel(ctx.message.guild.id)
 
-            msg = await ctx.send("Рассылки игр больше не будет (удаление через 3с)")
-            await sleep(3)
-            await msg.delete()
-
-    async def getChannels(self):
-        selectQuery = f"select free_games_channel_id from server_settings;"
-        async with self.bot.pool.acquire() as con:
-            res = await con.fetch(selectQuery)
-
-        return res
+        await ctx.send("Рассылки игр больше не будет (удаление через 3с)")
 
     async def getMessages(self):
         msgs = []
@@ -163,9 +135,10 @@ class FreeGames(Cog):
         await self.freeGames()
 
     async def freeGames(self):
-        channels = await self.getChannels()
+        channels = await self.free_games_repo.get_channels()
         if len(channels) < 1:
             return
+
         msgs = await self.getMessages()
 
         for channel in channels:
