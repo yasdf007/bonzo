@@ -55,7 +55,10 @@ print("-----------------------------" + Fore.MAGENTA)
 load_dotenv()  # загружает файл env
 
 
-logger = logging.getLogger("discord").setLevel(logging.DEBUG)
+
+logger = logging.getLogger("discord")
+logger.setLevel(logging.DEBUG)
+
 
 handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
 handler.setFormatter(
@@ -159,6 +162,23 @@ class Bot(bonzoBot):
             f"/ \n bonzo has been successfully initialized on {platform()} \n timestamp delta is: {round(endTime, 3)}s \n discord latency is: {(round(self.latency, 3))}s \n / \n end."
         )
 
+    @Cog.listener()
+    async def on_resumed(self):
+        print(Fore.GREEN +  "-----------------------\nbot resumed\n-----------------------" + Style.RESET_ALL)
+        logging.info("bot resumed")
+
+
+    @Cog.listener()
+    async def on_disconnect(self):
+        print(Fore.RED +  "-----------------------\nbot disconnected or connection failed\n-----------------------" + Style.RESET_ALL)
+        logging.warning("bot disconnected")
+
+    @Cog.listener()
+    async def on_connect(self):
+        print(Fore.GREEN +  "-----------------------\nbot connected\n-----------------------" + Style.RESET_ALL)
+        logging.info("bot connected")
+
+
 
 if __name__ == "__main__":
     bot = Bot()
@@ -169,23 +189,3 @@ if __name__ == "__main__":
         print(Fore.RED +  f"-----------------------\nConnection failed: {exp}\n-----------------------" + Style.RESET_ALL)
     finally:
         print(Fore.YELLOW +  "-----------------------\nStopped\n-----------------------" + Style.RESET_ALL)
-
-
-# events
-
-@bot.event
-async def on_resumed():
-    print(Fore.GREEN +  "-----------------------\nbot resumed\n-----------------------" + Style.RESET_ALL)
-    logging.info("bot resumed")
-
-
-@bot.event
-async def on_disconnect():
-    print(Fore.RED +  "-----------------------\nbot disconnected or connection failed\n-----------------------" + Style.RESET_ALL)
-    logging.warning("bot disconnected")
-
-@bot.event
-async def on_connect():
-    print(Fore.GREEN +  "-----------------------\nbot connected\n-----------------------" + Style.RESET_ALL)
-    logging.info("bot connected")
-
