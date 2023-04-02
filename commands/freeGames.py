@@ -28,8 +28,6 @@ from .resources.AutomatedMessages import automata
 from dependencies.api.free_games.abc import FreeGamesAPI
 
 class FreeGames(Cog):
-    link = "https://store-site-backend-static.ak.epicgames.com/freeGamesPromotions?locale=ru&country=RU&allowCountries=RU"
-
     def __init__(self, bot):
         self.bot = bot
         self.free_games_api: FreeGamesAPI = self.bot.dependency.free_games_api
