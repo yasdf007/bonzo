@@ -1,4 +1,11 @@
 import json
+import dataclasses
+
+class EnhancedJSONEncoder(json.JSONEncoder):
+        def default(self, o):
+            if dataclasses.is_dataclass(o):
+                return dataclasses.asdict(o)
+            return super().default(o)
 
 
 class DictMemoryDb:
@@ -13,7 +20,7 @@ class DictMemoryDb:
         
     def save(self):
         with open('db.json', 'w') as out:
-            json.dump(self.db, out, indent=4)
+            json.dump(self.db, out, indent=4, cls=EnhancedJSONEncoder)
 
         print('save before exit')
 
