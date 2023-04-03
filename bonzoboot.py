@@ -37,7 +37,7 @@ from dependencies.all                           import Dependencies
 
 from dependencies.repository.prefix.memory      import PrefixRepositoryMemory
 from dependencies.repository.free_games.memory  import FreeGamesRepositoryMemory
-from dependencies.repository.member_info.memory     import MemberHandlerRepositoryMemory
+from dependencies.repository.member_info.memory import MemberHandlerRepositoryMemory
 
 from dependencies.api.youtube_random.sdk        import YoutubeRandomApiSDK
 from dependencies.api.weather.openweather       import OpenWeatherMapAPI
@@ -114,14 +114,14 @@ class Bot(bonzoBot):
         else:
             await self.tree.sync()
    
-        try:
-            self.pool = await db.connectToDB()
-        except Exception as err:
-            print(
-                f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}"
-            )
-            print(err)
-            await self.unload_extension(f"commands.xpSystem")
+        # try:
+        #     self.pool = await db.connectToDB()
+        # except Exception as err:
+        #     print(
+        #         f"/ \n {Fore.RED} DB PASSWORD INVALID/ DB IS NOT SPECIFIED. ERRORS RELATED TO DATABASE DISRUPTION ARE NOT HANDLED YET. {Style.RESET_ALL}"
+        #     )
+        #     print(err)
+        #     await self.unload_extension(f"commands.xpSystem")
 
     async def cogsLoad(self):
         cmds = [x.stem for x in Path('./commands').iterdir() if x.suffix == '.py' and x.is_file()]

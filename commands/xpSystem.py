@@ -17,6 +17,12 @@ from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 from .resources.AutomatedMessages import automata
 
+from .resources.xp_system.abc import XpStrategy
+from .resources.xp_system.xp import IntegerXpValues, PowerStrategy
+
+from dependencies.repository.member_info.abc import MemberHandlerRepository
+
+
 
 class NoPrivateMessage(CommandError):
     pass
@@ -26,10 +32,13 @@ class AddXP(Cog):
     messageXP = 1
     voiceXP = 10
 
-    def __init__(self, bot):
+    def __init__(self, bot, xp_strategy: XpStrategy):
         self.bot = bot
+        self.xp_strategy = xp_strategy
+        self.members_repo: MemberHandlerRepository = self.bot.dependency.members_repo
 
     async def cog_command_error(self, ctx, error):
+        raise error
         if isinstance(error, CommandOnCooldown):
             return await ctx.message.reply(error)
 
@@ -39,6 +48,14 @@ class AddXP(Cog):
                     "Эту команду нельзя использовать в ЛС.", error=error
                 )
             )
+
+    @Cog.listener()
+    async def on_member_join(self, member):
+        await self.members_repo.insert_member(member.guild.id, member.id)
+
+    @Cog.listener()
+    async def on_member_remove(self, member):
+        await self.members_repo.remove_member(member.guild.id, member.id)
 
     async def calculateLevel(self, exp):
         return int((exp / 60) ** 0.5)
@@ -55,18 +72,6 @@ class AddXP(Cog):
 
         return round((devinded / devider) * 100, 2)
 
-    async def executeQuery(self, query: str, type_: str):
-        async with self.bot.pool.acquire() as con:
-            if type_ == "fetch":
-                result = await con.fetch(query)
-
-            if type_ == "fetchrow":
-                result = await con.fetchrow(query)
-
-            if type_ == "execute":
-                result = await con.execute(query)
-
-        return result
 
     @Cog.listener()
     async def on_message(self, message):
@@ -111,7 +116,7 @@ class AddXP(Cog):
             else:
                 self.bot.scheduler.resume_job(f"{member.id}")
 
-    @Cog.listener()
+    # @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         if member.bot:
             return
@@ -143,59 +148,25 @@ class AddXP(Cog):
         )
 
     async def addMessageXp(self, member):
-        selectQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                    select xp,nexttextxpat from xpinfo where xpinfo.id = (select res.id from res);"
+        xpInfo = await self.members_repo.get_member_info(member.guild.id, member.id)
 
-        xpInfo = await self.executeQuery(selectQuery, "fetchrow")
-
-        if xpInfo is None:
-            insertQuery = f"with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id) \
-                        insert into xpinfo (id) select res.id from res;"
-            await self.executeQuery(insertQuery, "execute")
-            return
-
-        xp = xpInfo["xp"]
-        nextMessageXpAt = xpInfo["nexttextxpat"]
-
-        if datetime.now() > nextMessageXpAt:
-            newXp = xp + self.messageXP
-            newLvl = await self.calculateLevel(newXp)
-            nextXpAt = datetime.now() + timedelta(seconds=60)
-
-            updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                            update xpinfo set xp={newXp}, LVL={newLvl}, NextTextXpAt = '{nextXpAt}' \
-                            where xpinfo.id = (select res.id from res);"
-
-            await self.executeQuery(updateQuery, "execute")
+        if datetime.now().timestamp() > xpInfo.text_xp_at:
+            newXp = xpInfo.xp + self.messageXP
+            next_text_xp_at = (datetime.now() + timedelta(seconds=60)).timestamp()
+            await self.members_repo.update_member_info(member.guild.id, member.id, xp=newXp, text_xp_at=next_text_xp_at)
 
     async def addVoiceXp(self, member):
-        selectQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                    select xp from xpinfo where xpinfo.id = (select res.id from res);"
+        xpInfo = await self.members_repo.get_member_info(member.guild.id, member.id)
+        
+        xp = xpInfo.xp
 
-        xpInfo = await self.executeQuery(selectQuery, "fetchrow")
-
-        if xpInfo is None:
-            insertQuery = f"with res as (insert into user_server (userid, serverid) values ({member.id}, {member.guild.id}) returning id)\
-                        insert into xpinfo (id) select res.id from res;"
-            await self.executeQuery(insertQuery, "execute")
-            return
-
-        newXp = xpInfo["xp"] + self.voiceXP
-        newLvl = await self.calculateLevel(newXp)
-
-        updateQuery = f"with res as (select id from user_server where userid=({member.id}) and serverid=({member.guild.id})) \
-                        update xpinfo set xp={newXp}, LVL={newLvl}  where xpinfo.id = (select res.id from res);"
-
-        await self.executeQuery(updateQuery, "execute")
-
+        newXp = xp + self.voiceXP
+        await self.members_repo.update_member_info(member.guild.id, member.id, xp=newXp)
 
     @guild_only()
     @hybrid_command(name="top", description="Показывает топ 10 по опыту")
     async def leaderboard(self, ctx):
-        selectQuery = f"select userId, xp, lvl from user_server join xpinfo ON user_server.id = xpinfo.id \
-        where user_server.serverid = {ctx.guild.id} and xp > 0 order by xp desc limit 10;"
-
-        result = await self.executeQuery(selectQuery, "fetch")
+        result = await self.members_repo.leaderboard(ctx.guild.id)
 
         if result is None:
             await ctx.message.reply("Значения не найдены")
@@ -204,24 +175,24 @@ class AddXP(Cog):
         embed = Embed(title="TOP 10 участников по опыту", color=ctx.author.color)
 
         embed.set_footer(
-            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.avatar_url
+            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.display_avatar.with_format("png")
         )
-        embed.set_thumbnail(url=ctx.guild.icon_url)
+        embed.set_thumbnail(url=ctx.guild.icon.with_format("png")) if ctx.guild.icon else None
 
-        guild = self.bot.get_guild(ctx.guild.id)
+        for user in result:
+            member = ctx.guild.get_member(user.member_id)
+            lvl = await self.calculateLevel(user.xp)
 
-        for id_, exp, lvl in result:
-            member = guild.get_member(id_)
             if not member:
                 embed.add_field(
                     name=f"*Пользователя нет на сервере*",
-                    value=f"LVL: {lvl}\nEXP: {exp}",
+                    value=f"LVL: {lvl}\nEXP: {user.xp}",
                     inline=False,
                 )
             else:
                 embed.add_field(
                     name=f"`{member.display_name}`",
-                    value=f"LVL: {lvl}\nEXP: {exp}",
+                    value=f"LVL: {lvl}\nEXP: {user.xp}",
                     inline=False,
                 )
 
@@ -231,27 +202,10 @@ class AddXP(Cog):
     @guild_only()
     @hybrid_command(name="rank", description="Показывает персональную карточку с уровнем")
     async def rank(self, ctx):
-        selectQuery = f"select xp,lvl,rank, overall from (select userid,xp, lvl, rank() over(order by xp desc)  from user_server \
-                        join xpinfo ON user_server.id = xpinfo.id where user_server.serverid = {ctx.guild.id}) x \
-                        join (select count(distinct id) as overall from user_server where serverid={ctx.guild.id}) as p on x.userid={ctx.author.id};"
-        try:
-            xpInfo = await self.executeQuery(selectQuery, "fetchrow")
-
-            xp = xpInfo["xp"]
-            lvl = xpInfo["lvl"]
-            rank = xpInfo["rank"]
-            maxRank = xpInfo["overall"]
-
-        except TypeError:
-            await ctx.message.reply("Тебя нет в базе данных, добавляю...")
-            insertQuery = f"with res as (insert into user_server (userid, serverid) values ({ctx.author.id}, {ctx.guild.id}) returning id)\
-                        insert into xpinfo (id) select res.id from res;"
-
-            await self.executeQuery(insertQuery, "execute")
-
+        result = await self.members_repo.rank(ctx.guild.id, ctx.author.id)
         await (
             await self.bot.loop.run_in_executor(
-                None, self.asyncRankCard, ctx, xp, lvl, rank, maxRank
+                None, self.asyncRankCard, ctx, result.xp, await self.calculateLevel(result.xp), result.rank, result.overall_ranks
             )
         )
 
@@ -264,7 +218,7 @@ class AddXP(Cog):
 
     async def asyncRankCard(self, ctx, xp, lvl, rank, maxRank):
         fullBlack = (0, 0, 0)
-        reqImage = await Asset.read(ctx.author.avatar_url_as(static_format="png"))
+        reqImage = await Asset.read(ctx.author.display_avatar.with_format("png"))
 
         with Image.open(BytesIO(reqImage)) as userProfilePhoto:
             with Image.open("./static/rankTemplate.png") as template:
@@ -330,4 +284,5 @@ class AddXP(Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(AddXP(bot))
+    xp_strategy = PowerStrategy(IntegerXpValues())
+    await bot.add_cog(AddXP(bot, xp_strategy))
