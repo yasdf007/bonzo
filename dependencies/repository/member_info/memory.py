@@ -63,7 +63,7 @@ class MemberHandlerRepositoryMemory(MemberHandlerRepository):
         guild_id  = str(guild_id)
 
         return [Leaderboard(int(member_id), member_info.xp) for member_id, member_info in \
-            sorted(self.db.db[self.scope][guild_id].items(), key=lambda x: x[1].xp, reverse=True)]
+            sorted(self.db.db[self.scope][guild_id].items(), key=lambda x: x[1].xp, reverse=True)][:10]
 
     async def rank(self, guild_id: int, member_id: int):
         guild_id  = str(guild_id)
