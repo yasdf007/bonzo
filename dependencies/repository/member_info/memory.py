@@ -69,11 +69,10 @@ class MemberHandlerRepositoryMemory(MemberHandlerRepository):
         guild_id  = str(guild_id)
         member_id  = str(member_id)
 
-        sorted_all = sorted(self.db.db[self.scope][guild_id].items(), key=lambda x: x[1].xp)
+        sorted_all = sorted(self.db.db[self.scope][guild_id].items(), key=lambda x: x[1].xp, reverse=True)
         overall_ranks = len(sorted_all)
 
-        for rank, (user_id, member_info)  in enumerate(sorted_all, start=1):
+        for rank, (user_id, member_info) in enumerate(sorted_all, start=1):
             if user_id == member_id:
-                print(Rank(member_info.xp, rank, overall_ranks))
 
                 return Rank(member_info.xp, rank, overall_ranks)
