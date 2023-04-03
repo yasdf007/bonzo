@@ -2,7 +2,7 @@ discord.py==2.2.2
 python-dotenv==0.19.2
 Pillow==9.3.0
 google-api-python-client==2.31.0
-apscheduler==3.8.1
+apscheduler==3.9.1
 asyncpg==0.25.0
 colorama==0.4.4
 wavelink==0.9.10 
