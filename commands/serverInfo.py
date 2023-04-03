@@ -76,7 +76,7 @@ class info(Cog):
         )
 
         embed.set_footer(
-            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.avatar.with_format("png")
+            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.display_avatar.with_format("png")
         )
 
         await ctx.send(embed=embed)

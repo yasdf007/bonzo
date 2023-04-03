@@ -43,7 +43,7 @@ class Info(Cog):
             title=f"Информация о {member.display_name}", color=member.top_role.colour
         )
 
-        embed.set_thumbnail(url=member.avatar.with_static_format("png"))
+        embed.set_thumbnail(url=member.display_avatar.with_static_format("png"))
 
         embed.add_field(
             name="Учетная запись:",

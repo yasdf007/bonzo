@@ -104,7 +104,7 @@ class helping(Cog):
             # 10/10 +1 = 1 + 1 = 2 page и тд
             embed.set_footer(
                 text=f"/by bonzo/ for {author}  / Page {1 + (i // 10)}/{pages} / powered by PAGINATOR /",
-                icon_url=author.avatar.with_static_format("png"),
+                icon_url=author.display_avatar.with_static_format("png"),
             )
             embed.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
 
