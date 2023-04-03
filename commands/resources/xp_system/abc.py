@@ -1,19 +1,16 @@
 from abc import ABC, abstractmethod, abstractproperty
 
-class XpValues(ABC):
-    def message_xp(self):
-        raise NotImplementedError
-
-    @abstractproperty
-    def voice_xp(self):
-        raise NotImplementedError
-
 class XpStrategy(ABC):
     @property    
     @abstractmethod
-    def xp_values(self):
+    def message_xp(self):
         raise NotImplementedError
         
+    @property    
+    @abstractmethod
+    def voice_xp(self):
+        raise NotImplementedError
+
     @abstractmethod
     def level_from_xp(xp: int):
         raise NotImplementedError

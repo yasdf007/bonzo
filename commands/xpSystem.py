@@ -18,7 +18,7 @@ from io import BytesIO
 from .resources.AutomatedMessages import automata
 
 from .resources.xp_system.abc import XpStrategy
-from .resources.xp_system.xp import IntegerXpValues, PowerStrategy
+from .resources.xp_system.xp import OriginalXP
 
 from dependencies.repository.member_info.abc import MemberHandlerRepository
 
@@ -29,9 +29,6 @@ class NoPrivateMessage(CommandError):
 
 
 class AddXP(Cog):
-    messageXP = 1
-    voiceXP = 10
-
     def __init__(self, bot, xp_strategy: XpStrategy):
         self.bot = bot
         self.xp_strategy = xp_strategy
@@ -57,15 +54,10 @@ class AddXP(Cog):
     async def on_member_remove(self, member):
         await self.members_repo.remove_member(member.guild.id, member.id)
 
-    async def calculateLevel(self, exp):
-        return int((exp / 60) ** 0.5)
 
-    async def calculateXp(self, lvl):
-        return int(60 * lvl ** 2)
-
-    async def percentsToLvlUp(self, currentXp, currentLVL):
-        xpToGetCurrentLVL = await self.calculateXp(currentLVL)
-        xpToGetNextLVL = await self.calculateXp(currentLVL + 1)
+    def percentsToLvlUp(self, currentXp, currentLVL):
+        xpToGetCurrentLVL = self.xp_strategy.xp_from_level(currentLVL)
+        xpToGetNextLVL = self.xp_strategy.xp_from_level(currentLVL + 1)
 
         devinded = currentXp - xpToGetCurrentLVL
         devider = xpToGetNextLVL - xpToGetCurrentLVL
@@ -151,7 +143,7 @@ class AddXP(Cog):
         xpInfo = await self.members_repo.get_member_info(member.guild.id, member.id)
 
         if datetime.now().timestamp() > xpInfo.text_xp_at:
-            newXp = xpInfo.xp + self.messageXP
+            newXp = xpInfo.xp + self.xp_strategy.message_xp
             next_text_xp_at = (datetime.now() + timedelta(seconds=60)).timestamp()
             await self.members_repo.update_member_info(member.guild.id, member.id, xp=newXp, text_xp_at=next_text_xp_at)
 
@@ -160,7 +152,7 @@ class AddXP(Cog):
         
         xp = xpInfo.xp
 
-        newXp = xp + self.voiceXP
+        newXp = xp + self.xp_strategy.voice_xp
         await self.members_repo.update_member_info(member.guild.id, member.id, xp=newXp)
 
     @guild_only()
@@ -181,8 +173,8 @@ class AddXP(Cog):
 
         for user in result:
             member = ctx.guild.get_member(user.member_id)
-            lvl = await self.calculateLevel(user.xp)
-
+            lvl = self.xp_strategy.level_from_xp(user.xp)
+            
             if not member:
                 embed.add_field(
                     name=f"*Пользователя нет на сервере*",
@@ -205,7 +197,7 @@ class AddXP(Cog):
         result = await self.members_repo.rank(ctx.guild.id, ctx.author.id)
         await (
             await self.bot.loop.run_in_executor(
-                None, self.asyncRankCard, ctx, result.xp, await self.calculateLevel(result.xp), result.rank, result.overall_ranks
+                None, self.asyncRankCard, ctx, result.xp, self.xp_strategy.level_from_xp(result.xp), result.rank, result.overall_ranks
             )
         )
 
@@ -233,9 +225,9 @@ class AddXP(Cog):
                     rezised = userProfilePhoto.resize(avatarSize)
                     mask = mask.resize(avatarSize)
 
-                    percents = await self.percentsToLvlUp(xp, lvl)
-                    xpToNextLVL = await self.calculateXp(lvl + 1)
-
+                    percents = self.percentsToLvlUp(xp, lvl)
+                    xpToNextLVL = self.xp_strategy.xp_from_level(lvl+1)
+                    
                     barWidth = bar.size[0]
                     croppedBar = bar.crop((0, 0, barWidth * (percents) / 100, 45))
 
@@ -284,5 +276,5 @@ class AddXP(Cog):
 
 
 async def setup(bot):
-    xp_strategy = PowerStrategy(IntegerXpValues())
+    xp_strategy = OriginalXP()
     await bot.add_cog(AddXP(bot, xp_strategy))
