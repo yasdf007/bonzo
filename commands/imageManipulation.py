@@ -1,9 +1,9 @@
 from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog
-from discord.ext.commands.errors import MissingRequiredArgument
+from discord.ext.commands.errors import MissingRequiredArgument, MissingRequiredAttachment
 from discord.ext.commands import Cog, command, CommandError, hybrid_command
 from discord.ext.commands.context import Context
-from discord import File
+from discord import File, Attachment
 
 from PIL import Image, ImageDraw, ImageFont, ImageSequence
 from io import BytesIO, StringIO
@@ -56,22 +56,25 @@ class ImageManipulation(Cog):
         if isinstance(error, FileTooLarge):
             return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ", error=error))
 
+        if isinstance(error, MissingRequiredAttachment):
+            return await ctx.send(embed=automata.generateEmbErr("Необходимо приложить файл", error=error))
+
         raise error
 
     @hybrid_command(name='ascii', description='Переводит картинку в ascii текст')
-    async def ascii(self, ctx, img_url: str):
-
-        if not self.urlValid.match(img_url):
+    async def ascii(self, ctx, image_url: str = None, attachment: Attachment = None):
+        image_url = image_url or attachment.url
+        if not self.urlValid.match(image_url):
             raise NoUrlFound
 
         async with ClientSession() as session:
-            async with session.head(img_url) as response:
+            async with session.head(image_url) as response:
                 fileType = response.content_type.split('/')[-1]
 
         if not any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
             raise InvalidFileType(fileType)
 
-        await (await self.bot.loop.run_in_executor(None, self.asyncToAscii, ctx, img_url))
+        await (await self.bot.loop.run_in_executor(None, self.asyncToAscii, ctx, image_url))
 
     async def asyncToAscii(self, ctx, url: str):
         async with ClientSession() as session:
@@ -103,7 +106,8 @@ class ImageManipulation(Cog):
                 await ctx.send(file=File(fp=txt, filename="now.txt"))
 
     @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
-    async def demotivator(self, ctx, image_url, text):
+    async def demotivator(self, ctx, text, image_url: str = None, attachment: Attachment = None):
+        image_url = image_url or attachment.url
         if not self.urlValid.match(image_url):
             raise NoUrlFound
 
@@ -151,7 +155,9 @@ class ImageManipulation(Cog):
 
 
     @hybrid_command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
-    async def shakalizator(self, ctx, image_url: str):
+    async def shakalizator(self, ctx, image_url: str = None, attachment: Attachment = None):
+        image_url = image_url or attachment.url
+
         if not self.urlValid.match(image_url):
             raise NoUrlFound
 
