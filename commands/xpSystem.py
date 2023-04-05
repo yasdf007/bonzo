@@ -181,6 +181,7 @@ class AddXP(Cog):
                     value=f"LVL: {lvl}\nEXP: {user.xp}",
                     inline=False,
                 )
+                await self.members_repo.remove_member(ctx.guild.id, user.member_id)
             else:
                 embed.add_field(
                     name=f"`{member.display_name}`",
