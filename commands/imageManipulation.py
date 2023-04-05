@@ -1,7 +1,7 @@
 from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog
 from discord.ext.commands.errors import MissingRequiredArgument, MissingRequiredAttachment
-from discord.ext.commands import Cog, command, CommandError, hybrid_command
+from discord.ext.commands import Cog, CommandError, hybrid_command
 from discord.ext.commands.context import Context
 from discord import File, Attachment
 
@@ -11,6 +11,8 @@ from aiohttp import ClientSession
 
 from re import compile
 
+from .resources.image_manipulation.shakal import resolve_shakal
+from .resources.image_manipulation.ascii import resolve_ascii
 
 class NoUrlFound(CommandError):
     pass
@@ -31,11 +33,12 @@ class TooManySymblos(CommandError):
 class FileTooLarge(CommandError):
     pass
 
+ONE_MEGABYTE = 1024 * 1024
+
+FIVE_MEGABYTES = 5 * ONE_MEGABYTE
 
 class ImageManipulation(Cog):
     urlValid = compile(r'https?://(?:www\.)?.+')
-    asciiChars = ['@', '%', '#', '*',
-                  '+', '=', '-', ';', ':', ',', '.']
 
     def __init__(self, bot):
         self.bot = bot
@@ -61,98 +64,76 @@ class ImageManipulation(Cog):
 
         raise error
 
+
+    async def get_bytes_from_url(self, url):
+        async with ClientSession() as session:
+            async with session.get(url) as response:
+                return await response.read()
+
+    async def get_file_info(self, url):
+        async with ClientSession() as session:
+            async with session.head(url) as response:
+                return response.content_type.split('/')[-1], response.content_length
+
     @hybrid_command(name='ascii', description='Переводит картинку в ascii текст')
     async def ascii(self, ctx, image_url: str = None, attachment: Attachment = None):
         image_url = image_url or attachment.url
         if not self.urlValid.match(image_url):
             raise NoUrlFound
 
-        async with ClientSession() as session:
-            async with session.head(image_url) as response:
-                fileType = response.content_type.split('/')[-1]
+        filetype, _ = await self.get_file_info(image_url)
 
-        if not any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
-            raise InvalidFileType(fileType)
-
-        await (await self.bot.loop.run_in_executor(None, self.asyncToAscii, ctx, image_url))
-
-    async def asyncToAscii(self, ctx, url: str):
-        async with ClientSession() as session:
-            async with session.get(url) as response:
-                try:
-                    requestImage = await response.read()
-                except:
-                    raise RequestNetworkError
-
-        with Image.open(BytesIO(requestImage)) as img:
-            img = img.convert('L')
-
-            width, height = img.size
-            aspect_ratio = height/width
-            new_width = 120
-            new_height = aspect_ratio * new_width * 0.55
-            img = img.resize((new_width, int(new_height)))
-
-            imageArray = img.getdata()
-
-            pixels = ''.join([self.asciiChars[pixel//25]
-                              for pixel in imageArray])
-            asciiImg = '\n'.join([pixels[index:index+new_width]
-                                  for index in range(0, len(pixels), new_width)])
-
-            with StringIO() as txt:
-                txt.write(asciiImg)
-                txt.seek(0)
-                await ctx.send(file=File(fp=txt, filename="now.txt"))
-
-    @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
-    async def demotivator(self, ctx, text, image_url: str = None, attachment: Attachment = None):
-        image_url = image_url or attachment.url
-        if not self.urlValid.match(image_url):
-            raise NoUrlFound
-
-        if len(text) > 25:
-            raise TooManySymblos
-
-        async with ClientSession() as session:
-            async with session.head(image_url) as response:
-                fileType = response.content_type.split('/')[-1]
-
-        if not any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
+        ascii = resolve_ascii(filetype)
+        if not ascii:
             raise InvalidFileType
 
-        # O_O - первый await создает coroutine, второй его ждет и все работает
-        await (await self.bot.loop.run_in_executor(None, self.asyncDemotivator, ctx, image_url, text))
+        image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
-    async def asyncDemotivator(self, ctx, image_url, underText):
+        async with ascii(image_bytes) as txt:
+            await ctx.send(file=File(fp=txt, filename="now.txt"))
+        
 
-        async with ClientSession() as session:
-            async with session.get(image_url) as response:
-                try:
-                    photo = await response.read()
-                except:
-                    raise RequestNetworkError
+    # @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
+    # async def demotivator(self, ctx, text, image_url: str = None, attachment: Attachment = None):
+    #     image_url = image_url or attachment.url
+    #     if not self.urlValid.match(image_url):
+    #         raise NoUrlFound
 
-        img = Image.open(BytesIO(photo))
-        template = Image.open('./static/demotivatorTemplate.png')
+    #     if len(text) > 25:
+    #         raise TooManySymblos
 
-        draw = ImageDraw.Draw(template)
-        font = ImageFont.truetype('./static/arial.ttf', 54)
-        textWidth = font.getsize(underText)[0]
-        # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-        img = img.convert('RGB')
-        img = img.resize((666, 655))
+    #     filetype, _ = await self.get_file_info(image_url)
 
-        template.paste(img, (50, 50))
+    #     demotivator = resolve_demotivator(filetype)
+    #     if not demotivator:
+    #         raise InvalidFileType
 
-        draw.text(((760 - textWidth) / 2, 720), underText, (255, 255, 255),
-                  font=font, align='right')
+    #     image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
-        with BytesIO() as temp:
-            template.save(temp, "png", quality=100)
-            temp.seek(0)
-            await ctx.send(file=File(fp=temp, filename='now.png'))
+    #     async with demotivator(image_bytes, text=text) as demotiv:
+    #         await ctx.send(file=File(fp=demotiv, filename=f'now.{filetype}'))
+        
+    # async def asyncDemotivator(self, image_bytes, underText):
 
+    #     img = Image.open(image_bytes)
+    #     template = Image.open('./static/demotivatorTemplate.png')
+
+    #     draw = ImageDraw.Draw(template)
+    #     font = ImageFont.truetype('./static/arial.ttf', 54)
+    #     textWidth = font.getsize(underText)[0]
+    #     # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
+    #     img = img.convert('RGB')
+    #     img = img.resize((666, 655))
+
+    #     template.paste(img, (50, 50))
+
+    #     draw.text(((760 - textWidth) / 2, 720), underText, (255, 255, 255),
+    #               font=font, align='right')
+
+    #     with BytesIO() as temp:
+    #         template.save(temp, "png", quality=100)
+    #         temp.seek(0)
+    #         await ctx.send(file=File(fp=temp, filename='now.png'))
 
     @hybrid_command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx, image_url: str = None, attachment: Attachment = None):
@@ -161,67 +142,19 @@ class ImageManipulation(Cog):
         if not self.urlValid.match(image_url):
             raise NoUrlFound
 
-        async with ClientSession() as session:
-            async with session.head(image_url) as response:
-                fileType = response.content_type.split('/')[-1]
+        filetype, length = await self.get_file_info(image_url)
 
-        if 'gif' in fileType:
-            await (await self.bot.loop.run_in_executor(None, self.asyncGifShakalizator, ctx, image_url))
-        # Один из форматов
-        elif any(ext in fileType for ext in ('png', 'jpeg', 'jpg')):
-            await (await self.bot.loop.run_in_executor(None, self.asyncPhotoShakalizator, ctx, image_url))
-        else:
-            raise InvalidFileType(fileType)
-
-    async def asyncGifShakalizator(self, ctx, url):
-        async with ClientSession() as session:
-            async with session.get(url) as response:
-                try:
-                    requestImage = await response.read()
-                except:
-                    raise RequestNetworkError
-
-        bytes = BytesIO(requestImage)
-        bytes.seek(0, 2)
-
-        if bytes.tell() >= 5242880:
+        if length > FIVE_MEGABYTES:
             raise FileTooLarge
+        
+        shakalizator = resolve_shakal(filetype)
+        if not shakalizator:
+            raise InvalidFileType
 
-        with Image.open(bytes) as img:
+        image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
-            frames = [frame.resize((int(img.size[0] // 8), int(img.size[1] // 8))).resize((300, 300))
-                      for frame in ImageSequence.Iterator(img)]
-
-            with BytesIO() as image_binary:
-                frames[0].save(image_binary, format='GIF', save_all=True,
-                               append_images=frames[1:], optimize=False, duration=100, loop=0)
-
-                image_binary.seek(0)
-
-                await ctx.send(file=File(fp=image_binary, filename='now.gif'))
-
-    async def asyncPhotoShakalizator(self, ctx, imageUrl):
-        async with ClientSession() as session:
-            async with session.get(imageUrl) as response:
-                try:
-                    requestImage = await response.read()
-                except:
-                    raise RequestNetworkError
-
-        # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-        with Image.open(BytesIO(requestImage)) as img:
-            img = img.convert('RGB')
-            img.thumbnail((750, 750))
-            # Изменение фотки
-            img = img.resize((int(img.size[0] / 2), int(img.size[1] / 2)))
-
-            # Создаем новую фотку
-            with BytesIO() as image_binary:
-                # Шакалим
-                img.save(image_binary, "jpeg", quality=0)
-                image_binary.seek(0)
-                await ctx.send(file=File(fp=image_binary, filename='now.jpeg'))
-
+        async with shakalizator(image_bytes) as shakalized:
+            await ctx.send(file=File(fp=shakalized, filename=f'now.{filetype}'))
 
 async def setup(bot):
     await bot.add_cog(ImageManipulation(bot))
