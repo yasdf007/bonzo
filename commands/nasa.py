@@ -1,9 +1,8 @@
 from discord import Embed
-from discord.ext.commands.context import Context
-from discord.ext.commands import Cog, command, CommandError, hybrid_command
-from aiohttp import ClientSession
+from discord.ext.commands import Cog, CommandError, hybrid_command, Context
 from .resources.AutomatedMessages import automata
 from dependencies.api.nasa.abc import NasaAPI 
+from bot import Bot
 
 name = "nasapict"
 description = "Картинка дня от NASA"
@@ -15,10 +14,10 @@ class NoPhotoFound(CommandError):
 
 class Nasa(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
         self.nasa_api: NasaAPI = self.bot.dependency.nasa_api
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, NoPhotoFound):
             return await ctx.send(
                 automata.generateEmbErr("Не удалось получить картинку дня", error=error)
@@ -26,7 +25,7 @@ class Nasa(Cog):
 
 
     @hybrid_command(name=name, description=description)
-    async def nasapict(self, ctx):
+    async def nasapict(self, ctx: Context):
         embed = Embed(title="Картинка дня от NASA", color=0x0000FF)
         try:    
             resp = await self.nasa_api.get_response()

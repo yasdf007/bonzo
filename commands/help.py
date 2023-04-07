@@ -1,8 +1,9 @@
 from discord import Embed, Member
-from discord.ext.commands import Cog, command, CommandError, Context, hybrid_command
+from discord.ext.commands import Cog,  CommandError, Context, hybrid_command
 from random import randint
 from math import ceil
 from commands.resources.paginator import Paginator
+from bot import Bot
 
 name = "help"
 description = "Все команды бота, инфа о команде help <cmd>"
@@ -13,15 +14,15 @@ class NoCommandFound(CommandError):
 
 class helping(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, NoCommandFound):
             return await ctx.send("Такой команды нет")
         raise error
         
     @hybrid_command(name=name, description=description)
-    async def help(self, ctx, cmd: str = None):
+    async def help(self, ctx: Context, cmd: str = None):
         if cmd is None:
             p = Paginator(ctx)
             embeds = await self.generateEmbed(ctx.author)
@@ -66,7 +67,7 @@ class helping(Cog):
 
         # Для пар команда - значение
         for key, value in cmd.params.items():
-            # у всех команд первые self, ctx у некоторых
+            # у всех команд первые self, ctx: Context у некоторых
             # self и ctx не нужны
             if key not in ("self", "ctx"):
                 # [] - необязательные, <> - обязательные переменные для функции

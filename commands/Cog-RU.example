@@ -3,8 +3,9 @@
 # ВЫ МОЖЕТЕ ИСПОЛЬЗОВАТЬ ЭТОТ ФАЙЛ В КАЧЕСТВЕ __МИНИМАЛЬНОГО__ ШАБЛОНА ПРИ СОЗДАНИИ СВОИХ МОДУЛЕЙ.
 
 # ИМПОРТИМ ВСЁ НЕОБХОДИМОЕ
-from discord.ext.commands import Cog, command, CommandError, hybrid_command
+from discord.ext.commands import Cog, command, CommandError, hybrid_command, Context
 from discord.ext.commands.context import Context
+from bot import Bot
 
 
 # НАЗЫВАЕМ ФУНКЦИЮ 
@@ -22,10 +23,10 @@ class YourError2(CommandError):
 # ОБЪЯВЛЯЕМ КЛАСС-КОГ ВАШЕЙ ФУНКЦИИ
 class YourName(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
     # ЛОВИМ ОШИБКИ ДЛЯ ПРЕФИКСНОЙ КОМАНДЫ
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, YourError1):
             return await ctx.send('ПОЛЬЗОВАТЕЛЬСКИЙ ВЫВОД ПРИ ОШИБКЕ 1')
 
@@ -34,7 +35,7 @@ class YourName(Cog):
 
     # ДЕЙСТВИЯ ПРИ ВЫЗОВЕ КОМАНДЫ
     @hybrid_command(name=name, description=description)
-    async def yourFunction(self, ctx):
+    async def yourFunction(self, ctx: Context):
         ''' ОПИСАНИЕ ДЕЙСТВИЙ ВМЕСТО ЭТОГО
         МНОГОСТРОЧНОГО
         КОММЕНТАРИЯ

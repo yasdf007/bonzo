@@ -1,7 +1,8 @@
 from discord import Embed
-from discord.ext.commands import Cog, command, has_permissions, bot_has_permissions, guild_only, hybrid_command
+from discord.ext.commands import Cog, command, has_permissions, bot_has_permissions, guild_only, hybrid_command, Context
 from discord.ext.commands.errors import MissingPermissions, BotMissingPermissions
 from datetime import datetime, timedelta
+from bot import Bot
 
 
 class Poll(Cog):
@@ -9,9 +10,9 @@ class Poll(Cog):
     pollIds = []
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, MissingPermissions):
             await ctx.send('**слыш,** тебе нельзя такое исполнять')
 
@@ -33,7 +34,7 @@ class Poll(Cog):
     @hybrid_command(name='poll', description='Выборы')
     @has_permissions(manage_messages=True)
     @bot_has_permissions(manage_messages=True)
-    async def poll(self, ctx, seconds: int, question: str, *options):
+    async def poll(self, ctx: Context, seconds: int, question: str, *options):
         await ctx.message.delete()
         if len(options) > len(self.emojis):
             await ctx.message.reply(f'Максимум {len(self.emojis)} значений')

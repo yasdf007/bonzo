@@ -1,4 +1,3 @@
-from discord import message
 from discord.ext.commands import (
     Cog,
     CommandError,
@@ -12,13 +11,14 @@ from discord.ext.commands import (
     command,
     has_permissions,
     cooldown,
-    hybrid_command
+    hybrid_command,
+    Context
 )
-from discord.ext.commands.context import Context
 from commands.resources.AutomatedMessages import automata
-from database import db
 
 from dependencies.repository.prefix.abc import PrefixRepository
+
+from bot import Bot
 
 class PrefixTooLong(CommandError):
     pass
@@ -38,10 +38,10 @@ class NotASCII(CommandError):
 
 class Settings(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
         self.prefix_repo: PrefixRepository = self.bot.dependency.prefix_repo
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, MissingPermissions):
             return await ctx.send(embed=automata.generateEmbErr("Ты не администратор"))
 
@@ -93,14 +93,14 @@ class Settings(Cog):
             )
 
         raise error
-
-    @guild_only()
-    @cooldown(rate=4, per=120, type=BucketType.guild)
-    @has_permissions(administrator=True)
+    
     @hybrid_command(
         name="set_prefix",
         description="Устанавливает серверный префикс для бота (только для админов, макс. 5 символов, без двойных кавечек)",
     )
+    @guild_only()
+    @cooldown(rate=4, per=120, type=BucketType.guild)
+    @has_permissions(administrator=True)
     async def set_prefix(self, ctx: Context, prefix: str):
         if not ctx.message.guild:
             raise

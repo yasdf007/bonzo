@@ -1,7 +1,7 @@
 import discord
 from discord import Embed
-from discord.ext.commands import Cog, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, hybrid_command, Context
+from bot import Bot
 
 name = "donate"
 description = "Пожертвования разработчикам bonzo"
@@ -11,11 +11,11 @@ telegdonate = "https://t.me/CryptoBot?start=IV8duUiKkI7K"
 
 class Donate(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
 
     @hybrid_command(name=name, description=description)
-    async def donate(self, ctx):
+    async def donate(self, ctx: Context):
         embed = Embed(
             title="**Способы пожертвований средств разработчикам Bonzo**",
             color=discord.Color.random(),

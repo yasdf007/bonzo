@@ -1,9 +1,8 @@
 from discord import Embed
-from discord.ext.commands.context import Context
-from discord.ext.commands import Cog, command, CommandError, hybrid_command
+from discord.ext.commands import Cog, CommandError, hybrid_command, Context
 from random import randint
-from typing import Optional
 from .resources.AutomatedMessages import automata
+from bot import Bot
 
 name = "roll"
 description = "Ролит как в доте или между двумя числами"
@@ -15,9 +14,9 @@ class NumberTooLarge(CommandError):
 
 class Roll(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, NumberTooLarge):
             return await ctx.send(
                 embed=automata.generateEmbErr(
@@ -30,7 +29,7 @@ class Roll(Cog):
     # dota 2 roll
 
     @hybrid_command(name=name, description=description)
-    async def roll(self, ctx, number_from: int = 1, number_to: int = 100):
+    async def roll(self, ctx: Context, number_from: int = 1, number_to: int = 100):
         oneMillon = 10 ** 6
 
         try:

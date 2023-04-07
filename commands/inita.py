@@ -1,7 +1,7 @@
 import discord
 from discord import Embed
-from discord.ext.commands import Cog, command, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog,  hybrid_command, Context
+from bot import Bot
 
 name = "init"
 description = "Краткая информация об использовании бота / How to start?"
@@ -10,11 +10,11 @@ supportserver = "https://discord.gg/kjUdcUGw"
 
 class Inita(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
 
     @hybrid_command(name=name, description=description)
-    async def inita(self, ctx):
+    async def inita(self, ctx: Context):
         embed = Embed(title="**Начало работы с bonzo**", color=discord.Color.random())
 
         if ctx.guild.id in self.bot.custom_prefix:

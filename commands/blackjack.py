@@ -1,17 +1,20 @@
-from discord.ext.commands import Cog, group, guild_only, hybrid_group
-import asyncio
+from discord.ext.commands import Cog, guild_only, hybrid_group, Context
 from discord.ext.commands.errors import NoPrivateMessage
+
 from .resources.blackjack.Blackjack import Blackjack
 from .resources.AutomatedMessages import automata
 
+from bot import Bot
+
+import asyncio
 
 class gameBlackjack(Cog):
     games = {}
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, NoPrivateMessage):
             return await ctx.send(
                 embed=automata.generateEmbErr(
@@ -29,7 +32,7 @@ class gameBlackjack(Cog):
         description="Начать игру blackjack",
         invoke_without_command=True,
     )
-    async def gameBlackjack(self, ctx):
+    async def gameBlackjack(self, ctx: Context):
         if ctx.author.bot:
             return
 
@@ -58,7 +61,7 @@ class gameBlackjack(Cog):
 
     @guild_only()
     @gameBlackjack.command(name="join", description="Присоединиться к игре blackjack")
-    async def join(self, ctx):
+    async def join(self, ctx: Context):
         if ctx.author.bot:
             return
 
@@ -79,7 +82,7 @@ class gameBlackjack(Cog):
 
     @guild_only()
     @gameBlackjack.command(name="stop", description="Остановить blackjack")
-    async def stop(self, ctx):
+    async def stop(self, ctx: Context):
         if ctx.author.bot:
             return
 
@@ -95,7 +98,7 @@ class gameBlackjack(Cog):
         await ctx.send("Игра остановлена")
 
     @gameBlackjack.command(name="leave", description="Выйти из blackjack")
-    async def leave(self, ctx):
+    async def leave(self, ctx: Context):
         if ctx.author.bot:
             return
 

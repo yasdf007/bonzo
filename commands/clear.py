@@ -1,7 +1,6 @@
 from commands.resources.AutomatedMessages import automata
 from discord import TextChannel
-from discord.ext.commands import Cog, has_permissions, command, bot_has_permissions, hybrid_command, Context
-from asyncio import sleep
+from discord.ext.commands import Cog, has_permissions, bot_has_permissions, hybrid_command, Context
 from discord.ext.commands.errors import (
     BadArgument,
     MissingRequiredArgument,
@@ -10,16 +9,18 @@ from discord.ext.commands.errors import (
     BotMissingPermissions,
 )
 
+from bot import Bot
+
 name = "clear"
 description = "Очищает последние x сообщений (для персонала сервера)"
 
 
 class Clear(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
     # Обработка ошибок
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, (MissingRequiredArgument, BadArgument)):
             await ctx.send(
                 embed=automata.generateEmbErr(
@@ -47,9 +48,9 @@ class Clear(Cog):
             )
 
     # функция, удаляющая X сообщений из чата
+    @hybrid_command(name=name, description=description)
     @has_permissions(manage_messages=True)
     @bot_has_permissions(manage_messages=True)
-    @hybrid_command(name=name, description=description)
     async def clear(self, ctx: Context, count: int):
         # удаляем запрошенное кол-во сообщений!
         await TextChannel.purge(ctx.message.channel, limit=count + 1, bulk=True)

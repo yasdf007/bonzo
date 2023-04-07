@@ -1,7 +1,7 @@
 from commands.resources.AutomatedMessages import automata
-from discord import TextChannel
-from discord.ext.commands import Cog, command, is_owner, hybrid_command
+from discord.ext.commands import Cog, is_owner, hybrid_command, Context
 from discord.ext.commands.errors import CommandInvokeError, NotOwner
+from bot import Bot
 
 name = "evala"
 description = "Исполняет код (только для разработчиков)"
@@ -9,11 +9,11 @@ description = "Исполняет код (только для разработч
 
 class evala(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
     # Обработка ошибок
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, CommandInvokeError):
             await ctx.send(
                 embed=automata.generateEmbErr("Ошибка при выполении запроса")
@@ -24,9 +24,9 @@ class evala(Cog):
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)
-    @is_owner()
     @hybrid_command(name=name, description=description)
-    async def evala(self, ctx, evcode: str):
+    @is_owner()
+    async def evala(self, ctx: Context, evcode: str):
         if not evcode:
             raise CommandInvokeError()
 

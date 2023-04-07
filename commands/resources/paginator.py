@@ -10,10 +10,10 @@ from asyncio import wait as asyncioWait
 from asyncio import TimeoutError as AsyncioTimeoutError
 from discord import errors
 from discord import Embed
-
+from discord.ext.commands import Context
 
 class Paginator:
-    def __init__(self, ctx, reactions: Union[tuple, list] = None, timeout: int = 120):
+    def __init__(self, ctx: Context, reactions: Union[tuple, list] = None, timeout: int = 120):
         self.reactions = reactions or ('⬅', '⏹', '➡')
         self.pages = []
         self.current = 0

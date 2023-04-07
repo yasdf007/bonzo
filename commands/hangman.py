@@ -1,10 +1,10 @@
-from discord.ext.commands.core import group, guild_only
+from discord.ext.commands.core import guild_only
 from commands.resources.hangman.Hangman import Hangman
-from discord.ext.commands import Cog, command, group, CommandError, hybrid_group
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, CommandError, hybrid_group, Context
 import asyncio
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from .resources.AutomatedMessages import automata
+from bot import Bot
 
 
 class NoPrivateMessage(CommandError):
@@ -15,9 +15,9 @@ class GameHangman(Cog):
     games = {}
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
             return await ctx.send(
                 embed=automata.generateEmbErr(
@@ -72,7 +72,7 @@ class GameHangman(Cog):
 
     @guild_only()
     @gameHangman.command(name="stop", description="Остановить игру виселица")
-    async def stop(self, ctx):
+    async def stop(self, ctx: Context):
         if ctx.author.bot:
             return
 

@@ -1,10 +1,8 @@
 import os
-import discord
 from discord import Embed
-from discord.ext.commands import Cog, command, CommandError, hybrid_command
-from discord.ext.commands.context import Context
-from .resources.AutomatedMessages import automata
+from discord.ext.commands import Cog, hybrid_command, Context
 from discord.ext.commands import Bot
+from bot import Bot
 
 name = "status"
 description = "Статус бота на данный момент"
@@ -13,11 +11,11 @@ osname = os.name
 
 class Status(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
         #статус бота
     @hybrid_command(name=name, description=description)
-    async def status(self, ctx):
+    async def status(self, ctx: Context):
         embed = Embed(title="**Информация**", color=0x1fcf48)
 
         embed.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")

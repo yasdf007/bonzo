@@ -1,9 +1,9 @@
 from discord import Embed
-from discord.ext.commands import Cog, command, CommandError, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from discord.ext.commands.core import guild_only
 from discord.ext.commands import NoPrivateMessage
 from .resources.AutomatedMessages import automata
+from bot import Bot
 
 
 name = "serverinfo"
@@ -13,9 +13,9 @@ description = "Показывает информацию о сервере"
 
 class info(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, NoPrivateMessage):
             return await ctx.send(
                 embed=automata.generateEmbErr(
@@ -25,8 +25,8 @@ class info(Cog):
         raise error
 
     # функция, отправляющая информацию о сервере
-    @guild_only()
     @hybrid_command(name=name, description=description)
+    @guild_only()
     async def serverinfo(self, ctx: Context):
         server = ctx.guild
         embed = Embed(title="**Информация о сервере:**", colour=0x7D07DE)

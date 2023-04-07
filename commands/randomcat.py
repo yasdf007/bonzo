@@ -1,6 +1,6 @@
-from discord.ext.commands import Cog, command, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from random import randint
+from bot import Bot
 
 name = "randomcat"
 description = "Отправляет случайного котика :3"
@@ -8,10 +8,10 @@ description = "Отправляет случайного котика :3"
 
 class randomCat(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
     @hybrid_command(name=name, description=description)
-    async def randomcat(self, ctx, num: int = 1):
+    async def randomcat(self, ctx: Context, num: int = 1):
         if int(num) > 2:
             num = 2
         # Делаем Num ссылок

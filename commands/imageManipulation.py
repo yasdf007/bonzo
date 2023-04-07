@@ -1,18 +1,18 @@
 from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog
 from discord.ext.commands.errors import MissingRequiredArgument, MissingRequiredAttachment
-from discord.ext.commands import Cog, CommandError, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, CommandError, hybrid_command, Context
 from discord import File, Attachment
 
-from PIL import Image, ImageDraw, ImageFont, ImageSequence
-from io import BytesIO, StringIO
+from io import BytesIO
 from aiohttp import ClientSession
 
 from re import compile
 
 from .resources.image_manipulation.shakal import resolve_shakal
 from .resources.image_manipulation.ascii import resolve_ascii
+
+from bot import Bot
 
 class NoUrlFound(CommandError):
     pass
@@ -41,9 +41,9 @@ class ImageManipulation(Cog):
     urlValid = compile(r'https?://(?:www\.)?.+')
 
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
             return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена", error=error))
 
@@ -76,7 +76,7 @@ class ImageManipulation(Cog):
                 return response.content_type.split('/')[-1], response.content_length
 
     @hybrid_command(name='ascii', description='Переводит картинку в ascii текст')
-    async def ascii(self, ctx, image_url: str = None, attachment: Attachment = None):
+    async def ascii(self, ctx: Context, image_url: str = None, attachment: Attachment = None):
         image_url = image_url or attachment.url
         if not self.urlValid.match(image_url):
             raise NoUrlFound
@@ -94,7 +94,7 @@ class ImageManipulation(Cog):
         
 
     # @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
-    # async def demotivator(self, ctx, text, image_url: str = None, attachment: Attachment = None):
+    # async def demotivator(self, ctx: Context, text, image_url: str = None, attachment: Attachment = None):
     #     image_url = image_url or attachment.url
     #     if not self.urlValid.match(image_url):
     #         raise NoUrlFound
@@ -136,7 +136,7 @@ class ImageManipulation(Cog):
     #         await ctx.send(file=File(fp=temp, filename='now.png'))
 
     @hybrid_command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
-    async def shakalizator(self, ctx, image_url: str = None, attachment: Attachment = None):
+    async def shakalizator(self, ctx: Context, image_url: str = None, attachment: Attachment = None):
         image_url = image_url or attachment.url
 
         if not self.urlValid.match(image_url):

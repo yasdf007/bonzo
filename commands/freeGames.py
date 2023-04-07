@@ -1,20 +1,16 @@
-from os import name
 from discord.ext.commands import (
     Cog,
     guild_only,
     has_permissions,
     bot_has_permissions,
-    group,
     BucketType,
     cooldown,
 )
-from aiohttp import ClientSession
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
-from discord.ext.commands import command, hybrid_group, hybrid_command
+from discord.ext.commands import hybrid_group, hybrid_command, Context
 from discord.ext.commands.core import is_owner
 from discord.ext.commands.errors import (
-    CommandInvokeError,
     CommandOnCooldown,
     MissingPermissions,
     NoPrivateMessage,
@@ -27,10 +23,11 @@ from .resources.AutomatedMessages import automata
 
 from dependencies.api.free_games.abc import FreeGamesAPI
 from dependencies.repository.free_games.abc import FreeGamesRepository
+from bot import Bot
 
 class FreeGames(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
         self.free_games_api: FreeGamesAPI = self.bot.dependency.free_games_api
         self.free_games_repo: FreeGamesRepository = self.bot.dependency.free_games_repo
 
@@ -38,8 +35,7 @@ class FreeGames(Cog):
             self.freeGames,
             CronTrigger(day_of_week="thu", hour=19, minute=3, jitter=120),
         )
-
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, MissingPermissions):
             return await ctx.message.reply(
                 embed=automata.generateEmbErr(
@@ -73,7 +69,7 @@ class FreeGames(Cog):
         aliases=["free", "freeGames"],
         invoke_without_command=True,
     )
-    async def initFreeGames(self, ctx):
+    async def initFreeGames(self, ctx: Context):
         await ctx.message.delete()
 
         channel = await self.free_games_repo.get_channel_by_guild(ctx.message.guild.id)
@@ -94,7 +90,7 @@ class FreeGames(Cog):
     @has_permissions(administrator=True)
     @initFreeGames.command(name="delete", description="Удаляет рассылку бесплатных игр")
     @bot_has_permissions(send_messages=True)
-    async def removeFromFreeGames(self, ctx):
+    async def removeFromFreeGames(self, ctx: Context):
         await ctx.message.delete()
 
         channel = await self.free_games_repo.get_channel_by_guild(ctx.message.guild.id)
@@ -126,12 +122,12 @@ class FreeGames(Cog):
             msgs.append(embedd)
         return msgs
 
-    @is_owner()
     @hybrid_command(
         name="run_free_games",
         description="Ручной запуск бесплатных игр (только для создателей)",
     )
-    async def runFreeGanes(self, ctx):
+    @is_owner()
+    async def runFreeGanes(self, ctx: Context):
         await self.freeGames()
 
     async def freeGames(self):

@@ -1,16 +1,13 @@
 from discord.channel import DMChannel
 from discord.ext.commands import (
     Cog,
-    command,
     CommandOnCooldown,
-    cooldown,
-    BucketType,
     guild_only,
     CommandError,
-    hybrid_command
+    hybrid_command,
+    Context
 )
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
-from discord.ext.commands.context import Context
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
 from .resources.AutomatedMessages import automata
@@ -21,6 +18,7 @@ from .resources.xp_system.image import ImageGeneration
 
 from dependencies.repository.member_info.abc import MemberHandlerRepository
 
+from bot import Bot
 
 
 class NoPrivateMessage(CommandError):
@@ -29,13 +27,12 @@ class NoPrivateMessage(CommandError):
 
 class AddXP(Cog):
     def __init__(self, bot, xp_strategy: XpStrategy, image_creation: ImageGeneration):
-        self.bot = bot
+        self.bot: Bot = bot
         self.xp_strategy = xp_strategy
         self.members_repo: MemberHandlerRepository = self.bot.dependency.members_repo
         self.image_creation = image_creation
 
-    async def cog_command_error(self, ctx, error):
-        raise error
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, CommandOnCooldown):
             return await ctx.message.reply(error)
 
@@ -155,9 +152,9 @@ class AddXP(Cog):
         newXp = xp + self.xp_strategy.voice_xp
         await self.members_repo.update_member_info(member.guild.id, member.id, xp=newXp)
 
-    @guild_only()
     @hybrid_command(name="top", description="Показывает топ 10 по опыту")
-    async def leaderboard(self, ctx):
+    @guild_only()
+    async def leaderboard(self, ctx: Context):
         result = await self.members_repo.leaderboard(ctx.guild.id)
 
         if result is None:
@@ -192,9 +189,9 @@ class AddXP(Cog):
         await ctx.send(embed=embed)
 
 
-    @guild_only()
     @hybrid_command(name="rank", description="Показывает персональную карточку с уровнем")
-    async def rank(self, ctx):
+    @guild_only()
+    async def rank(self, ctx: Context):
         result = await self.members_repo.rank(ctx.guild.id, ctx.author.id)
         
         photo_bytes = await Asset.read(ctx.author.display_avatar.with_format("png"))

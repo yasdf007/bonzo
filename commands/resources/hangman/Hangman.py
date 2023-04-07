@@ -3,10 +3,11 @@ from discord.embeds import Embed
 from .words import getWord
 from .states import *
 import asyncio
+from discord.ext.commands import Context
 
 
 class Hangman:
-    def __init__(self, ctx, player):
+    def __init__(self, ctx: Context, player):
         self.player = player
         self.ctx = ctx
         self.game = {'state': 0, 'lives': 7}

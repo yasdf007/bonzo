@@ -1,7 +1,7 @@
-from discord.ext.commands import Cog, command, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from random import sample
 from aiohttp import ClientSession
+from bot import Bot
 
 name = "randimg"
 description = "Отправляет случайное изображение из imgur"
@@ -9,19 +9,19 @@ description = "Отправляет случайное изображение и
 
 class randImg(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
 
     @hybrid_command(name=name, description=description)
-    async def randimg(self, ctx):
-        photo = await self.process(ctx)
+    async def randimg(self, ctx: Context):
+        photo = await self.process()
 
         while photo == None:
-            photo = await self.process(ctx)
+            photo = await self.process()
 
         await ctx.send(photo)
 
-    async def process(self, ctx):
+    async def process(self):
         url = "https://i.imgur.com/"
         symbols = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 

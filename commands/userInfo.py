@@ -1,10 +1,10 @@
 from discord import Embed, Spotify, CustomActivity
-from discord.ext.commands import Cog, command, MemberNotFound, CommandError, hybrid_command
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog, MemberNotFound, CommandError, hybrid_command, Context
 from discord.member import Member
 from discord.ext.commands.core import guild_only
 from .resources.AutomatedMessages import automata
 from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
+from bot import Bot
 
 name = "info"
 description = "Выдаёт информацию о пользователе"
@@ -20,9 +20,9 @@ class SlashMissingUser(CommandError):
 
 class Info(Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         if isinstance(error, MemberNotFound):
             await ctx.message.reply(embed=automata.generateEmbErr(f"Пользователь {error.argument} не найден", error=error))
 
@@ -34,9 +34,9 @@ class Info(Cog):
             )
         raise error
 
-    @guild_only()
     @hybrid_command(name=name, description=description)
-    async def info(self, ctx, member: Member = None):
+    @guild_only()
+    async def info(self, ctx: Context, member: Member = None):
         if not member:
             member = ctx.author
         embed = Embed(

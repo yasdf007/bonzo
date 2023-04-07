@@ -12,8 +12,7 @@ import asyncio
 from os import getenv
 import discord
 import re
-from discord.ext.commands.context import Context
-from discord.ext.commands import MissingRequiredArgument, BadArgument, hybrid_command
+from discord.ext.commands import MissingRequiredArgument, BadArgument, hybrid_command, Context
 import wavelink
 from discord.ext import commands
 from discord import Embed
@@ -28,6 +27,9 @@ from .resources.AutomatedMessages import automata
 from .resources.equalizers import equalizers
 from .resources.music.bonzoPlayer import BonzoPlayer
 from .resources.music.filters import *
+
+from bot import Bot
+
 
 RURL = re.compile("https?:\/\/(?:www\.)?.+")
 TIME_REGEX = re.compile("([0-9]{1,2})m:([0-9]{1,2})s")
@@ -49,7 +51,7 @@ class NoPrivateMessage(commands.CommandError):
 
 class MusicController:
     def __init__(self, bot, guild_id):
-        self.bot = bot
+        self.bot: Bot = bot
         self.guild_id = guild_id
         self.channel = None
 
@@ -110,7 +112,7 @@ class MusicController:
 
 class Music(commands.Cog):
     def __init__(self, bot):
-        self.bot = bot
+        self.bot: Bot = bot
         self.controllers = {}
         self.eqs = equalizers
         self.password = getenv("LAVAPASS")
@@ -179,13 +181,13 @@ class Music(commands.Cog):
 
         return controller
 
-    async def cog_check(self, ctx):
+    async def cog_check(self, ctx: Context):
         """A local check which applies to all commands in this cog."""
         if not ctx.guild:
             raise NoPrivateMessage
         return True
 
-    async def cog_command_error(self, ctx, error):
+    async def cog_command_error(self, ctx: Context, error):
         """A local error handler for all errors arising from commands in this cog."""
         if isinstance(error, NoPrivateMessage):
             try:
@@ -298,7 +300,7 @@ class Music(commands.Cog):
 
                 await self.teardown(member.guild.id)
 
-    async def checkIsSameVoice(self, ctx, voiceChannel):
+    async def checkIsSameVoice(self, ctx: Context, voiceChannel):
         if ctx.author not in voiceChannel.members:
             raise IncorrectChannelError(
                 automata.generateEmbErr(
@@ -316,7 +318,7 @@ class Music(commands.Cog):
 
         await player.destroy()
 
-    async def connect(self, ctx, channel: discord.VoiceChannel):
+    async def connect(self, ctx: Context, channel: discord.VoiceChannel):
         """Connect to a valid voice channel."""
         if not channel:
             try:
@@ -354,7 +356,7 @@ class Music(commands.Cog):
 
 
     @hybrid_command(name="play", description="Играет музыку по ссылке или по названию")
-    async def play(self, ctx, query: str):
+    async def play(self, ctx: Context, query: str):
         if len(query) < 1:
             raise MissingRequiredArgument(ctx.author)
         try:
@@ -420,7 +422,7 @@ class Music(commands.Cog):
             await ctx.send(embed=embed, delete_after=15)
 
     @hybrid_command(name="pause", description="Останавливает музыку")
-    async def pause(self, ctx):
+    async def pause(self, ctx: Context):
         """Pause the player."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -441,7 +443,7 @@ class Music(commands.Cog):
 
 
     @hybrid_command(name="resume", description="Возобновляет музыку")
-    async def resume(self, ctx):
+    async def resume(self, ctx: Context):
         """Resume the player from a paused state."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -462,7 +464,7 @@ class Music(commands.Cog):
 
 
     @hybrid_command(name="skip", description="Пропускает играющую музыку")
-    async def skip(self, ctx):
+    async def skip(self, ctx: Context):
         """Skip the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -485,7 +487,7 @@ class Music(commands.Cog):
 
 
     @hybrid_command(name="volume", description="Устанавливает громкость плеера")
-    async def volume(self, ctx, vol: int):
+    async def volume(self, ctx: Context, vol: int):
         """Set the player volume."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -507,7 +509,7 @@ class Music(commands.Cog):
 
 
     @hybrid_command(name="now_playing", description="Показывает текущий трек")
-    async def now_playing(self, ctx):
+    async def now_playing(self, ctx: Context):
         """Retrieve the currently playing song."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -528,7 +530,7 @@ class Music(commands.Cog):
         )
 
     @hybrid_command(name="queue", description="Показывает очередь из треков (первые 5)")
-    async def queue(self, ctx):
+    async def queue(self, ctx: Context):
         """Retrieve information on the next 5 songs from the queue."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
         if not player.is_connected:
@@ -553,7 +555,7 @@ class Music(commands.Cog):
         await ctx.send(embed=embed, delete_after=15)
 
     @hybrid_command(name="stop", description="Отключается и чистит очередь")
-    async def stop(self, ctx):
+    async def stop(self, ctx: Context):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -583,7 +585,7 @@ class Music(commands.Cog):
         # ],
 
     @hybrid_command(name="equalizer", description="Пресеты эквалайзера музыки", aliases=["eq"])
-    async def equalizer(self, ctx, equalizer="None"):
+    async def equalizer(self, ctx: Context, equalizer="None"):
         """Change the players equalizer."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -611,7 +613,7 @@ class Music(commands.Cog):
         )
 
     @hybrid_command(name="loop", description="Зацикливает, расцикливает трек")
-    async def loop(self, ctx):
+    async def loop(self, ctx: Context):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -638,7 +640,7 @@ class Music(commands.Cog):
         await ctx.send(embed=embed, delete_after=15)
 
     @hybrid_command(name="shuffle", description="Перемешивает треки в очереди")
-    async def shuffle_(self, ctx):
+    async def shuffle_(self, ctx: Context):
         """Stop and disconnect the player and controller."""
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
@@ -657,7 +659,7 @@ class Music(commands.Cog):
         return await ctx.send("Очередь перемешана", delete_after=15)
 
     @hybrid_command(name="skip_to", description="Пропускает до таймкода в треке (формат 0m:00s)")
-    async def skip_to(self, ctx, time: str):
+    async def skip_to(self, ctx: Context, time: str):
         player = self.bot.wavelink.get_player(ctx.guild.id, cls=BonzoPlayer)
 
         if not player.is_connected:
