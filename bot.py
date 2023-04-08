@@ -4,11 +4,13 @@ print("loading...")
 print("-----------------------------")
 
 import discord
+import json
 
 from discord              import Intents, Game, Status, Message
 from discord.ext.commands import Cog, when_mentioned_or, Bot as bonzoBot
 
-from config   import OWNER_IDS, prefix, DEBUG_GUILD
+from commands.resources.AutomatedMessages import AutoEmbed
+from config                               import OWNER_IDS, prefix
 
 from colorama import Fore, Style
 from dotenv   import load_dotenv
@@ -19,6 +21,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from platform import platform
 from os       import getenv
 from pathlib import Path
+
 
 import logging
 
@@ -46,10 +49,12 @@ print("-----------------------------" + Fore.MAGENTA)
 # IMPORT END
 
 
+error_dict = json.load(open("errors.json", "r"))
+
 
 load_dotenv()  # загружает файл env
 
-
+autoemb = AutoEmbed()
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.DEBUG)
@@ -147,7 +152,6 @@ class Bot(bonzoBot):
         print(Fore.GREEN +  "-----------------------\nbot resumed\n-----------------------" + Style.RESET_ALL)
         logging.info("bot resumed")
 
-
     @Cog.listener()
     async def on_disconnect(self):
         print(Fore.RED +  "-----------------------\nbot disconnected or connection failed\n-----------------------" + Style.RESET_ALL)
@@ -158,3 +162,21 @@ class Bot(bonzoBot):
         print(Fore.GREEN +  "-----------------------\nbot connected\n-----------------------" + Style.RESET_ALL)
         logging.info("bot connected")
 
+
+
+    @Cog.listener()
+    async def on_slash_command_error(ctx, error):
+        await ctx.send(
+            embed=AutoEmbed.type_autoembed(
+            "error",
+            f"```{error_dict[error.__class__.__name__]}```"
+            ),
+            ephemeral=True,
+        components=[
+            discord.ui.Button(
+            style=discord.ButtonStyle.url, 
+            label="репортнуть", 
+            url="https://discord.gg/ZNrSmQfp2d"
+            )
+            ]
+        )
