@@ -165,13 +165,12 @@ class Bot(bonzoBot):
 
 
     @Cog.listener()
-    async def on_slash_command_error(ctx, error):
+    async def on_command_error(ctx, error):
         await ctx.send(
             embed=AutoEmbed.type_autoembed(
             "error",
             f"```{error_dict[error.__class__.__name__]}```"
             ),
-            ephemeral=True,
         components=[
             discord.ui.Button(
             style=discord.ButtonStyle.url, 
