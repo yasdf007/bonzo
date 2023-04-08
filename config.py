@@ -2,6 +2,7 @@ from os import getenv
 from dotenv import load_dotenv
 from colorama import Fore, Back, Style
 from discord import Object
+from dataclasses import dataclass
 
 load_dotenv()
 DEBUG_GUILD = None
@@ -24,3 +25,16 @@ else:
     print(
         f"{Fore.GREEN} Config: {Style.RESET_ALL} Prefix unspecified. Using default prefix {prefix}."
     )
+
+@dataclass
+class LavalinkConfig():
+    host:str
+    port:str
+    password: str
+
+
+lavalink_config = LavalinkConfig(
+    host=getenv('LAVALINK_HOST'),
+    port=getenv('LAVALINK_PORT'),
+    password=getenv('LAVALINK_NODE_PASSWORD')
+)

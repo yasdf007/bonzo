@@ -1,37 +1,55 @@
-from commands.resources.music.filters import Timescale
-import wavelink
+import pomice
+from discord import Message, HTTPException, Embed
+from discord.ext.commands import Context
+from contextlib import suppress
+from datetime import timedelta
 
-
-class BonzoPlayer(wavelink.Player):
-
+class BonzoPlayer(pomice.Player):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        
+        self.queue = pomice.Queue()
+        self.controller: Message = None
+        self.context: Context = None
 
-        self.filter = Timescale()
+    async def do_next(self) -> None:
+        if self.controller:
+            with suppress(HTTPException):
+                await self.controller.delete()
 
-    #### SETS ####
-    async def set_speed(self, speed):
-        await self.filter.set_speed(speed=speed)
+        try:
+            track: pomice.Track = self.queue.get()
+        except pomice.QueueEmpty:
+            return await self.teardown()
+        
+        await self.play(track)
 
-        await self.node._send(op='filters', guildId=str(self.guild_id), **self.filter.payload)
+        embed = await self.get_controller(track)
 
-    async def set_pitch(self, pitch):
-        await self.filter.set_pitch(pitch=pitch)
+        self.controller = await self.context.send(embed=embed)
 
-        await self.node._send(op='filters', guildId=str(self.guild_id), **self.filter.payload)
+    async def shuffle(self):
+        return self.queue.shuffle()
 
-    #### RESETS ####
-    async def reset_speed(self):
-        await self.filter.reset_speed()
+    async def get_controller(self, track: pomice.Track):
+        embed = Embed(title=f"Сейчас играет {track.title}")
 
-        await self.node._send(op='filters', guildId=str(self.guild_id), **self.filter.payload)
+        embed.set_thumbnail(url=track.thumbnail)
+        embed.add_field(
+            name="Продолжительность",
+            value=str(timedelta(milliseconds=int(track.length))),
+            inline=False
+        )
+        embed.add_field(name="В очереди", value=str(self.queue.size), inline=False)
+        embed.add_field(name="Ссылка на трек", value=f"[Клик]({track.uri})\n[{track.requester.mention}]")
 
-    async def reset_pitch(self):
-        await self.filter.reset_pitch()
+        return embed
+    
+    async def teardown(self):
+        with suppress((HTTPException), (KeyError)):
+            await self.destroy()
+            if self.controller:
+                await self.controller.delete()
 
-        await self.node._send(op='filters', guildId=str(self.guild_id), **self.filter.payload)
-
-    async def reset_filter(self):
-        await self.filter.reset_filters()
-
-        await self.node._send(op='filters', guildId=str(self.guild_id), **self.filter.payload)
+    async def set_context(self, ctx: Context):
+        self.context = ctx
