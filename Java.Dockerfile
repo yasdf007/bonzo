@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk:13
+FROM azul/zulu-openjdk:19-latest
 
 # Run as non-root user
 RUN groupadd -g 322 lavalink && \

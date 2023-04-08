@@ -4,7 +4,7 @@ networks:
 
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:15
     container_name: postgresql_bot
     restart: always
     tty: true
@@ -36,6 +36,8 @@ services:
       dockerfile: Java.Dockerfile
     container_name: lavalink
     restart: always
+    ports:
+      - 2333:2333
     volumes:
       - ./lavalink:/home/lavalink
     networks:
