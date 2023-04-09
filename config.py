@@ -6,10 +6,12 @@ from dataclasses import dataclass
 
 load_dotenv()
 DEBUG_GUILD = None
+MAIN_GUILD = None
 
 if getenv("DEBUG_GUILD"):
     DEBUG_GUILD = Object(id=int(getenv("DEBUG_GUILD")))
-
+if getenv("MAIN_GUILD"):
+    MAIN_GUILD = Object(id=int(getenv("MAIN_GUILD")))
 try:
     OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",")]
 except:

@@ -19,11 +19,13 @@ from discord.ext.commands.errors import (
 from discord.enums import ChannelType
 from discord import Embed
 from discord import Colour
+from discord.app_commands import guilds
 from .resources.AutomatedMessages import automata
 
 from dependencies.api.free_games.abc import FreeGamesAPI
 from dependencies.repository.free_games.abc import FreeGamesRepository
 from bot import Bot
+from config import MAIN_GUILD
 
 class FreeGames(Cog):
     def __init__(self, bot):
@@ -127,6 +129,7 @@ class FreeGames(Cog):
         name="run_free_games",
         description="Ручной запуск бесплатных игр (только для создателей)",
     )
+    @guilds(MAIN_GUILD)
     @is_owner()
     async def runFreeGanes(self, ctx: Context):
         await self.freeGames()
