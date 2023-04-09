@@ -219,10 +219,8 @@ class Music(Cog):
         if not eq:
             raise CustomCheckError(message="Такого пресета эквалайзера нет!")
 
-        try:
-            await player.add_filter(eq, fast_apply=True)
-        except pomice.exceptions.FilterTagAlreadyInUse:
-            raise CustomCheckError(f"Пресет {preset} уже используется!")
+        await player.reset_filters()
+        await player.add_filter(eq, fast_apply=True)
 
         await ctx.send(f"Применил пресет {preset}")
 
