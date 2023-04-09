@@ -25,10 +25,10 @@ class GameHangman(Cog):
                 )
             )
 
-    @guild_only()
     @hybrid_group(
         name="hangman", description="Начать игру виселица", invoke_without_command=True
     )
+    @guild_only()
     async def gameHangman(self, ctx: Context):
         if ctx.author.bot:
             return
@@ -70,8 +70,8 @@ class GameHangman(Cog):
             if isAfk == True:
                 self.games.pop(str(guild_id))
 
-    @guild_only()
     @gameHangman.command(name="stop", description="Остановить игру виселица")
+    @guild_only()
     async def stop(self, ctx: Context):
         if ctx.author.bot:
             return

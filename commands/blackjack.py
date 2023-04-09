@@ -26,12 +26,12 @@ class gameBlackjack(Cog):
         self.games.pop(str(ctx.guild.id))
         raise error
 
-    @guild_only()
     @hybrid_group(
         name="blackjack",
         description="Начать игру blackjack",
         invoke_without_command=True,
     )
+    @guild_only()
     async def gameBlackjack(self, ctx: Context):
         if ctx.author.bot:
             return
@@ -59,8 +59,8 @@ class gameBlackjack(Cog):
 
             self.games[str(ctx.guild.id)][1] = False
 
-    @guild_only()
     @gameBlackjack.command(name="join", description="Присоединиться к игре blackjack")
+    @guild_only()
     async def join(self, ctx: Context):
         if ctx.author.bot:
             return
@@ -80,8 +80,8 @@ class gameBlackjack(Cog):
         self.games[str(ctx.guild.id)][0].append(str(ctx.author.id))
         await ctx.send(f"Добавил {ctx.message.author}")
 
-    @guild_only()
     @gameBlackjack.command(name="stop", description="Остановить blackjack")
+    @guild_only()
     async def stop(self, ctx: Context):
         if ctx.author.bot:
             return

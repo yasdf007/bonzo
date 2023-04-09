@@ -8,7 +8,7 @@ from discord.ext.commands import (
 )
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
-from discord.ext.commands import hybrid_group, hybrid_command, Context
+from discord.ext.commands import hybrid_group, hybrid_command, Context, check
 from discord.ext.commands.core import is_owner
 from discord.ext.commands.errors import (
     CommandOnCooldown,
@@ -44,7 +44,7 @@ class FreeGames(Cog):
             )
         
         if isinstance(error, NotOwner):
-            pass
+            return
         
         if isinstance(error, NoPrivateMessage):
             return await ctx.send(
@@ -59,16 +59,16 @@ class FreeGames(Cog):
             )
         raise error
 
-    @guild_only()
-    @cooldown(rate=2, per=600, type=BucketType.guild)
-    @has_permissions(administrator=True)
-    @bot_has_permissions(send_messages=True)
     @hybrid_group(
         name="freegames",
         description="Использует данный канал для рассылки бесплатных игр `b/freegames delete` для удаления канала",
         aliases=["free", "freeGames"],
         invoke_without_command=True,
     )
+    @guild_only()
+    @cooldown(rate=2, per=600, type=BucketType.guild)
+    @has_permissions(administrator=True)
+    @bot_has_permissions(send_messages=True)
     async def initFreeGames(self, ctx: Context):
         await ctx.message.delete()
 
@@ -85,11 +85,12 @@ class FreeGames(Cog):
             "Этот канал будет использоваться для рассылки бесплатных игр (удаление через 3с)", delete_after=3
         )
 
-    @guild_only()
+
+    @initFreeGames.command(name="delete", description="Удаляет рассылку бесплатных игр")
     @cooldown(rate=2, per=600, type=BucketType.guild)
     @has_permissions(administrator=True)
-    @initFreeGames.command(name="delete", description="Удаляет рассылку бесплатных игр")
     @bot_has_permissions(send_messages=True)
+    @guild_only()
     async def removeFromFreeGames(self, ctx: Context):
         await ctx.message.delete()
 
