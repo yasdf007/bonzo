@@ -1,16 +1,7 @@
-from discord.ext.commands import CheckFailure
-from typing import Optional, Any
 from discord.ext.commands import Context, check
-import pomice
 from .bonzoPlayer import BonzoPlayer
 
-
-class CustomCheckError(CheckFailure):
-    message: str = None
-    def __init__(self, message: Optional[str] = None, *args: Any) -> None:
-        self.message = message
-        super().__init__(message, *args)
-
+from ..exceptions  import CustomCheckError
 
 async def get_player(ctx: Context):
     if ctx.voice_client:

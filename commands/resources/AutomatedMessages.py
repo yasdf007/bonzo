@@ -87,19 +87,15 @@ class AutoEmbed():
 
         return embed
 
-    def type_autoembed(
-        self,
-        type: str,
-        description: str,
-        timestamp = datetime.datetime.now()
-    ):
-        
-        
+    def type_autoembed(self, type: str, description: str, timestamp = datetime.datetime.now(), dev_link=False,error_id=None):
         embed = discord.Embed(
-        title=Embeds[type]["title"],
-        description=description,
-        colour=Embeds[type]["colour"],
-        timestamp=timestamp
-        )
-
+            title=Embeds[type]["title"],
+            description=description,
+            colour=Embeds[type]["colour"],
+            timestamp=timestamp
+        )  
+        if dev_link:
+            embed.add_field(name="Связь с разработчиками.", value="[Клик](https://discord.gg/amPKsVR2Uk)")
+        if error_id:
+            embed.set_footer(text=error_id)
         return embed

@@ -9,7 +9,6 @@ import json
 from discord              import Intents, Game, Status, Message
 from discord.ext.commands import Cog, when_mentioned_or, Bot as bonzoBot
 
-from commands.resources.AutomatedMessages import AutoEmbed
 from config                               import OWNER_IDS, prefix
 
 from colorama import Fore, Style
@@ -49,23 +48,18 @@ print("-----------------------------" + Fore.MAGENTA)
 # IMPORT END
 
 
-error_dict = json.load(open("errors.json", "r"))
-
 
 load_dotenv()  # загружает файл env
-
-autoemb = AutoEmbed()
 
 logger = logging.getLogger("discord")
 logger.setLevel(logging.DEBUG)
 
 
-handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="w")
+handler = logging.FileHandler(filename="discord.log", encoding="utf-8", mode="a")
 handler.setFormatter(
     logging.Formatter("%(asctime)s:%(levelname)s:%(name)s: %(message)s")
 )
 logger.addHandler(handler)
-
 
 class Bot(bonzoBot):
     def __init__(self):
@@ -161,21 +155,3 @@ class Bot(bonzoBot):
     async def on_connect(self):
         print(Fore.GREEN +  "-----------------------\nbot connected\n-----------------------" + Style.RESET_ALL)
         logging.info("bot connected")
-
-
-
-    @Cog.listener()
-    async def on_command_error(ctx, error):
-        await ctx.send(
-            embed=AutoEmbed.type_autoembed(
-            "error",
-            f"```{error_dict[error.__class__.__name__]}```"
-            ),
-        components=[
-            discord.ui.Button(
-            style=discord.ButtonStyle.url, 
-            label="репортнуть", 
-            url="https://discord.gg/ZNrSmQfp2d"
-            )
-            ]
-        )

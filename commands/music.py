@@ -24,15 +24,16 @@ class Music(Cog):
         self.bot: Bot = bot
 
     async def cog_command_error(self, ctx: Context, error: CommandError):
-        if isinstance(error, CustomCheckError):
-            return await ctx.send(f"ОШБИКА: {error.message}", ephemeral=True)
-        if isinstance(error, MissingRequiredArgument):
-            return await ctx.send(f"ОШБИКА: необходим аргумент: {error.param.name}", ephemeral=True)
+        logging.warning(f"MUSIC ERROR: {error}")
+        # if isinstance(error, CustomCheckError):
+        #     return 
+        # if isinstance(error, MissingRequiredArgument):
+        #     return
 
         # logging.warning(f"MUSIC ERROR: {error}")
-        await ctx.send(f"Упс... кажется произошла неизвестная ошибка :(")
-        await ctx.voice_client.teardown()
-        raise error
+        # await ctx.send(f"Упс... кажется произошла неизвестная ошибка :(")
+        # await ctx.voice_client.teardown()
+        # # raise error
 
     async def start_nodes(self):
             await self.bot.wait_until_ready()
