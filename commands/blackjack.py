@@ -59,6 +59,12 @@ class gameBlackjack(Cog):
 
             self.games[str(ctx.guild.id)][1] = False
 
+
+    @gameBlackjack.command(name="start", description="Начать игру blackjack")
+    @guild_only()
+    async def start(self, ctx: Context):
+        await ctx.invoke(self.gameBlackjack)
+
     @gameBlackjack.command(name="join", description="Присоединиться к игре blackjack")
     @guild_only()
     async def join(self, ctx: Context):
