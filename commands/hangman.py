@@ -70,6 +70,13 @@ class GameHangman(Cog):
             if isAfk == True:
                 self.games.pop(str(guild_id))
 
+    @gameHangman.command(
+        name="start", description="Начать игру виселица", invoke_without_command=True
+    )
+    @guild_only()
+    async def start(self, ctx: Context):
+        await ctx.invoke(self.gameHangman)
+
     @gameHangman.command(name="stop", description="Остановить игру виселица")
     @guild_only()
     async def stop(self, ctx: Context):
