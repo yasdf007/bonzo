@@ -59,12 +59,19 @@ class Music(Cog):
         if member.id != self.bot.user.id:
             return
         
+        node: pomice.Node = self.pomice.get_node()
+        if not node:
+            return
+
+        player: BonzoPlayer = node.get_player(member.guild.id)
+        if not player:
+            return
+
         if before.channel and not after.channel:
-            node: pomice.Node = self.pomice.get_node()
-            if node:
-                player: BonzoPlayer = node.get_player(member.guild.id)
-                if player:
-                    await player.teardown()
+            await player.teardown()
+        
+        if before.channel and after.channel:
+            player(self.bot, after.channel)
 
     @Cog.listener()
     async def on_pomice_track_end(self, player: BonzoPlayer, track, _):
