@@ -1,9 +1,9 @@
-# Created by bonzoTeam (c) 2021.
+# Created by bonzoTeam (c) 2023.
 # ДАННЫЙ ФАЙЛ ЯВЛЯЕТСЯ ПРИМЕРОМ ДЛЯ ЛЮБОГО ПОДКЛЮЧАЕМОГО КОГА НА СИСТЕМЕ BONZO
 # ВЫ МОЖЕТЕ ИСПОЛЬЗОВАТЬ ЭТОТ ФАЙЛ В КАЧЕСТВЕ __МИНИМАЛЬНОГО__ ШАБЛОНА ПРИ СОЗДАНИИ СВОИХ МОДУЛЕЙ.
 
 # ИМПОРТИМ ВСЁ НЕОБХОДИМОЕ
-from discord.ext.commands import Cog, command, CommandError, hybrid_command, Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from discord.ext.commands.context import Context
 from bot import Bot
 
@@ -14,24 +14,12 @@ description = 'YOUR_BEAUTIFUL_DESCRIPTION'
 
 # ОБЪЯВЛЯЕМ ОШИБКИ
 
-class YourError1(CommandError):
-    pass
-
-class YourError2(CommandError):
-    pass
 
 # ОБЪЯВЛЯЕМ КЛАСС-КОГ ВАШЕЙ ФУНКЦИИ
 class YourName(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
 
-    # ЛОВИМ ОШИБКИ ДЛЯ ПРЕФИКСНОЙ КОМАНДЫ
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, YourError1):
-            return await ctx.send('ПОЛЬЗОВАТЕЛЬСКИЙ ВЫВОД ПРИ ОШИБКЕ 1')
-
-        if isinstance(error, YourError2):
-            return await ctx.send('ПОЛЬЗОВАТЕЛЬСКИЙ ВЫВОД ПРИ ОШИБКЕ 2')
 
     # ДЕЙСТВИЯ ПРИ ВЫЗОВЕ КОМАНДЫ
     @hybrid_command(name=name, description=description)
