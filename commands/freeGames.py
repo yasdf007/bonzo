@@ -114,6 +114,7 @@ class FreeGames(Cog):
     @hybrid_command(
         name="run_free_games",
         description="Ручной запуск бесплатных игр (только для создателей)",
+        hidden=True
     )
     @guilds(MAIN_GUILD)
     @is_owner()

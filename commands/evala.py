@@ -14,7 +14,7 @@ class evala(Cog):
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)
-    @hybrid_command(name=name, description=description)
+    @hybrid_command(name=name, description=description, hidden=True)
     @guilds(MAIN_GUILD)
     @is_owner()
     async def evala(self, ctx: Context, evcode: str):

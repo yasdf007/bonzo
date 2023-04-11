@@ -81,7 +81,7 @@ class helping(Cog):
 
     async def generateEmbed(self, author: Member):
         embeds = []
-        legacyNewCommands = list(self.bot.commands)
+        legacyNewCommands = filter(lambda cmd: not cmd.hidden, list(self.bot.commands))
         allCommands = sorted(legacyNewCommands, key=lambda x: x.name)
         # ceil - округляем в большую сторону
         # 17/10 = 1.8 => 2
