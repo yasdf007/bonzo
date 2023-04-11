@@ -15,5 +15,8 @@
     "BotMissingAnyRole": "У бота нет необходимых ролей.",
     "MissingPermissions": "Нет необходимых разрешений.",
     "BotMissingPermissions": "У бота нет необходимых разрешений.",
+    "MissingRequiredAttachment": "Необходимо приложить файл",
+    "InvalidEndOfQuotedStringError" : "Двойные кавычки недопустимы", 
+    "ExpectedClosingQuoteError" : "Не найден символ кавычек", 
     "UnknownError": "Неизвестная ошибка."
 }
