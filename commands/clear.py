@@ -1,13 +1,6 @@
-from commands.resources.AutomatedMessages import automata
 from discord import TextChannel
 from discord.ext.commands import Cog, has_permissions, bot_has_permissions, hybrid_command, Context
-from discord.ext.commands.errors import (
-    BadArgument,
-    MissingRequiredArgument,
-    MissingPermissions,
-    CommandInvokeError,
-    BotMissingPermissions,
-)
+
 
 from bot import Bot
 
@@ -18,34 +11,6 @@ description = "Очищает последние x сообщений (для п
 class Clear(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    # Обработка ошибок
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, (MissingRequiredArgument, BadArgument)):
-            await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Введите количество сообщений целым числом"
-                )
-            )
-
-        if isinstance(error, MissingPermissions):
-            await ctx.send(
-                embed=automata.generateEmbErr(
-                    "У вас недостаточно прав для исполнения данной команды"
-                )
-            )
-
-        if isinstance(error, CommandInvokeError):
-            await ctx.send(
-                embed=automata.generateEmbErr("Ошибка при исполнении команды")
-            )
-
-        if isinstance(error, BotMissingPermissions):
-            await ctx.send(
-                embed=automata.generateEmbErr(
-                    "У bonzo недостаточно прав для исполнения данной команды (Manage Messages)"
-                )
-            )
 
     # функция, удаляющая X сообщений из чата
     @hybrid_command(name=name, description=description)

@@ -1,99 +1,21 @@
 from discord.ext.commands import (
     Cog,
-    CommandError,
-    MissingPermissions,
     BucketType,
-    MissingRequiredArgument,
-    CommandOnCooldown,
-    InvalidEndOfQuotedStringError,
-    ExpectedClosingQuoteError,
     guild_only,
-    command,
     has_permissions,
     cooldown,
     hybrid_command,
     Context
 )
-from commands.resources.AutomatedMessages import automata
-
 from dependencies.repository.prefix.abc import PrefixRepository
-
 from bot import Bot
-
-class PrefixTooLong(CommandError):
-    pass
-
-
-class PrefixTooShort(CommandError):
-    pass
-
-
-class NoSpecialSymbolFound(CommandError):
-    pass
-
-
-class NotASCII(CommandError):
-    pass
-
+from .resources.exceptions import CustomCheckError
 
 class Settings(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
         self.prefix_repo: PrefixRepository = self.bot.dependency.prefix_repo
 
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, MissingPermissions):
-            return await ctx.send(embed=automata.generateEmbErr("Ты не администратор"))
-
-        if isinstance(error, PrefixTooLong):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Префикс слишком длинный (макс. 5 символов)"
-                )
-            )
-
-        if isinstance(error, MissingRequiredArgument):
-            return await ctx.send(
-                embed=automata.generateEmbErr("Нужно указать префикс")
-            )
-
-        if isinstance(error, PrefixTooShort):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Префикс слишком короткий (мин. 1 символ)"
-                )
-            )
-
-        if isinstance(error, NoSpecialSymbolFound):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Префикс должен заканчиваться спец. символом, доступны [_.,!#$%^&*()<>?/\|}{~:]'"
-                )
-            )
-
-        if isinstance(
-            error, (InvalidEndOfQuotedStringError, ExpectedClosingQuoteError)
-        ):
-            return await ctx.send(
-                embed=automata.generateEmbErr("Двойные кавычки недопустимы")
-            )
-
-        if isinstance(error, NotASCII):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Префикс должен состоять только из ascii символов"
-                )
-            )
-
-        if isinstance(error, CommandOnCooldown):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    f"Нельзя часто менять префикс. Попробуй через {error.retry_after: .0f}с."
-                )
-            )
-
-        raise error
-    
     @hybrid_command(
         name="set_prefix",
         description="Устанавливает серверный префикс для бота (только для админов, макс. 5 символов, без двойных кавечек)",
@@ -105,17 +27,17 @@ class Settings(Cog):
         if not ctx.message.guild:
             raise
         if len(prefix) < 1:
-            raise PrefixTooShort
+            raise CustomCheckError(message="Префикс слишком короткий (мин. 1 символ)")
         if len(prefix) > 5:
-            raise PrefixTooLong
+            raise CustomCheckError(message="Префикс слишком длинный (макс. 5 символов)")
 
         if not prefix.isascii():
-            raise NotASCII
+            raise CustomCheckError(message="Префикс должен состоять только из ascii символов")
 
         prefix = rf"{prefix}"
 
         if prefix[-1] not in "[_.!#$%^&*()<>?/\|}{~:]'":
-            raise NoSpecialSymbolFound
+            raise CustomCheckError(message= "Префикс должен заканчиваться спец. символом, доступны [_.,!#$%^&*()<>?/\|}{~:]'")
 
         await self.prefix_repo.insertPrefix(guild_id=ctx.message.guild.id, prefix=prefix)
         await ctx.send(f"Установил префикс {prefix} для {ctx.message.guild.name}!")

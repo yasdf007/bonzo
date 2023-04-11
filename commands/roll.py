@@ -1,8 +1,9 @@
 from discord import Embed
 from discord.ext.commands import Cog, CommandError, hybrid_command, Context
 from random import randint
-from .resources.AutomatedMessages import automata
 from bot import Bot
+
+from .resources.exceptions import CustomCheckError
 
 name = "roll"
 description = "Ролит как в доте или между двумя числами"
@@ -15,19 +16,8 @@ class NumberTooLarge(CommandError):
 class Roll(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, NumberTooLarge):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Числа больше 10^6 (миллион) не поддерживаются"
-                )
-            )
-        raise error
-
-
+        
     # dota 2 roll
-
     @hybrid_command(name=name, description=description)
     async def roll(self, ctx: Context, number_from: int = 1, number_to: int = 100):
         oneMillon = 10 ** 6
@@ -39,7 +29,7 @@ class Roll(Cog):
 
         except AssertionError:
             # То ошибка
-            raise NumberTooLarge
+            raise CustomCheckError(message="Числа больше 10^6 (миллион) не поддерживаются")
 
         embed = Embed()
         # Еслм два числа указаны

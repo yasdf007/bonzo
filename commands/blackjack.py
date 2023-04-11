@@ -1,8 +1,5 @@
 from discord.ext.commands import Cog, guild_only, hybrid_group, Context
-from discord.ext.commands.errors import NoPrivateMessage
-
 from .resources.blackjack.Blackjack import Blackjack
-from .resources.AutomatedMessages import automata
 
 from bot import Bot
 
@@ -15,17 +12,9 @@ class gameBlackjack(Cog):
         self.bot: Bot = bot
 
     async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, NoPrivateMessage):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
-
-        await ctx.send("Произошла ошибка во время игры.")
         self.games.pop(str(ctx.guild.id))
         raise error
-
+    
     @hybrid_group(
         name="blackjack",
         description="Начать игру blackjack",

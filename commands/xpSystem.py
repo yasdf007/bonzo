@@ -1,16 +1,12 @@
 from discord.channel import DMChannel
 from discord.ext.commands import (
     Cog,
-    CommandOnCooldown,
     guild_only,
-    CommandError,
     hybrid_command,
     Context
 )
-from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from discord import Embed, File, Asset
 from datetime import datetime, timedelta
-from .resources.AutomatedMessages import automata
 
 from .resources.xp_system.abc import XpStrategy
 from .resources.xp_system.xp import OriginalXP
@@ -21,27 +17,12 @@ from dependencies.repository.member_info.abc import MemberHandlerRepository
 from bot import Bot
 
 
-class NoPrivateMessage(CommandError):
-    pass
-
-
 class AddXP(Cog):
     def __init__(self, bot, xp_strategy: XpStrategy, image_creation: ImageGeneration):
         self.bot: Bot = bot
         self.xp_strategy = xp_strategy
         self.members_repo: MemberHandlerRepository = self.bot.dependency.members_repo
         self.image_creation = image_creation
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, CommandOnCooldown):
-            return await ctx.message.reply(error)
-
-        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
 
     @Cog.listener()
     async def on_member_join(self, member):

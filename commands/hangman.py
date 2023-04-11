@@ -2,8 +2,6 @@ from discord.ext.commands.core import guild_only
 from commands.resources.hangman.Hangman import Hangman
 from discord.ext.commands import Cog, CommandError, hybrid_group, Context
 import asyncio
-from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
-from .resources.AutomatedMessages import automata
 from bot import Bot
 
 
@@ -16,14 +14,6 @@ class GameHangman(Cog):
 
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
 
     @hybrid_group(
         name="hangman", description="Начать игру виселица", invoke_without_command=True

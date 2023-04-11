@@ -1,5 +1,4 @@
 from discord.ext.commands import Cog, is_owner, hybrid_command, Context
-from discord.ext.commands.errors import MissingPermissions, NotOwner
 import traceback
 from bot import Bot
 from config import MAIN_GUILD
@@ -8,11 +7,6 @@ from discord.app_commands import guilds
 class CogsManagement(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, (MissingPermissions, NotOwner)):
-            return
-        raise error
 
     @hybrid_command(name="load", description="Загружает ког")
     @guilds(MAIN_GUILD)

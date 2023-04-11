@@ -1,8 +1,6 @@
 from discord import Embed
 from discord.ext.commands import Cog, hybrid_command, Context
 from discord.ext.commands.core import guild_only
-from discord.ext.commands import NoPrivateMessage
-from .resources.AutomatedMessages import automata
 from bot import Bot
 
 
@@ -14,15 +12,6 @@ description = "Показывает информацию о сервере"
 class info(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, NoPrivateMessage):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
-        raise error
 
     # функция, отправляющая информацию о сервере
     @hybrid_command(name=name, description=description)

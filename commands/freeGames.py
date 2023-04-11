@@ -38,20 +38,6 @@ class FreeGames(Cog):
             CronTrigger(day_of_week="thu", hour=19, minute=3, jitter=120),
         )
     async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, MissingPermissions):
-            return await ctx.message.reply(
-                embed=automata.generateEmbErr(
-                    "Только администратор может использовать эту команду", error=error
-                )
-            )
-        
-        if isinstance(error, NotOwner):
-            return
-        
-        if isinstance(error, NoPrivateMessage):
-            return await ctx.send(
-                embed=automata.generateEmbErr("Только на серверах", error=error)
-            )
         if isinstance(error, CommandOnCooldown):
             return await ctx.message.reply(
                 embed=automata.generateEmbErr(

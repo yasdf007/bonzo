@@ -1,8 +1,8 @@
-from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog
-from discord.ext.commands.errors import MissingRequiredArgument, MissingRequiredAttachment
-from discord.ext.commands import Cog, CommandError, hybrid_command, Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from discord import File, Attachment
+
+from .resources.exceptions import CustomCheckError
 
 from io import BytesIO
 from aiohttp import ClientSession
@@ -14,24 +14,6 @@ from .resources.image_manipulation.ascii import resolve_ascii
 
 from bot import Bot
 
-class NoUrlFound(CommandError):
-    pass
-
-
-class InvalidFileType(CommandError):
-    pass
-
-
-class RequestNetworkError(CommandError):
-    pass
-
-
-class TooManySymblos(CommandError):
-    pass
-
-
-class FileTooLarge(CommandError):
-    pass
 
 ONE_MEGABYTE = 1024 * 1024
 
@@ -42,28 +24,6 @@ class ImageManipulation(Cog):
 
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, (NoUrlFound, MissingRequiredArgument)):
-            return await ctx.send(embed=automata.generateEmbErr("Ссылка не найдена", error=error))
-
-        if isinstance(error, InvalidFileType):
-            return await ctx.send(embed=automata.generateEmbErr("Неподдерживаемый формат файла - доступны png, jpeg и jpg", error=error))
-
-        if isinstance(error, RequestNetworkError):
-            return await ctx.send(embed=automata.generateEmbErr("Не удалось открыть файл", error=error))
-
-        if isinstance(error, TooManySymblos):
-            return await ctx.send(embed=automata.generateEmbErr("Команда поддерживает не более 25 символов", error=error))
-
-        if isinstance(error, FileTooLarge):
-            return await ctx.send(embed=automata.generateEmbErr("Максимальный размер файла - 5МБ", error=error))
-
-        if isinstance(error, MissingRequiredAttachment):
-            return await ctx.send(embed=automata.generateEmbErr("Необходимо приложить файл", error=error))
-
-        raise error
-
 
     async def get_bytes_from_url(self, url):
         async with ClientSession() as session:
@@ -77,15 +37,17 @@ class ImageManipulation(Cog):
 
     @hybrid_command(name='ascii', description='Переводит картинку в ascii текст')
     async def ascii(self, ctx: Context, image_url: str = None, attachment: Attachment = None):
+        if not image_url and not attachment:
+            raise CustomCheckError(message="Ссылка не найдена")
+
         image_url = image_url or attachment.url
         if not self.urlValid.match(image_url):
-            raise NoUrlFound
+            raise CustomCheckError(message="Ссылка не найдена")
 
         filetype, _ = await self.get_file_info(image_url)
-
         ascii = resolve_ascii(filetype)
         if not ascii:
-            raise InvalidFileType
+            raise CustomCheckError(message="Неподдерживаемый формат файла - доступны png, jpeg и jpg")
 
         image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
@@ -100,7 +62,7 @@ class ImageManipulation(Cog):
     #         raise NoUrlFound
 
     #     if len(text) > 25:
-    #         raise TooManySymblos
+    #         raise CustomCheckError(message="Команда поддерживает не более 25 символов")
 
     #     filetype, _ = await self.get_file_info(image_url)
 
@@ -137,20 +99,24 @@ class ImageManipulation(Cog):
 
     @hybrid_command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
     async def shakalizator(self, ctx: Context, image_url: str = None, attachment: Attachment = None):
+        if not image_url and not attachment:
+            raise CustomCheckError(message="Ссылка не найдена")
+        
         image_url = image_url or attachment.url
 
         if not self.urlValid.match(image_url):
-            raise NoUrlFound
+            raise CustomCheckError(message="Ссылка не найдена")
 
         filetype, length = await self.get_file_info(image_url)
 
-        if length > FIVE_MEGABYTES:
-            raise FileTooLarge
         
         shakalizator = resolve_shakal(filetype)
         if not shakalizator:
-            raise InvalidFileType
+            raise CustomCheckError(message="Неподдерживаемый формат файла - доступны png, jpeg, jpg, gif")
 
+        if length > FIVE_MEGABYTES:
+            raise CustomCheckError(message="Максимальный размер файла - 5МБ")
+        
         image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
         async with shakalizator(image_bytes) as shakalized:

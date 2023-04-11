@@ -1,38 +1,16 @@
 from discord import Embed, Spotify, CustomActivity
-from discord.ext.commands import Cog, MemberNotFound, CommandError, hybrid_command, Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from discord.member import Member
 from discord.ext.commands.core import guild_only
-from .resources.AutomatedMessages import automata
-from discord.ext.commands import NoPrivateMessage as NoPrivateMsg
 from bot import Bot
 
 name = "info"
 description = "Выдаёт информацию о пользователе"
 
 
-class NoPrivateMessage(CommandError):
-    pass
-
-
-class SlashMissingUser(CommandError):
-    pass
-
-
 class Info(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, MemberNotFound):
-            await ctx.message.reply(embed=automata.generateEmbErr(f"Пользователь {error.argument} не найден", error=error))
-
-        if isinstance(error, (NoPrivateMessage, NoPrivateMsg)):
-            return await ctx.send(
-                embed=automata.generateEmbErr(
-                    "Эту команду нельзя использовать в ЛС.", error=error
-                )
-            )
-        raise error
 
     @hybrid_command(name=name, description=description)
     @guild_only()

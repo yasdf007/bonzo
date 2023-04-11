@@ -1,6 +1,5 @@
-from commands.resources.AutomatedMessages import automata
 from discord.ext.commands import Cog, is_owner, hybrid_command, Context
-from discord.ext.commands.errors import CommandInvokeError, NotOwner
+from discord.ext.commands.errors import CommandInvokeError
 from discord.app_commands import guilds
 from bot import Bot
 from config import MAIN_GUILD
@@ -12,17 +11,6 @@ description = "Исполняет код (только для разработч
 class evala(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    # Обработка ошибок
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, CommandInvokeError):
-            await ctx.send(
-                embed=automata.generateEmbErr("Ошибка при выполении запроса")
-            )
-
-        if isinstance(error, NotOwner):
-            pass
 
     # eval - запуск кода от лица бота овнером через discord.
     # не следует использовать рядовым пользователям. дословно закомментировано не будет (!)

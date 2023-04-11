@@ -1,6 +1,6 @@
 import pomice
 
-from discord.ext.commands import hybrid_command, Context, Cog, CommandError
+from discord.ext.commands import hybrid_command, Context, Cog
 from discord import Member, VoiceState, Interaction
 from discord.app_commands import Choice, autocomplete
 
@@ -22,18 +22,6 @@ TIME_REGEX = re.compile("([0-9]{1,2})m:([0-9]{1,2})s")
 class Music(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error: CommandError):
-        logging.warning(f"MUSIC ERROR: {error}")
-        # if isinstance(error, CustomCheckError):
-        #     return 
-        # if isinstance(error, MissingRequiredArgument):
-        #     return
-
-        # logging.warning(f"MUSIC ERROR: {error}")
-        # await ctx.send(f"Упс... кажется произошла неизвестная ошибка :(")
-        # await ctx.voice_client.teardown()
-        # # raise error
 
     async def start_nodes(self):
             await self.bot.wait_until_ready()

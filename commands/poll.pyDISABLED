@@ -1,6 +1,5 @@
 from discord import Embed
 from discord.ext.commands import Cog, command, has_permissions, bot_has_permissions, guild_only, hybrid_command, Context
-from discord.ext.commands.errors import MissingPermissions, BotMissingPermissions
 from datetime import datetime, timedelta
 from bot import Bot
 
@@ -11,13 +10,6 @@ class Poll(Cog):
 
     def __init__(self, bot):
         self.bot: Bot = bot
-
-    async def cog_command_error(self, ctx: Context, error):
-        if isinstance(error, MissingPermissions):
-            await ctx.send('**слыш,** тебе нельзя такое исполнять')
-
-        if isinstance(error, BotMissingPermissions):
-            await ctx.send(f'Не могу управлять сообщениями')
 
     @Cog.listener()
     async def on_raw_reaction_add(self, payload):

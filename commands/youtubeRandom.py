@@ -11,9 +11,6 @@ class YoutubeRandom(Cog):
         self.bot: Bot = bot
         self.youtube_random_api: YoutubeRandomApi = self.bot.dependency.youtube_random_api
 
-    async def cog_command_error(self, ctx: Context, error):
-        raise error
-        
     @hybrid_command(name=name, description=description, aliases=["randvid", "video"])
     async def randomVideo(self, ctx: Context):
         youtubeVideoId = await self.youtube_random_api.get_video_id()

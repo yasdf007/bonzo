@@ -30,5 +30,5 @@ async def asyncToAscii(image_bytes: BytesIO):
 
 
 def resolve_ascii(type):
-    if (ext in type for ext in ('png', 'jpeg', 'jpg')):
+    if any(ext in type for ext in ('png', 'jpeg', 'jpg')):
         return asyncToAscii
