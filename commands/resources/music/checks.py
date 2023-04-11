@@ -12,6 +12,19 @@ async def get_player(ctx: Context):
     return player
 
 
+def same_voice():
+    async def predicate(ctx: Context):
+        player: BonzoPlayer = await get_player(ctx)
+
+        if not player:
+            return True
+        
+        if ctx.author.voice.channel.id != player.channel.id:
+            raise CustomCheckError(message="Ты должен быть в том же голосовом канале, что и бот!")
+        return True
+    
+    return check(predicate)
+
 def author_in_voice():
     async def predicate(ctx: Context):
         if not ctx.author.voice:

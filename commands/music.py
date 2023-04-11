@@ -1,11 +1,11 @@
 import pomice
 
-from discord.ext.commands import hybrid_command, Context, Cog, CommandError, MissingRequiredArgument
+from discord.ext.commands import hybrid_command, Context, Cog, CommandError
 from discord import Member, VoiceState, Interaction
 from discord.app_commands import Choice, autocomplete
 
 from .resources.music.bonzoPlayer import BonzoPlayer
-from .resources.music.checks import CustomCheckError, author_in_voice, bot_in_voice, get_player, is_playing
+from .resources.music.checks import CustomCheckError, author_in_voice, bot_in_voice, get_player, is_playing, same_voice
 from .resources.music.ui import DropdownView, Dropdown
 from .resources.music.filters import equalizers
 
@@ -85,6 +85,7 @@ class Music(Cog):
         await player.do_next()
 
     @hybrid_command(name='play', description="Ищет и играет музыку по ссылке или запросу.")
+    @same_voice()
     @author_in_voice()
     async def play(self, ctx: Context, query: str):
         self.check_status()
@@ -109,6 +110,7 @@ class Music(Cog):
 
 
     @hybrid_command(name='stop', description="Останавливает воспроизведение и отключается.")
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def stop(self, ctx: Context):
@@ -121,6 +123,7 @@ class Music(Cog):
 
     @hybrid_command(name='skip', description="Пропускает текущую музыку.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def skip(self, ctx: Context):
@@ -133,6 +136,7 @@ class Music(Cog):
         await player.stop()
 
     @hybrid_command(name='search', description="Осуществляет поиск музыки.")
+    @same_voice()
     @author_in_voice()
     async def search(self, ctx: Context, query: str):
         self.check_status()
@@ -156,6 +160,7 @@ class Music(Cog):
 
     @hybrid_command(name='pause', description="Останавливает/возобновляет воспроизведение.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def pause(self, ctx: Context):
@@ -172,6 +177,7 @@ class Music(Cog):
         
     @hybrid_command(name='unpause', description="Возобновляет воспроизведение.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def unpause(self, ctx: Context):
@@ -187,6 +193,7 @@ class Music(Cog):
     # -------------------
     @hybrid_command(name='volume', description="Меняет громкость воспроизведение.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def volume(self, ctx: Context, volume: int):
@@ -209,6 +216,7 @@ class Music(Cog):
 
     @hybrid_command(name='equalizer', description="Применяет пресет эквалайзера.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     @autocomplete(preset=equalizer_autocomplete)
@@ -227,6 +235,7 @@ class Music(Cog):
 
     @hybrid_command(name='reset_filters', description="Убирает фильтры.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def reset_filters(self, ctx: Context):
@@ -255,6 +264,7 @@ class Music(Cog):
 
     @hybrid_command(name='loop', description="Ставит/убирает текущую музыку на повтор.")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def loop(self, ctx: Context):
@@ -269,6 +279,7 @@ class Music(Cog):
             return await ctx.send(f"{player.current.title} поставлен на повтор.")
 
     @hybrid_command(name='shuffle', description="Перемешивает музыку в очереди.")
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def shuffle(self, ctx: Context):
@@ -284,6 +295,7 @@ class Music(Cog):
 
     @hybrid_command(name='seek', description="Пропускает до таймкода в музыке (формат 0m:00s).")
     @is_playing()
+    @same_voice()
     @author_in_voice()
     @bot_in_voice()
     async def seek(self, ctx: Context, time: str):
