@@ -1,12 +1,8 @@
 from discord.ext.commands.core import guild_only
 from commands.resources.hangman.Hangman import Hangman
-from discord.ext.commands import Cog, CommandError, hybrid_group, Context
+from discord.ext.commands import Cog, hybrid_group, Context
 import asyncio
 from bot import Bot
-
-
-class NoPrivateMessage(CommandError):
-    pass
 
 
 class GameHangman(Cog):

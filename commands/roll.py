@@ -1,5 +1,5 @@
 from discord import Embed
-from discord.ext.commands import Cog, CommandError, hybrid_command, Context
+from discord.ext.commands import Cog, hybrid_command, Context
 from random import randint
 from bot import Bot
 
@@ -8,9 +8,6 @@ from .resources.exceptions import CustomCheckError
 name = "roll"
 description = "Ролит как в доте или между двумя числами"
 
-
-class NumberTooLarge(CommandError):
-    pass
 
 
 class Roll(Cog):
