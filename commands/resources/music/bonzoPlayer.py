@@ -41,7 +41,7 @@ class BonzoPlayer(pomice.Player):
             inline=False
         )
         embed.add_field(name="В очереди", value=str(self.queue.size), inline=False)
-        embed.add_field(name="Ссылка на трек", value=f"[Клик]({track.uri})\n[{track.requester.mention}]")
+        embed.add_field(name="Ссылка на трек", value=f"[Клик]({track.uri})")
 
         return embed
     
