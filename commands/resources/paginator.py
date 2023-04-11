@@ -8,6 +8,7 @@ from typing import Union
 from asyncio import FIRST_COMPLETED as ASYNCIO_FIRST_COMPLETED
 from asyncio import wait as asyncioWait
 from asyncio import TimeoutError as AsyncioTimeoutError
+from asyncio import gather
 from discord import errors
 from discord import Embed
 from discord.ext.commands import Context
@@ -60,15 +61,10 @@ class Paginator:
                     self.ctx.bot.wait_for('reaction_add',
                                           timeout=self.timeout, check=author_check),
                     self.ctx.bot.wait_for('reaction_remove',
-                                          timeout=self.timeout, check=author_check)]
+                                          timeout=self.timeout, check=author_check)
+                    ]
 
-                tasks_result, tasks = await asyncioWait(tasks, return_when=ASYNCIO_FIRST_COMPLETED)
-
-                for task in tasks:
-                    task.cancel()
-                for task in tasks_result:
-                    response = await task
-
+                response = await gather(*tasks)
             except AsyncioTimeoutError:
                 break
 
@@ -77,15 +73,15 @@ class Paginator:
             except Exception:
                 pass
 
-            if response[0].emoji == self.reactions[0]:
+            if response[0][0].emoji == self.reactions[0]:
                 self.current = self.current - \
                     1 if self.current > 0 else len(self.pages) - 1
                 await self.controller.edit(embed=self.pages[self.current])
 
-            if response[0].emoji == self.reactions[1]:
+            if response[0][0].emoji == self.reactions[1]:
                 break
 
-            if response[0].emoji == self.reactions[2]:
+            if response[0][0].emoji == self.reactions[2]:
                 self.current = self.current + \
                     1 if self.current < len(self.pages) - 1 else 0
                 await self.controller.edit(embed=self.pages[self.current])
