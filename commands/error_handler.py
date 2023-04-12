@@ -41,12 +41,19 @@ class ErrorHandler(Cog):
                 ),
             )
 
+
         if error.__class__.__name__ in error_dict:
             if not isinstance(error, CommandInvokeError):
+                argument = getattr(error, 'argument', None) or getattr(error, 'retry_after', None) or (getattr(error, 'param', None)).name
+
+                description = f"```{error_dict[error.__class__.__name__]}```"
+                if argument:
+                    description = description.format(argument=argument)
+
                 return await ctx.send(
                     embed=AutoEmbed().type_autoembed(
                         type="error",
-                        description=f"```{error_dict[error.__class__.__name__]}```",
+                        description=description,
                     ),
                 )
 
