@@ -15,6 +15,7 @@ LAVALINK_HOST=getenv('LAVALINK_HOST')
 LAVALINK_PORT=int(getenv('LAVALINK_PORT'))
 LAVALINK_NODE_PASSWORD=getenv('LAVALINK_NODE_PASSWORD')
 
+LAVALINK_CONNECTION_OPTIONS={'host': LAVALINK_HOST, 'port': LAVALINK_PORT, 'password': LAVALINK_NODE_PASSWORD, 'identifier': 'MAIN'}
 
 def not_empty(**kwargs):
     for k, v in kwargs.items():
