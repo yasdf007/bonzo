@@ -46,7 +46,7 @@ class BonzoPlayer(pomice.Player):
         return embed
     
     async def teardown(self):
-        with suppress((HTTPException), (KeyError)):
+        with suppress((HTTPException), (KeyError), (pomice.exceptions.NodeRestException)):
             await self.destroy()
             if self.controller:
                 await self.controller.delete()
