@@ -24,20 +24,19 @@ class Music(Cog):
         self.bot: Bot = bot
 
     async def start_nodes(self):
-            await self.bot.wait_until_ready()
-            await self.pomice.create_node(
-                    bot=self.bot,
-                    **LAVALINK_CONNECTION_OPTIONS,
-                )
+        await self.bot.wait_until_ready()
+        await self.pomice.create_node(
+                bot=self.bot,
+                **LAVALINK_CONNECTION_OPTIONS,
+            )
 
     async def cog_load(self) -> None:
         self.pomice = pomice.NodePool()
         self.bot.loop.create_task(self.start_nodes())
 
-    def check_status(self):
-        node: pomice.Node = self.pomice.get_node()
+    def check_status(self, node: pomice.Node):
         if not node.is_connected:
-            raise CustomCheckError(message="Отсутствует соединение с проигрывателем!")
+            raise CustomCheckError(message="Отсутствует соединение с проигрывателем! Подождите некоторое время.")
     
     @Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
@@ -80,9 +79,8 @@ class Music(Cog):
     @same_voice()
     @author_in_voice()
     async def play(self, ctx: Context, query: str):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
 
         results = await player.get_tracks(query, ctx=ctx)
         if not results:
@@ -106,8 +104,6 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def stop(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
         await player.teardown()
 
@@ -119,21 +115,23 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def skip(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
 
         track = player.current
         await ctx.send(f"Пропустил {track.title}")
-        await player.stop()
+        try:
+            await player.stop()
+        except Exception as e:
+            logging.warning(f"COULD NOT SKIP: {e}")
 
     @hybrid_command(name='search', description="Осуществляет поиск музыки.")
     @same_voice()
     @author_in_voice()
     async def search(self, ctx: Context, query: str):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
+
         results = await player.get_tracks(query, ctx=ctx)
         if not results:
             raise CustomCheckError(message="Не найдено ни одного трека!")
@@ -156,9 +154,8 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def pause(self, ctx: Context):
-        self.check_status()
-        
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
 
         if player.is_paused:
             await player.set_pause(False)
@@ -173,9 +170,8 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def unpause(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
         
         if not player.is_paused:
             raise CustomCheckError(message="Музыка не на паузе!")
@@ -189,9 +185,8 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def volume(self, ctx: Context, volume: int):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
 
         await player.set_volume(volume)
         await ctx.send(f"Установлена громкость: {volume}")
@@ -213,9 +208,9 @@ class Music(Cog):
     @bot_in_voice()
     @autocomplete(preset=equalizer_autocomplete)
     async def equalizer(self, ctx: Context, preset: str):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
+
         eq = equalizers.get(preset)
         if not eq:
             raise CustomCheckError(message="Такого пресета эквалайзера нет!")
@@ -231,9 +226,9 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def reset_filters(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
+
         try:
             await player.reset_filters(fast_apply=True)
         except pomice.exceptions.FilterInvalidArgument:
@@ -248,9 +243,8 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def now_playing(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
         
         await ctx.send(embed=await player.get_controller(player.current))
 
@@ -260,9 +254,9 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def loop(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
+
         if player.queue.is_looping:
             player.queue.disable_loop()
             return await ctx.send(f"{player.current.title} убран с повтора.")
@@ -275,9 +269,9 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def shuffle(self, ctx: Context):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
+
         if len(player.queue) < 1:
             raise CustomCheckError(message="Очередь пустая, перемешивать нечего!")
         await ctx.send("Очередь перемешана")
@@ -291,9 +285,8 @@ class Music(Cog):
     @author_in_voice()
     @bot_in_voice()
     async def seek(self, ctx: Context, time: str):
-        self.check_status()
-
         player: BonzoPlayer = await get_player(ctx)
+        self.check_status(player.node)
         
         match = TIME_REGEX.match(time)
         if not match:
