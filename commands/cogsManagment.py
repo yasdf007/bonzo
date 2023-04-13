@@ -43,7 +43,7 @@ class CogsManagement(Cog):
 
 
     @hybrid_command(name="sync", description="Синхронизирует команды", hidden=True)
-    @guilds(MAIN_GUILD.id)
+    @guilds(MAIN_GUILD)
     @is_owner()
     async def sync_cmds(self, ctx: Context):
         synced = await self.bot.tree.sync()
