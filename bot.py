@@ -4,12 +4,11 @@ print("loading...")
 print("-----------------------------")
 
 import discord
-import json
 
 from discord              import Intents, Game, Status, Message
 from discord.ext.commands import Cog, when_mentioned_or, Bot as bonzoBot
 
-from config                               import OWNER_IDS, prefix
+from config                               import OWNER_IDS, PREFIX
 
 from colorama import Fore, Style
 from dotenv   import load_dotenv
@@ -114,9 +113,9 @@ class Bot(bonzoBot):
 
     async def _get_prefix(self, bot, message: Message):
         if not message.guild:
-            return when_mentioned_or(prefix)(bot, message)
+            return when_mentioned_or(PREFIX)(bot, message)
         
-        guild_prefix = await self.dependency.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or prefix
+        guild_prefix = await self.dependency.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or PREFIX
 
         return when_mentioned_or(guild_prefix)(bot, message)
 

@@ -10,7 +10,7 @@ from .resources.music.ui import DropdownView, Dropdown
 from .resources.music.filters import equalizers
 
 from bot import Bot
-from config import lavalink_config
+from config import LAVALINK_HOST, LAVALINK_PORT, LAVALINK_NODE_PASSWORD
 
 from typing import List
 
@@ -27,9 +27,9 @@ class Music(Cog):
             await self.bot.wait_until_ready()
             await self.pomice.create_node(
                     bot=self.bot,
-                    host=lavalink_config.host,
-                    port=int(lavalink_config.port),
-                    password=lavalink_config.password,
+                    host=LAVALINK_HOST,
+                    port=LAVALINK_PORT,
+                    password=LAVALINK_NODE_PASSWORD,
                     identifier="MAIN"
                 )
 

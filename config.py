@@ -1,42 +1,24 @@
 from os import getenv
 from dotenv import load_dotenv
-from colorama import Fore, Back, Style
 from discord import Object
-from dataclasses import dataclass
 
 load_dotenv()
-DEBUG_GUILD = None
-MAIN_GUILD = None
 
-if getenv("DEBUG_GUILD"):
-    DEBUG_GUILD = Object(id=int(getenv("DEBUG_GUILD")))
-if getenv("MAIN_GUILD"):
-    MAIN_GUILD = Object(id=int(getenv("MAIN_GUILD")))
-try:
-    OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",")]
-except:
-    OWNER_IDS = None
-    print(f"{Fore.GREEN} Config: {Style.RESET_ALL} Owners unspecified.")
+DEBUG_GUILD = Object(id=int(getenv("DEBUG_GUILD")))
+MAIN_GUILD = Object(id=int(getenv("MAIN_GUILD")))
 
-prefix = "b/"
+OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",") if len(getenv("OWNER_IDS")) > 0] or None
 
-if not len(getenv("PREFIX")) == 0:
-    prefix = getenv("PREFIX")
-else:
-    prefix = "b/"
-    print(
-        f"{Fore.GREEN} Config: {Style.RESET_ALL} Prefix unspecified. Using default prefix {prefix}."
-    )
+PREFIX = getenv("PREFIX") or "b/"
 
-@dataclass
-class LavalinkConfig():
-    host:str
-    port:str
-    password: str
+LAVALINK_HOST=getenv('LAVALINK_HOST')
+LAVALINK_PORT=int(getenv('LAVALINK_PORT'))
+LAVALINK_NODE_PASSWORD=getenv('LAVALINK_NODE_PASSWORD')
 
 
-lavalink_config = LavalinkConfig(
-    host=getenv('LAVALINK_HOST'),
-    port=getenv('LAVALINK_PORT'),
-    password=getenv('LAVALINK_NODE_PASSWORD')
-)
+def not_empty(**kwargs):
+    for k, v in kwargs.items():
+        if not v:
+            raise TypeError(f"ARGUMENT **{k}** MUST NOT BE EMPTY")
+        
+not_empty(MAIN_GUILD=MAIN_GUILD, PREFIX=PREFIX)
