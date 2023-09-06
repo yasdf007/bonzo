@@ -17,6 +17,9 @@ LAVALINK_NODE_PASSWORD=getenv('LAVALINK_NODE_PASSWORD')
 
 LAVALINK_CONNECTION_OPTIONS={'host': LAVALINK_HOST, 'port': LAVALINK_PORT, 'password': LAVALINK_NODE_PASSWORD, 'identifier': 'MAIN'}
 
+YOUTUBE_API_KEY=getenv('YOUTUBE_API_KEY')
+COINMARKETCAP_API_KEY=getenv('COINMARKETCAP_API_KEY')
+
 def not_empty(**kwargs):
     for k, v in kwargs.items():
         if not v:

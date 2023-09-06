@@ -11,10 +11,13 @@ from dependencies.repository.prefix.abc import PrefixRepository
 from bot import Bot
 from .resources.exceptions import CustomCheckError
 
+from dependencies.repository.prefix.memory import PrefixRepositoryMemory
+from database.memory.db import DictMemoryDB
+
 class Settings(Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, prefix_repo: PrefixRepository):
         self.bot: Bot = bot
-        self.prefix_repo: PrefixRepository = self.bot.dependency.prefix_repo
+        self.prefix_repo = prefix_repo
 
     @hybrid_command(
         name="set_prefix",
@@ -44,4 +47,4 @@ class Settings(Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(Settings(bot))
+    await bot.add_cog(Settings(bot, PrefixRepositoryMemory(DictMemoryDB)))

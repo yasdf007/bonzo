@@ -135,5 +135,4 @@ dmypy.json
 dbLite/database.sqlite
 commands/tox.ini
 dbLite/database.sqlite-journal
-postgres/
 lavalink/

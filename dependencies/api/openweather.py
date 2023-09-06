@@ -1,7 +1,6 @@
-from .abc import Response, WeatherAPI
 from aiohttp import ClientSession
 
-class OpenWeatherMapAPI(WeatherAPI):
+class OpenWeatherMapAPI:
     def __init__(self, token: str):
         self.BASE_URL = f'https://api.openweathermap.org/data/2.5/weather?lang=ru&units=metric&appid={token}'
     
@@ -35,7 +34,7 @@ class OpenWeatherMapAPI(WeatherAPI):
         # Возвращаем направление ветра в зависимости от градусов
         return possibleDirections[value % 16]
 
-    async def get_weather_data(self, city) -> Response:
+    async def get_weather_data(self, city):
         async with ClientSession() as session:
             async with session.get(self.BASE_URL, params={'q': city}) as response:
                 if(response.status == 404):
@@ -62,13 +61,12 @@ class OpenWeatherMapAPI(WeatherAPI):
 
         # Получаем эмодзики исходя из id из запроса
         weatherId = await self.getWeatherMoji(str((jsonResult['weather'][0]['id'])), weatherIsDay)
-
-        return Response(
-            city=city, 
-            weatherType=f'{weatherType} {weatherId}', 
-            temp=weatherTemp, 
-            wind_speed=weatherWindSpeed,
-            wind_direction=weatherDirection, 
-            humidity=weatherHumidity,
-            weatherCountry=weatherCountry
-        )
+        return {
+            'city': city, 
+            'weatherType': f'{weatherType} {weatherId}', 
+            'temp': weatherTemp, 
+            'wind_speed': weatherWindSpeed,
+            'wind_direction': weatherDirection, 
+            'humidity': weatherHumidity,
+            'weatherCountry': weatherCountry
+        }

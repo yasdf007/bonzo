@@ -1,6 +1,5 @@
 from discord import Embed
 from discord.ext.commands import Cog, hybrid_command, Context
-from dependencies.api.nasa.abc import NasaAPI 
 from bot import Bot
 from .resources.exceptions import CustomCheckError
 name = "nasapict"
@@ -10,7 +9,6 @@ description = "Картинка дня от NASA"
 class Nasa(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
-        self.nasa_api: NasaAPI = self.bot.dependency.nasa_api
 
     @hybrid_command(name=name, description=description)
     async def nasapict(self, ctx: Context):

@@ -22,16 +22,20 @@ from discord import Colour
 from discord.app_commands import guilds
 from .resources.AutomatedMessages import automata
 
-from dependencies.api.free_games.abc import FreeGamesAPI
 from dependencies.repository.free_games.abc import FreeGamesRepository
+from dependencies.repository.free_games.memory import FreeGamesRepositoryMemory
+from database.memory.db import DictMemoryDB
+
+from dependencies.api import epic_games
+
 from bot import Bot
 from config import MAIN_GUILD
 
+
 class FreeGames(Cog):
-    def __init__(self, bot):
+    def __init__(self, bot, free_games_repo: FreeGamesRepository):
         self.bot: Bot = bot
-        self.free_games_api: FreeGamesAPI = self.bot.dependency.free_games_api
-        self.free_games_repo: FreeGamesRepository = self.bot.dependency.free_games_repo
+        self.free_games_repo = free_games_repo
 
         self.bot.scheduler.add_job(
             self.freeGames,
@@ -95,18 +99,18 @@ class FreeGames(Cog):
 
     async def getMessages(self):
         msgs = []
-        games = await self.free_games_api.get_free_games()
+        games = await epic_games.get_free_games()
 
         for game in games:
             embedd = Embed(
                 title="**Бесплатная игра недели (Epic Games)**", colour=Colour.random()
             )
             embedd.set_image(
-                url=game.game_photo_url
+                url=game['game_photo_url']
             )
-            embedd.add_field(name=f"**{game.name}**", value=f"**{game.link_to_game}**", inline=False)
-            embedd.add_field(name="**Цена до раздачи: **", value=f"{game.price_before}")
-            embedd.add_field(name="**Действует до: **", value=f"{game.due_date}")
+            embedd.add_field(name=f"**{game['name']}**", value=f"**{game['link_to_game']}**", inline=False)
+            embedd.add_field(name="**Цена до раздачи: **", value=f"{game['price_before']}")
+            embedd.add_field(name="**Действует до: **", value=f"{game['due_date']}")
 
             msgs.append(embedd)
         return msgs
@@ -143,4 +147,5 @@ class FreeGames(Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(FreeGames(bot))
+    free_games_repo = FreeGamesRepositoryMemory(DictMemoryDB)
+    await bot.add_cog(FreeGames(bot, free_games_repo))

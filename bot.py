@@ -20,24 +20,10 @@ from platform import platform
 from os       import getenv
 from pathlib import Path
 
+from dependencies.repository.prefix.abc import PrefixRepository
 
 import logging
 
-from dependencies.all                           import Dependencies
-
-from dependencies.repository.prefix.memory      import PrefixRepositoryMemory
-from dependencies.repository.free_games.memory  import FreeGamesRepositoryMemory
-from dependencies.repository.member_info.memory import MemberHandlerRepositoryMemory
-
-from dependencies.api.youtube_random.sdk        import YoutubeRandomApiSDK
-from dependencies.api.weather.openweather       import OpenWeatherMapAPI
-from dependencies.api.weather.wttr              import WttrAPI
-from dependencies.api.nasa.nasa                 import NasaApi
-from dependencies.api.dvach.dvach               import RandomtubeAPI
-from dependencies.api.crypto.coinmarketcap      import CoinmarketcapAPI
-from dependencies.api.free_games.epic_games     import EpicGamesApi
-
-from database.memory.db import DictMemoryDb
 
 print(Fore.GREEN + "libs imported")
 print("-----------------------------")
@@ -61,10 +47,12 @@ handler.setFormatter(
 logger.addHandler(handler)
 
 class Bot(bonzoBot):
-    def __init__(self):
+    def __init__(self, prefix_repo: PrefixRepository):
         intents = Intents.default()
         intents.members = True
         intents.message_content = True
+
+        self.prefix_repo = prefix_repo
 
         super().__init__(
             command_prefix=self._get_prefix,
@@ -78,21 +66,6 @@ class Bot(bonzoBot):
         self.startTime = None
     
     async def setup_hook(self):
-        mem = DictMemoryDb
-        
-        self.dependency = Dependencies(
-            prefix_repo=PrefixRepositoryMemory(mem),
-            free_games_repo=FreeGamesRepositoryMemory(mem),
-            members_repo=MemberHandlerRepositoryMemory(mem),
-            youtube_random_api=YoutubeRandomApiSDK(getenv("YOUTUBE_API_KEY")),
-            openweather_api=OpenWeatherMapAPI(getenv("WEATHER_TOKEN")),
-            crypto_api=CoinmarketcapAPI(getenv('COINMARKETCAP_API_KEY')),
-            wttr_api=WttrAPI(),
-            nasa_api=NasaApi(),
-            dvach_api=RandomtubeAPI(),
-            free_games_api=EpicGamesApi(),
-        )
-
         await self.cogsLoad()
 
         # await self.tree.sync()
@@ -115,8 +88,8 @@ class Bot(bonzoBot):
         if not message.guild:
             return when_mentioned_or(PREFIX)(bot, message)
         
-        guild_prefix = await self.dependency.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or PREFIX
-
+        guild_prefix = await self.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or PREFIX
+        
         return when_mentioned_or(guild_prefix)(bot, message)
 
     def run(self):

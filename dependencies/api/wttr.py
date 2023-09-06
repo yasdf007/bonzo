@@ -1,7 +1,6 @@
-from .abc import Response, WeatherAPI
 from aiohttp import ClientSession
 
-class WttrAPI(WeatherAPI):
+class WttrAPI:
     def __init__(self):
         self.BASE_URL = "https://ru.wttr.in/"
 
@@ -16,7 +15,7 @@ class WttrAPI(WeatherAPI):
         # Возвращаем направление ветра в зависимости от градусов
         return possibleDirections[value % 16]
 
-    async def get_weather_data(self, city) -> Response:
+    async def get_weather_data(self, city):
         async with ClientSession() as session:
             async with session.get(f'{self.BASE_URL}/{city}', params={'format': 'j1'}) as response:
                 if(response.status == 404):
@@ -40,15 +39,15 @@ class WttrAPI(WeatherAPI):
 
         pict = WEATHER_SYMBOL_WEGO[wwo]
 
-        return Response(
-            city=city, 
-            weatherType=f'{weatherType} {WEATHER_SYMBOL[wwo]}`{pict}`', 
-            temp=weatherTemp, 
-            wind_speed=weatherWindSpeed,
-            wind_direction=weatherDirection, 
-            humidity=weatherHumidity,
-            weatherCountry=jsonResult["nearest_area"][0]['country'][0]['value']
-        )
+        return {
+            'city': city, 
+            'weatherType': f'{weatherType} {WEATHER_SYMBOL[wwo]}`{pict}`', 
+            'temp': weatherTemp, 
+            'wind_speed': weatherWindSpeed,
+            'wind_direction': weatherDirection, 
+            'humidity': weatherHumidity,
+            'weatherCountry': jsonResult["nearest_area"][0]['country'][0]['value']
+        }
 
 
 #   https://github.com/chubin/wttr.in/blob/master/lib/constants.py

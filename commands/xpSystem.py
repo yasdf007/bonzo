@@ -13,16 +13,18 @@ from .resources.xp_system.xp import OriginalXP
 from .resources.xp_system.image import ImageGeneration
 
 from dependencies.repository.member_info.abc import MemberHandlerRepository
+from dependencies.repository.member_info.memory import MemberHandlerRepositoryMemory
+from database.memory.db import DictMemoryDB
 
 from bot import Bot
 
 
 class AddXP(Cog):
-    def __init__(self, bot, xp_strategy: XpStrategy, image_creation: ImageGeneration):
+    def __init__(self, bot, xp_strategy: XpStrategy, image_creation: ImageGeneration, members_repo: MemberHandlerRepository):
         self.bot: Bot = bot
         self.xp_strategy = xp_strategy
-        self.members_repo: MemberHandlerRepository = self.bot.dependency.members_repo
         self.image_creation = image_creation
+        self.members_repo = members_repo
 
     @Cog.listener()
     async def on_member_join(self, member):
@@ -188,4 +190,5 @@ class AddXP(Cog):
 async def setup(bot):
     xp_strategy = OriginalXP()
     image_gen = ImageGeneration()
-    await bot.add_cog(AddXP(bot, xp_strategy, image_gen))
+    member_repo = MemberHandlerRepositoryMemory(DictMemoryDB)
+    await bot.add_cog(AddXP(bot, xp_strategy, image_gen, member_repo))

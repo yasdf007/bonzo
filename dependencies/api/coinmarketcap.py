@@ -1,7 +1,6 @@
-from .abc import CryptoAPI, Response
 from aiohttp import ClientSession
 
-class CoinmarketcapAPI(CryptoAPI):
+class CoinmarketcapAPI:
         LISTINGS_URL = "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest"
 
         def __init__(self, token: str):
@@ -18,12 +17,14 @@ class CoinmarketcapAPI(CryptoAPI):
             async with ClientSession(headers=self.HEADERS) as session:
                 async with session.get(self.LISTINGS_URL, params=params) as response:
                     res = (await response.json())["data"]
+                    print(res)
+                    crypto = []
 
-            return list(map(
-                lambda info: Response(
-                    name=info['name'],
-                    symbol=info['symbol'],
-                    price_usd=info["quote"]["USD"]["price"]),
-                    res
-                ))
+                    for coin in res:
+                         crypto.append({
+                            'name': coin['name'],
+                            'symbol': coin['symbol'],
+                            'price_usd': coin["quote"]["USD"]["price"]
+                         })
 
+                    return crypto

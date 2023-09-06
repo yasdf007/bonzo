@@ -5,9 +5,11 @@ Created by ムAloneStranger (c) 2023.
 """
 
 from bot import Bot, Fore, Style
+from dependencies.repository.prefix.memory import PrefixRepositoryMemory
+from database.memory.db import DictMemoryDB
 
 if __name__ == "__main__":
-    bot = Bot()
+    bot = Bot(PrefixRepositoryMemory(DictMemoryDB))
 
     try:
         bot.run()

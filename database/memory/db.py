@@ -25,7 +25,7 @@ class DictMemoryDb:
         print('save before exit')
 
 
-DictMemoryDb = DictMemoryDb()
+DictMemoryDB = DictMemoryDb()
 
 import atexit
-atexit.register(DictMemoryDb.save)
+atexit.register(DictMemoryDB.save)
