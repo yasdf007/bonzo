@@ -1,6 +1,6 @@
 APScheduler==3.10.1
 asyncpg==0.27.0
-discord.py==2.2.2
+discord.py==2.3.2
 Pillow==9.5.0
 pomice==2.4.1
 python-dotenv==1.0.0
