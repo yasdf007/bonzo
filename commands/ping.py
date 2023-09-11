@@ -1,4 +1,5 @@
-from discord.ext.commands import Cog, hybrid_command, Context
+from discord import app_commands, Interaction
+from discord.ext.commands import Cog
 from bot import Bot
 
 name = "ping"
@@ -10,10 +11,10 @@ class ping(Cog):
         self.bot: Bot = bot
 
     # Задержка
-    @hybrid_command(name=name, description=description)
-    async def ping(self, ctx: Context):
-        botLatency = round(ctx.bot.latency * 1000, 2)
-        await ctx.send(f"Pong! {str(botLatency)}ms (задержка)")
+    @app_commands.command(name=name, description=description)
+    async def ping(self, inter: Interaction):
+        botLatency = round(inter.client.latency * 1000, 2)
+        await inter.response.send_message(f"Pong! {str(botLatency)}ms (задержка)")
 
 
 async def setup(bot):
