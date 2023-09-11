@@ -60,14 +60,13 @@ class Bot(bonzoBot):
             owner_ids=OWNER_IDS,
         )
 
-        self.game = Game("@Bonzo init | stacknox2")
+        self.game = Game("/init | ON REWORK")
         self.scheduler = AsyncIOScheduler()
         self.startTime = None
 
     async def setup_hook(self):
         await self.cogsLoad()
-
-        # await self.tree.sync()
+        await self.tree.sync()
 
     async def cogsLoad(self):
         cmds = [x.stem for x in Path(
