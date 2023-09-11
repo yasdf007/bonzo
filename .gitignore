@@ -136,4 +136,5 @@ dbLite/database.sqlite
 commands/tox.ini
 dbLite/database.sqlite-journal
 lavalink/
+postgres/
 db.json
