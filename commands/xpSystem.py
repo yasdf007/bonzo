@@ -17,7 +17,6 @@ from dependencies.repository.member_info.memory import MemberHandlerRepositoryMe
 from database.memory.db import DictMemoryDB
 
 from bot import Bot
-import asyncio
 
 class AddXP(Cog):
     def __init__(self, bot, xp_strategy: XpStrategy, image_creation: ImageGeneration, members_repo: MemberHandlerRepository):
@@ -183,8 +182,7 @@ class AddXP(Cog):
         
         percents = self.percentsToLvlUp(result.xp, lvl)
 
-        loop = asyncio.get_event_loop()
-        card_bytes = await loop.run_in_executor(None, self.image_creation.create_card, ctx.author, result.xp, self.xp_strategy.xp_from_level(lvl+1), lvl, result.rank, photo_bytes, percents, result.overall_ranks)    
+        card_bytes = await self.bot.loop.run_in_executor(None, self.image_creation.create_card, ctx.author, result.xp, self.xp_strategy.xp_from_level(lvl+1), lvl, result.rank, photo_bytes, percents, result.overall_ranks)    
             
         await ctx.send(file=File(fp=card_bytes, filename="now.png"))
 
