@@ -1,3 +1,5 @@
+import asyncio
+
 from discord.ext.commands import Cog
 from discord.ext.commands import Cog, hybrid_command, Context
 from discord import File, Attachment
@@ -45,14 +47,16 @@ class ImageManipulation(Cog):
             raise CustomCheckError(message="Ссылка не найдена")
 
         filetype, _ = await self.get_file_info(image_url)
-        ascii = resolve_ascii(filetype)
-        if not ascii:
+        ascii_func = resolve_ascii(filetype)
+        if not ascii_func:
             raise CustomCheckError(message="Неподдерживаемый формат файла - доступны png, jpeg и jpg")
 
         image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
-        async with ascii(image_bytes) as txt:
-            await ctx.send(file=File(fp=txt, filename="now.txt"))
+        loop = asyncio.get_event_loop()
+        txt = await loop.run_in_executor(None, ascii_func, image_bytes)
+
+        await ctx.send(file=File(fp=txt, filename="now.txt"))
         
 
     # @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
@@ -110,8 +114,8 @@ class ImageManipulation(Cog):
         filetype, length = await self.get_file_info(image_url)
 
         
-        shakalizator = resolve_shakal(filetype)
-        if not shakalizator:
+        shakalizator_func = resolve_shakal(filetype)
+        if not shakalizator_func:
             raise CustomCheckError(message="Неподдерживаемый формат файла - доступны png, jpeg, jpg, gif")
 
         if length > FIVE_MEGABYTES:
@@ -119,8 +123,9 @@ class ImageManipulation(Cog):
         
         image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
-        async with shakalizator(image_bytes) as shakalized:
-            await ctx.send(file=File(fp=shakalized, filename=f'now.{filetype}'))
+        loop = asyncio.get_event_loop()
+        shakalized = await loop.run_in_executor(None, shakalizator_func, image_bytes)
+        await ctx.send(file=File(fp=shakalized, filename=f'now.{filetype}'))
 
 async def setup(bot):
     await bot.add_cog(ImageManipulation(bot))

@@ -5,8 +5,7 @@ from contextlib import asynccontextmanager
 asciiChars = ['@', '%', '#', '*',
                   '+', '=', '-', ';', ':', ',', '.']
 
-@asynccontextmanager
-async def asyncToAscii(image_bytes: BytesIO):
+def bytes_to_ascii(image_bytes: BytesIO):
     with Image.open(image_bytes) as img:
         img = img.convert('L')
 
@@ -26,9 +25,9 @@ async def asyncToAscii(image_bytes: BytesIO):
         txt = StringIO()
         txt.write(asciiImg)
         txt.seek(0)
-        yield txt
+        return txt
 
 
 def resolve_ascii(type):
     if any(ext in type for ext in ('png', 'jpeg', 'jpg')):
-        return asyncToAscii
+        return bytes_to_ascii
