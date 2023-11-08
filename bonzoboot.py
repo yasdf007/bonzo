@@ -11,9 +11,4 @@ from database.memory.db import DictMemoryDB
 if __name__ == "__main__":
     bot = Bot(PrefixRepositoryMemory(DictMemoryDB))
 
-    try:
-        bot.run()
-    except Exception as exp:
-        print(Fore.RED +  f"-----------------------\nConnection failed: {exp}\n-----------------------" + Style.RESET_ALL)
-    finally:
-        print(Fore.YELLOW +  "-----------------------\nStopped\n-----------------------" + Style.RESET_ALL)
+    bot.run()
