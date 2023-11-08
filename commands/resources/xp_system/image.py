@@ -23,8 +23,7 @@ class ImageGeneration:
     def __enter__(self):
         return self
 
-    @asynccontextmanager
-    async def create_card(self, username: str, xp: int, xp_to_level_up: int, lvl: int, rank: int, photo_bytes: bytes, percents: float, all_ranks: int):
+    def create_card(self, username: str, xp: int, xp_to_level_up: int, lvl: int, rank: int, photo_bytes: bytes, percents: float, all_ranks: int):
         fullBlack = (0, 0, 0)
 
         with Image.open(BytesIO(photo_bytes)) as user_pfp:
@@ -47,7 +46,7 @@ class ImageGeneration:
             template.paste(croppedBar, (100, 255), croppedBar)
 
             percentsText = f"{percents}%"
-            textWidth = self.font.getsize(percentsText)[0]
+            textWidth = self.font.getlength(percentsText)
 
             draw.text(
                 ((650 - textWidth) / 2, 270),
@@ -85,4 +84,4 @@ class ImageGeneration:
             template.save(b, "png")
             b.seek(0)
 
-            yield b
+            return b
