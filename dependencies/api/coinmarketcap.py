@@ -17,7 +17,6 @@ class CoinmarketcapAPI:
             async with ClientSession(headers=self.HEADERS) as session:
                 async with session.get(self.LISTINGS_URL, params=params) as response:
                     res = (await response.json())["data"]
-                    print(res)
                     crypto = []
 
                     for coin in res:

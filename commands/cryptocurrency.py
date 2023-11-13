@@ -1,39 +1,39 @@
+from discord import app_commands, Interaction
 from discord.embeds import Embed
-from discord.ext.commands import Cog, Context, hybrid_command
+from discord.ext.commands import Cog, Context
 from bot import Bot
 
 from dependencies.api import coinmarketcap
 
 from config import COINMARKETCAP_API_KEY
 
-name = "crypto"
-description = "Выводит информацию о криптовалюте (INDEV)"
+def format_price_usdt(price: float):
+    if price > 99.9:
+        return round(price, 1)
+    elif price > 0.0099:
+        return round(price, 2)
+    else:
+       return round(price, 6)
 
 class Crypto(Cog):
     def __init__(self, bot, cmc: coinmarketcap.CoinmarketcapAPI):
         self.bot: Bot = bot
         self.cmc = cmc
 
-    @hybrid_command(name=name, description=description)
-    async def get_crypto_listings(self, ctx: Context):
+    @app_commands.command(name="crypto", description= "Выводит информацию о криптовалюте (INDEV)")
+    async def get_crypto_listings(self, inter: Interaction):
         res = await self.cmc.get_biggest_currencies()
 
         embed = Embed(title="10 крупнейших криптовалют по капитализации")
 
         for crypto in res:
-            finprice = float(crypto['price_usd'])
-            if finprice > 99.9:
-                finprice = str(int(round(finprice, 1)))
-            elif finprice > 0.0099:
-                finprice = str(round(finprice, 2))
-            else:
-                finprice = str(round(finprice, 6))
-
+            price = format_price_usdt( float(crypto['price_usd']))
             embed.add_field(
                 name=f"{crypto['name']} | {crypto['symbol']}",
-                value=f"Цена: ${finprice}",
+                value=f"Цена: ${price}",
             )
-        await ctx.send(embed=embed)
+
+        await inter.response.send_message(embed=embed)
 
 
 async def setup(bot):
