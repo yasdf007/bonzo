@@ -6,7 +6,7 @@ class RandomtubeAPI:
         "Accept": "application/json",
         "Content-Type": "application/json",
     }
-    URL = "https://api.randomtube.xyz/v1/videos"
+    URL = "https://api.randomtube.xyz/v1/entries/videos"
     PARAMS = {"board": "b", "chan": "2ch.hk", "page": 1}
     
     async def get_random_url(self):

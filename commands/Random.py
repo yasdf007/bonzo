@@ -5,7 +5,7 @@ import random
 from string import ascii_lowercase, digits
 from aiohttp import ClientSession
 
-from dependencies.api import youtube
+from dependencies.api import youtube, dvach
 from config import YOUTUBE_API_KEY
 
 def get_random_prntsc_link():
@@ -33,8 +33,9 @@ async def get_random_imgur_link():
 
 
 class Random(GroupCog, group_name='random', group_description='Различные случайные данные'):
-    def __init__(self, bot, youtube_sdk: youtube.YoutubeRandomApiSDK):
+    def __init__(self, bot, youtube_sdk: youtube.YoutubeRandomApiSDK, random_tube: dvach.RandomtubeAPI):
         self.bot: Bot = bot
+        self.random_tube = random_tube
         self.youtube_sdk = youtube_sdk
 
     @app_commands.command(name='cat', description='Отправляет случайного кота')
@@ -50,6 +51,11 @@ class Random(GroupCog, group_name='random', group_description='Различны�
         link = await self.youtube_sdk.get_random_video()
         await inter.response.send_message(link) 
     
+    @app_commands.command(name='2ch', description='(18+) Отправляет случайное видео с https://2ch.hk')
+    async def random_2ch(self, inter: Interaction):
+        link = await self.random_tube.get_random_url()
+        await inter.response.send_message(link) 
+
     @app_commands.command(name='imgur', description='Отправляет случайное изображение из https://imgur.com')
     async def random_imgur(self, inter: Interaction):
         link = await get_random_imgur_link()
@@ -58,5 +64,6 @@ class Random(GroupCog, group_name='random', group_description='Различны�
         await inter.response.send_message(link)
 
 async def setup(bot):
-    sdk = youtube.YoutubeRandomApiSDK(YOUTUBE_API_KEY)
-    await bot.add_cog(Random(bot, sdk))
+    yt_sdk = youtube.YoutubeRandomApiSDK(YOUTUBE_API_KEY)
+    random_tube = dvach.RandomtubeAPI()
+    await bot.add_cog(Random(bot, yt_sdk, random_tube))
