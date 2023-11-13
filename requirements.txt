@@ -7,3 +7,4 @@ pomice==2.7.2
 python-dotenv==1.0.0
 colorama==0.4.6
 google-api-python-client==2.107.0
+aiogoogle==5.6.0

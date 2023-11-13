@@ -5,6 +5,9 @@ import random
 from string import ascii_lowercase, digits
 from aiohttp import ClientSession
 
+from dependencies.api import youtube
+from config import YOUTUBE_API_KEY
+
 def get_random_prntsc_link():
     symbolsStr = "".join(random.choices(ascii_lowercase + digits, k=6))
     return f"https://prnt.sc/{symbolsStr}"
@@ -30,8 +33,9 @@ async def get_random_imgur_link():
 
 
 class Random(GroupCog, group_name='random', group_description='Различные случайные данные'):
-    def __init__(self, bot):
+    def __init__(self, bot, youtube_sdk: youtube.YoutubeRandomApiSDK):
         self.bot: Bot = bot
+        self.youtube_sdk = youtube_sdk
 
     @app_commands.command(name='cat', description='Отправляет случайного кота')
     async def random_cat(self, inter: Interaction):
@@ -40,7 +44,12 @@ class Random(GroupCog, group_name='random', group_description='Различны�
     @app_commands.command(name='prntsc', description='Отправляет случайное изображение из https://prnt.sc')
     async def random_prntsc(self, inter: Interaction):
         await inter.response.send_message(get_random_prntsc_link())
-
+    
+    @app_commands.command(name='youtube', description='Отправляет случайное видео из https://youtube.com')
+    async def random_yt(self, inter: Interaction):
+        link = await self.youtube_sdk.get_random_video()
+        await inter.response.send_message(link) 
+    
     @app_commands.command(name='imgur', description='Отправляет случайное изображение из https://imgur.com')
     async def random_imgur(self, inter: Interaction):
         link = await get_random_imgur_link()
@@ -49,4 +58,5 @@ class Random(GroupCog, group_name='random', group_description='Различны�
         await inter.response.send_message(link)
 
 async def setup(bot):
-    await bot.add_cog(Random(bot))
+    sdk = youtube.YoutubeRandomApiSDK(YOUTUBE_API_KEY)
+    await bot.add_cog(Random(bot, sdk))
