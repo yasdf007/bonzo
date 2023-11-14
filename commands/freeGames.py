@@ -81,6 +81,27 @@ class FreeGames(GroupCog, group_name='freegames'):
 
         return embedd
 
+    @app_commands.command(name="current", description="Отправляет текущие бесплатные игры")
+    @cooldown(rate=1, per=30, type=BucketType.guild)
+    async def current_free_games(self, inter: Interaction):
+        free_games = await epic_games.get_free_games()
+        for free_game in free_games:
+            embed = self.build_free_game_embed(free_game)
+            await inter.response.send_message(embed=embed)
+
+    def build_free_game_embed(self, game):
+        embedd = Embed(
+            title="**Бесплатная игра недели (Epic Games)**", colour=Colour.random()
+        )
+        embedd.set_image(
+            url=game['game_photo_url']
+        )
+        embedd.add_field(name=f"**{game['name']}**", value=f"**{game['link_to_game']}**", inline=False)
+        embedd.add_field(name="**Цена до раздачи: **", value=f"{game['price_before']}")
+        embedd.add_field(name="**Действует до: **", value=f"{game['due_date']}")
+
+        return embedd
+
     @hybrid_command(
         name="owner_run",
         description="Ручной запуск бесплатных игр (только для создателей)"
@@ -97,7 +118,7 @@ class FreeGames(GroupCog, group_name='freegames'):
 
         free_games = await epic_games.get_free_games()
         for free_game in free_games:
-            free_game_embed = await self.build_free_game_embed(free_game)
+            free_game_embed = self.build_free_game_embed(free_game)
 
             for channel in channels:
                 channel = self.bot.get_channel(channel)
