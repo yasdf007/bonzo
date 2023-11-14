@@ -9,7 +9,7 @@ from discord.ext.commands import (
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
 from discord.ext.commands import  hybrid_command, Context
-from discord.ext.commands.core import is_owner
+from .resources import checks
 
 from discord.enums import ChannelType
 from discord import Embed, Colour, app_commands, Interaction
@@ -43,9 +43,9 @@ class FreeGames(GroupCog, group_name='freegames'):
         description="Инициализирует данный канал для рассылки бесплатных игр",
     )
     @guild_only()
-    @cooldown(rate=2, per=15, type=BucketType.guild)
-    @has_permissions(administrator=True)
-    @bot_has_permissions(send_messages=True)
+    @app_commands.checks.cooldown(rate=2, per=15, key=BucketType.guild)
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.bot_has_permissions(send_messages=True)
     async def init_free_games(self, inter: Interaction):
         channel = await self.free_games_repo.get_channel_by_guild(inter.guild.id)
         if channel:
@@ -60,9 +60,9 @@ class FreeGames(GroupCog, group_name='freegames'):
         )
 
     @app_commands.command(name="stop", description="Останавливает рассылку бесплатных игр")
-    @cooldown(rate=2, per=15, type=BucketType.guild)
-    @has_permissions(administrator=True)
-    @bot_has_permissions(send_messages=True)
+    @app_commands.checks.cooldown(rate=2, per=15, key=BucketType.guild)
+    @app_commands.checks.has_permissions(administrator=True)
+    @app_commands.checks.bot_has_permissions(send_messages=True)
     @guild_only()
     async def removeFromFreeGames(self, inter: Interaction):
         await self.free_games_repo.delete_channel(inter.guild.id)
@@ -82,7 +82,7 @@ class FreeGames(GroupCog, group_name='freegames'):
         return embedd
 
     @app_commands.command(name="current", description="Отправляет текущие бесплатные игры")
-    @cooldown(rate=1, per=30, type=BucketType.guild)
+    @app_commands.checks.cooldown(rate=1, per=30, key=BucketType.guild)
     async def current_free_games(self, inter: Interaction):
         free_games = await epic_games.get_free_games()
         for free_game in free_games:
@@ -102,12 +102,12 @@ class FreeGames(GroupCog, group_name='freegames'):
 
         return embedd
 
-    @hybrid_command(
+    @app_commands.command(
         name="owner_run",
         description="Ручной запуск бесплатных игр (только для создателей)"
     )
     @guilds(MAIN_GUILD)
-    @is_owner()
+    @checks.check_is_owner()
     async def runFreeGanes(self, ctx):
         await self.send_free_games()
 
