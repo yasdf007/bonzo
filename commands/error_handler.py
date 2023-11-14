@@ -1,6 +1,6 @@
 from discord.ext.commands import Cog,  command, Context
-from discord.ext.commands.errors import CommandError, CommandNotFound, NotOwner, CommandInvokeError
-
+from discord.ext.commands.errors import NotOwner
+from discord import Interaction, app_commands
 
 from bot import Bot
 from .resources.exceptions import CustomCheckError
@@ -27,34 +27,38 @@ logger.addHandler(handler)
 class ErrorHandler(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
+        bot.tree.error(coro = self.dispatch_slash_command_error)
 
-    @Cog.listener()
-    async def on_command_error(self, ctx: Context, error: CommandError):
-        if isinstance(error, (CommandNotFound, NotOwner)):
+    async def dispatch_slash_command_error(self, interaction: Interaction, error:  app_commands.AppCommandError):
+        self.bot.dispatch("app_command_error", interaction, error)
+
+    @Cog.listener('on_app_command_error')
+    async def on_slash_command_error(self, inter: Interaction, error: app_commands.AppCommandError):
+        if isinstance(error, (app_commands.CommandNotFound, NotOwner)):
             return
 
         if isinstance(error, CustomCheckError):
-            return await ctx.send(
+            return await inter.response.send_message(
                 embed=AutoEmbed().type_autoembed(
                     type="error",
                     description=f"```{error.message}```"
-                ),
+                ), ephemeral=True
             )
 
 
         if error.__class__.__name__ in error_dict:
-            if not isinstance(error, CommandInvokeError):
+            if not isinstance(error, app_commands.CommandInvokeError):
                 argument = getattr(error, 'argument', None) or getattr(error, 'retry_after', None) or (getattr(error, 'param', None)).name
 
                 description = f"```{error_dict[error.__class__.__name__]}```"
                 if argument:
                     description = description.format(argument=argument)
 
-                return await ctx.send(
+                return await inter.response.send_message(
                     embed=AutoEmbed().type_autoembed(
                         type="error",
                         description=description,
-                    ),
+                    ), ephemeral=True
                 )
 
         error_id = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(9))
@@ -62,16 +66,16 @@ class ErrorHandler(Cog):
         
         message = error_dict['UnknownError']
 
-        if isinstance(error, CommandInvokeError):
+        if isinstance(error,  app_commands.CommandInvokeError):
             message = error_dict['CommandInvokeError']
 
-        await ctx.send(
+        await inter.response.send_message(
             embed=AutoEmbed().type_autoembed(
                 type="error",
                 description=f"```{message}```",
                 error_id=error_id,
                 dev_link=True
-            ),
+            ), ephemeral=True
         )
 
 
