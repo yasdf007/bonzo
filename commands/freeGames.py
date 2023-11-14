@@ -1,4 +1,5 @@
 from discord.ext.commands import (
+    Cog,
     GroupCog,
     guild_only,
     has_permissions,
@@ -13,7 +14,6 @@ from .resources import checks
 
 from discord.enums import ChannelType
 from discord import Embed, Colour, app_commands, Interaction
-from discord.app_commands import guilds
 from .resources.AutomatedMessages import automata
 
 from dependencies.repository.free_games.abc import FreeGamesRepository
@@ -28,7 +28,9 @@ from config import MAIN_GUILD
 import logging
 import traceback
 
-class FreeGames(GroupCog, group_name='freegames'):
+class FreeGames(Cog):
+    group =  app_commands.Group(name="freegames", description="Оповещения о бесплатных играх")
+    
     def __init__(self, bot, free_games_repo: FreeGamesRepository):
         self.bot: Bot = bot
         self.free_games_repo = free_games_repo
@@ -37,8 +39,9 @@ class FreeGames(GroupCog, group_name='freegames'):
             self.send_free_games,
             CronTrigger(day_of_week="thu", hour=19, minute=3, jitter=120),
         )
+        super().__init__()
 
-    @app_commands.command(
+    @group.command(
         name="init",
         description="Инициализирует данный канал для рассылки бесплатных игр",
     )
@@ -59,7 +62,7 @@ class FreeGames(GroupCog, group_name='freegames'):
             "Этот канал будет использоваться для рассылки бесплатных игр (удаление через 3с)", delete_after=3
         )
 
-    @app_commands.command(name="stop", description="Останавливает рассылку бесплатных игр")
+    @group.command(name="stop", description="Останавливает рассылку бесплатных игр")
     @app_commands.checks.cooldown(rate=2, per=15, key=BucketType.guild)
     @app_commands.checks.has_permissions(administrator=True)
     @app_commands.checks.bot_has_permissions(send_messages=True)
@@ -81,7 +84,7 @@ class FreeGames(GroupCog, group_name='freegames'):
 
         return embedd
 
-    @app_commands.command(name="current", description="Отправляет текущие бесплатные игры")
+    @group.command(name="current", description="Отправляет текущие бесплатные игры")
     @app_commands.checks.cooldown(rate=1, per=30, key=BucketType.guild)
     async def current_free_games(self, inter: Interaction):
         free_games = await epic_games.get_free_games()
@@ -102,11 +105,8 @@ class FreeGames(GroupCog, group_name='freegames'):
 
         return embedd
 
-    @app_commands.command(
-        name="owner_run",
-        description="Ручной запуск бесплатных игр (только для создателей)"
-    )
-    @guilds(MAIN_GUILD)
+    @app_commands.command(name="freegames_owner_run", description="Ручной запуск бесплатных игр (только для создателей)")
+    @app_commands.guilds(MAIN_GUILD)
     @checks.check_is_owner()
     async def runFreeGanes(self, ctx):
         await self.send_free_games()
