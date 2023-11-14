@@ -30,4 +30,5 @@ class FreeGamesRepositoryMemory(FreeGamesRepository):
 
     async def delete_channel(self, guild_id: int):
         guild_id = str(guild_id)
-        del self.db.db[self.scope][guild_id]
+        if guild_id in self.db.db[self.scope]:
+            del self.db.db[self.scope][guild_id]
