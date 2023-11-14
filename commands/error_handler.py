@@ -1,5 +1,5 @@
 from discord.ext.commands import Cog,  command, Context
-from discord.ext.commands.errors import NotOwner
+from .resources import exceptions
 from discord import Interaction, app_commands
 
 from bot import Bot
@@ -34,9 +34,16 @@ class ErrorHandler(Cog):
 
     @Cog.listener('on_app_command_error')
     async def on_slash_command_error(self, inter: Interaction, error: app_commands.AppCommandError):
-        if isinstance(error, (app_commands.CommandNotFound, NotOwner)):
+        if isinstance(error, app_commands.CommandNotFound):
             return
-
+        
+        if isinstance(error, exceptions.NotOwner):
+            return await inter.response.send_message(
+                embed=AutoEmbed().type_autoembed(
+                    type="error",
+                    description=f"```Вы не можете использовать данную команду.```"
+                ), ephemeral=True
+            )
         if isinstance(error, CustomCheckError):
             return await inter.response.send_message(
                 embed=AutoEmbed().type_autoembed(

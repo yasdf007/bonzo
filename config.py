@@ -7,7 +7,7 @@ load_dotenv()
 DEBUG_GUILD = Object(id=int(getenv("DEBUG_GUILD")))
 MAIN_GUILD = Object(id=int(getenv("MAIN_GUILD")))
 
-OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",") if len(getenv("OWNER_IDS")) > 0] or None
+OWNER_IDS = [int(id) for id in getenv("OWNER_IDS").split(",") if len(getenv("OWNER_IDS")) > 0] or []
 
 PREFIX = getenv("PREFIX") or "b/"
 
