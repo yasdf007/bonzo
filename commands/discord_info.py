@@ -10,6 +10,11 @@ class DiscordInfo(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
 
+    @app_commands.command(name="ping", description='Понг!')
+    async def ping(self, inter: Interaction):
+        botLatency = round(inter.client.latency * 1000, 2)
+        await inter.response.send_message(f"Pong! {str(botLatency)}ms (задержка)")
+
     # функция, отправляющая информацию о сервере
     @guild_only()
     @app_commands.command(name='serverinfo', description='Показывает информацию о сервере')
