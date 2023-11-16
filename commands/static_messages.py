@@ -60,9 +60,6 @@ def build_bot_init_message(prefix):
     )
     embed.add_field(name="**Для использования slash-команд:**", value="/help_slash")
     embed.add_field(
-        name="**Для изменения префикса:**", value="@Bonzo set_prefix [ваш префикс]"
-    )
-    embed.add_field(
         name="**Для связи с разработчиками:**",
         value=f"[Перейдите на сервер (нажмите сюда)]({supportserver})",
     )

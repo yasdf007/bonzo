@@ -15,7 +15,6 @@ from discord.ext.commands import Cog, when_mentioned_or
 from dotenv import load_dotenv
 
 from config import OWNER_IDS, PREFIX
-from dependencies.repository.prefix.abc import PrefixRepository
 
 print("loading...")
 print("-----------------------------")
@@ -44,17 +43,15 @@ logger.addHandler(handler)
 
 
 class Bot(bonzoBot):
-    def __init__(self, prefix_repo: PrefixRepository):
+    def __init__(self):
         intents = Intents.default()
         intents.presences = True
         intents.members = True
         # it is mandatory to request access to this intent explicitly via discord dev portal
         intents.message_content = False
 
-        self.prefix_repo = prefix_repo
-
         super().__init__(
-            command_prefix=self._get_prefix,
+            command_prefix=when_mentioned_or(PREFIX),
             help_command=None,
             intents=intents,
             owner_ids=OWNER_IDS,
@@ -66,8 +63,7 @@ class Bot(bonzoBot):
 
     async def setup_hook(self):
         await self.cogsLoad()
-        await self.tree.sync()
-
+        # await self.tree.sync()
     async def cogsLoad(self):
         cmds = [x.stem for x in Path(
             './commands').iterdir() if x.suffix == '.py' and x.is_file()]
@@ -81,14 +77,6 @@ class Bot(bonzoBot):
             except Exception as error:  # something in cog wrong
                 print(f"error in cog {cmd}, {curr}/{total} | {error}")
                 logging.error(f"cog filename not load: {error}")
-
-    async def _get_prefix(self, bot, message: Message):
-        if not message.guild:
-            return when_mentioned_or(PREFIX)(bot, message)
-
-        guild_prefix = await self.prefix_repo.prefix_for_guild(guild_id=message.guild.id) or PREFIX
-
-        return when_mentioned_or(guild_prefix)(bot, message)
 
     def run(self):
         self.startTime = time()  # таймштамп: код успешно прочитан
