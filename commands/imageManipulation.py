@@ -1,6 +1,5 @@
 from discord.ext.commands import Cog
-from discord.ext.commands import Cog, hybrid_command, Context
-from discord import File, Attachment
+from discord import File, Attachment, app_commands, Interaction
 
 from .resources.exceptions import CustomCheckError
 
@@ -11,6 +10,7 @@ from re import compile
 
 from .resources.image_manipulation.shakal import resolve_shakal
 from .resources.image_manipulation.ascii import resolve_ascii
+from .resources.image_manipulation.demotivator import resolve_demotivator
 
 from bot import Bot
 
@@ -35,8 +35,8 @@ class ImageManipulation(Cog):
             async with session.head(url) as response:
                 return response.content_type.split('/')[-1], response.content_length
 
-    @hybrid_command(name='ascii', description='Переводит картинку в ascii текст')
-    async def ascii(self, ctx: Context, image_url: str = None, attachment: Attachment = None):
+    @app_commands.command(name='ascii', description='Переводит картинку в ascii текст')
+    async def ascii(self, inter: Interaction, image_url: str = None, attachment: Attachment = None):
         if not image_url and not attachment:
             raise CustomCheckError(message="Ссылка не найдена")
 
@@ -53,53 +53,32 @@ class ImageManipulation(Cog):
 
         txt = await self.bot.loop.run_in_executor(None, ascii_func, image_bytes)
 
-        await ctx.send(file=File(fp=txt, filename="now.txt"))
+        await inter.response.send_message(file=File(fp=txt, filename="now.txt"))
         
+    @app_commands.command(name='demotivator', description='Как в мемах. Нужна ссылка')
+    async def demotivator(self, inter: Interaction, text: str, image_url: str = None, attachment: Attachment = None):
+        if not image_url and not attachment:
+            raise CustomCheckError(message="Ссылка не найдена")
 
-    # @hybrid_command(name='demotivator', description='Как в мемах. Нужна ссылка')
-    # async def demotivator(self, ctx: Context, text, image_url: str = None, attachment: Attachment = None):
-    #     image_url = image_url or attachment.url
-    #     if not self.urlValid.match(image_url):
-    #         raise NoUrlFound
+        image_url = image_url or attachment.url
+        if not self.urlValid.match(image_url):
+            raise CustomCheckError(message="Ссылка не найдена")
 
-    #     if len(text) > 25:
-    #         raise CustomCheckError(message="Команда поддерживает не более 25 символов")
+        if len(text) > 25:
+            raise CustomCheckError(message="Введите не более 25 символов")
 
-    #     filetype, _ = await self.get_file_info(image_url)
+        filetype, _ = await self.get_file_info(image_url)
 
-    #     demotivator = resolve_demotivator(filetype)
-    #     if not demotivator:
-    #         raise InvalidFileType
-
-    #     image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
-
-    #     async with demotivator(image_bytes, text=text) as demotiv:
-    #         await ctx.send(file=File(fp=demotiv, filename=f'now.{filetype}'))
+        demotivator_func = resolve_demotivator(filetype)
+        if not demotivator_func:
+            raise CustomCheckError(message="Неподдерживаемый формат файла - доступны png, jpeg и jpg")
         
-    # async def asyncDemotivator(self, image_bytes, underText):
-
-    #     img = Image.open(image_bytes)
-    #     template = Image.open('./static/demotivatorTemplate.png')
-
-    #     draw = ImageDraw.Draw(template)
-    #     font = ImageFont.truetype('./static/arial.ttf', 54)
-    #     textWidth = font.getsize(underText)[0]
-    #     # Открываем фотку в RGB формате (фотки без фона ARGB ломают все)
-    #     img = img.convert('RGB')
-    #     img = img.resize((666, 655))
-
-    #     template.paste(img, (50, 50))
-
-    #     draw.text(((760 - textWidth) / 2, 720), underText, (255, 255, 255),
-    #               font=font, align='right')
-
-    #     with BytesIO() as temp:
-    #         template.save(temp, "png", quality=100)
-    #         temp.seek(0)
-    #         await ctx.send(file=File(fp=temp, filename='now.png'))
-
-    @hybrid_command(name='shakalizator', description='Надо прикрепить фотку или гиф.', aliases=['шакал', 'сжать', 'shakal'])
-    async def shakalizator(self, ctx: Context, image_url: str = None, attachment: Attachment = None):
+        image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
+        demotiv_img = await self.bot.loop.run_in_executor(None, demotivator_func, image_bytes, text)
+        await inter.response.send_message(file=File(fp=demotiv_img, filename="now.jpeg"))
+        
+    @app_commands.command(name='shakalizator', description='Надо прикрепить фотку или гиф.')
+    async def shakalizator(self, inter: Interaction, image_url: str = None, attachment: Attachment = None):
         if not image_url and not attachment:
             raise CustomCheckError(message="Ссылка не найдена")
         
@@ -109,7 +88,6 @@ class ImageManipulation(Cog):
             raise CustomCheckError(message="Ссылка не найдена")
 
         filetype, length = await self.get_file_info(image_url)
-
         
         shakalizator_func = resolve_shakal(filetype)
         if not shakalizator_func:
@@ -121,7 +99,7 @@ class ImageManipulation(Cog):
         image_bytes = BytesIO(await self.get_bytes_from_url(image_url))
 
         shakalized = await self.bot.loop.run_in_executor(None, shakalizator_func, image_bytes)
-        await ctx.send(file=File(fp=shakalized, filename=f'now.{filetype}'))
+        await inter.response.send_message(file=File(fp=shakalized, filename=f'now.{filetype}'))
 
 async def setup(bot):
     await bot.add_cog(ImageManipulation(bot))
