@@ -3,7 +3,10 @@ from aiohttp import ClientSession
 class OpenWeatherMapAPI:
     def __init__(self, token: str):
         self.BASE_URL = f'https://api.openweathermap.org/data/2.5/weather?lang=ru&units=metric&appid={token}'
-    
+        self.USERAGENT = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
     async def getWeatherMoji(self, weatherId, weatherIsDay):
         if weatherId.startswith('2'):
             return ':thunder_cloud_rain:'
@@ -35,7 +38,7 @@ class OpenWeatherMapAPI:
         return possibleDirections[value % 16]
 
     async def get_weather_data(self, city):
-        async with ClientSession() as session:
+        async with ClientSession(headers=self.USERAGENT) as session:
             async with session.get(self.BASE_URL, params={'q': city}) as response:
                 if(response.status == 404):
                     return None
