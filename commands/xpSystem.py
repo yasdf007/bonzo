@@ -1,11 +1,6 @@
 from discord.channel import DMChannel
-from discord.ext.commands import (
-    Cog,
-    guild_only,
-    hybrid_command,
-    Context
-)
-from discord import Embed, File, Asset
+from discord.ext.commands import Cog, guild_only
+from discord import Embed, File, Asset, app_commands, Interaction
 from datetime import datetime, timedelta
 
 from .resources.xp_system.abc import XpStrategy
@@ -134,24 +129,23 @@ class AddXP(Cog):
         newXp = xp + self.xp_strategy.voice_xp
         await self.members_repo.update_member_info(member.guild.id, member.id, xp=newXp)
 
-    @hybrid_command(name="top", description="Показывает топ 10 по опыту")
+    @app_commands.command(name="top", description="Показывает топ 10 по опыту")
     @guild_only()
-    async def leaderboard(self, ctx: Context):
-        result = await self.members_repo.leaderboard(ctx.guild.id)
-
-        if result is None:
-            await ctx.message.reply("Значения не найдены")
+    async def leaderboard(self, inter: Interaction):
+        result = await self.members_repo.leaderboard(inter.guild.id)
+        if not result:
+            await inter.response.send_message("Значения не найдены")
             return
 
-        embed = Embed(title="TOP 10 участников по опыту", color=ctx.author.color)
+        embed = Embed(title="TOP 10 участников по опыту", color=inter.user.color)
 
         embed.set_footer(
-            text=f"/by bonzo/ for {ctx.author}", icon_url=ctx.author.display_avatar.with_format("png")
+            text=f"/by bonzo/ for {inter.user}", icon_url=inter.user.display_avatar.with_format("png")
         )
-        embed.set_thumbnail(url=ctx.guild.icon.with_format("png")) if ctx.guild.icon else None
+        embed.set_thumbnail(url=inter.guild.icon.with_format("png")) if inter.guild.icon else None
 
         for user in result:
-            member = ctx.guild.get_member(user.member_id)
+            member = inter.guild.get_member(user.member_id)
             lvl = self.xp_strategy.level_from_xp(user.xp)
             
             if not member:
@@ -160,7 +154,7 @@ class AddXP(Cog):
                     value=f"LVL: {lvl}\nEXP: {user.xp}",
                     inline=False,
                 )
-                await self.members_repo.remove_member(ctx.guild.id, user.member_id)
+                await self.members_repo.remove_member(inter.guild.id, user.member_id)
             else:
                 embed.add_field(
                     name=f"`{member.display_name}`",
@@ -168,23 +162,23 @@ class AddXP(Cog):
                     inline=False,
                 )
 
-        await ctx.send(embed=embed)
+        await inter.response.send_message(embed=embed)
 
 
-    @hybrid_command(name="rank", description="Показывает персональную карточку с уровнем")
+    @app_commands.command(name="rank", description="Показывает персональную карточку с уровнем")
     @guild_only()
-    async def rank(self, ctx: Context):
-        result = await self.members_repo.rank(ctx.guild.id, ctx.author.id)
+    async def rank(self, inter: Interaction):
+        result = await self.members_repo.rank(inter.guild.id, inter.user.id)
         
-        photo_bytes = await Asset.read(ctx.author.display_avatar.with_format("png"))
+        photo_bytes = await Asset.read(inter.user.display_avatar.with_format("png"))
         
         lvl = self.xp_strategy.level_from_xp(result.xp)
         
         percents = self.percentsToLvlUp(result.xp, lvl)
 
-        card_bytes = await self.bot.loop.run_in_executor(None, self.image_creation.create_card, ctx.author, result.xp, self.xp_strategy.xp_from_level(lvl+1), lvl, result.rank, photo_bytes, percents, result.overall_ranks)    
+        card_bytes = await self.bot.loop.run_in_executor(None, self.image_creation.create_card, inter.user, result.xp, self.xp_strategy.xp_from_level(lvl+1), lvl, result.rank, photo_bytes, percents, result.overall_ranks)    
             
-        await ctx.send(file=File(fp=card_bytes, filename="now.png"))
+        await inter.response.send_message(file=File(fp=card_bytes, filename="now.png"))
 
 
 async def setup(bot):
