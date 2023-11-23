@@ -89,4 +89,6 @@ class GameHangman(Cog):
 
 
 async def setup(bot):
-    await bot.add_cog(GameHangman(bot))
+    # TODO: FIX
+    if False:
+        await bot.add_cog(GameHangman(bot))
