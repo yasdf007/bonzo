@@ -13,7 +13,7 @@ from database.memory.db import DictMemoryDB
 
 from bot import Bot
 
-class AddXP(Cog):
+class XpSystem(Cog):
     def __init__(self, bot, xp_strategy: XpStrategy, image_creation: ImageGeneration, members_repo: MemberHandlerRepository):
         self.bot: Bot = bot
         self.xp_strategy = xp_strategy
@@ -185,4 +185,4 @@ async def setup(bot):
     xp_strategy = OriginalXP()
     image_gen = ImageGeneration()
     member_repo = MemberHandlerRepositoryMemory(DictMemoryDB)
-    await bot.add_cog(AddXP(bot, xp_strategy, image_gen, member_repo))
+    await bot.add_cog(XpSystem(bot, xp_strategy, image_gen, member_repo))
