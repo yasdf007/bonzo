@@ -1,5 +1,5 @@
-from discord import Embed
-from discord.ext.commands import Cog, hybrid_command, Context
+from discord import Embed, app_commands, Interaction
+from discord.ext.commands import Cog
 from bot import Bot
 from typing import List
 from discord.app_commands import Choice, autocomplete
@@ -27,15 +27,14 @@ class weather(Cog):
     def __init__(self, bot):
         self.bot: Bot = bot
  
-    @hybrid_command(name=name, description=description)
+    @app_commands.command(name=name, description=description)
     @autocomplete(provider=provider_autocomplete)
-    async def getWeather(self, ctx: Context, city: str, provider: str = 'openweather'):
+    async def getWeather(self, inter: Interaction, city: str, provider: str = 'openweather'):
         weather_provider = get_provider(provider)
 
         res = await weather_provider.get_weather_data(city)
         if not res:
             raise CustomCheckError(message='Запрашиваемый город не найден')
-
 
         embed = Embed(
             title=f'Погода: {res["city"]}:', color=0x543964)
@@ -47,9 +46,8 @@ class weather(Cog):
                         value=f'{res["wind_direction"]} {res["wind_speed"]} м/с', inline=False)
         embed.add_field(name='Влажность:droplet:',
                         value=f'{res["humidity"]} %', inline=False)
-        embed.set_footer(text='Powered by openweathermap.org')
 
-        await ctx.send(embed=embed)
+        await inter.response.send_message(embed=embed)
 
 
 
