@@ -3,16 +3,9 @@
 # ВЫ МОЖЕТЕ ИСПОЛЬЗОВАТЬ ЭТОТ ФАЙЛ В КАЧЕСТВЕ __МИНИМАЛЬНОГО__ ШАБЛОНА ПРИ СОЗДАНИИ СВОИХ МОДУЛЕЙ.
 
 # ИМПОРТИМ ВСЁ НЕОБХОДИМОЕ
-from discord.ext.commands import Cog, hybrid_command, Context
-from discord.ext.commands.context import Context
+from discord.ext.commands import Cog
+from discord import app_commands, Interaction
 from bot import Bot
-
-
-# НАЗЫВАЕМ ФУНКЦИЮ 
-name = 'YOURNAME'
-description = 'YOUR_BEAUTIFUL_DESCRIPTION'
-
-# ОБЪЯВЛЯЕМ ОШИБКИ
 
 
 # ОБЪЯВЛЯЕМ КЛАСС-КОГ ВАШЕЙ ФУНКЦИИ
@@ -22,13 +15,13 @@ class YourName(Cog):
 
 
     # ДЕЙСТВИЯ ПРИ ВЫЗОВЕ КОМАНДЫ
-    @hybrid_command(name=name, description=description)
-    async def yourFunction(self, ctx: Context):
+    @app_commands.command(name='YOURNAME', description='YOUR_BEAUTIFUL_DESCRIPTION')
+    async def yourFunction(self, inter: Interaction):
         ''' ОПИСАНИЕ ДЕЙСТВИЙ ВМЕСТО ЭТОГО
         МНОГОСТРОЧНОГО
         КОММЕНТАРИЯ
         '''
-        await ctx.send('ВАШ ВЫВОД ВМЕСТО ЭТОЙ СТРОКИ')
+        await inter.response.send_message('ВАШ ВЫВОД ВМЕСТО ЭТОЙ СТРОКИ')
 
 # ПОДКЛЮЧАЕМ КОГ К БОТУ
 async def setup(bot):
