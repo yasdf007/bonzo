@@ -9,12 +9,13 @@ from discord import Interaction
 import asyncio
 
 class Blackjack:
-    def __init__(self, ctx: Context, players):
+    def __init__(self, bot, inter: Interaction, players):
+        self.bot = bot
         self.deck = Deck()
         self.players = players
         self.dealer = None
         self.game = {}
-        self.ctx = ctx
+        self.inter = inter
 
     async def initGame(self):
         self.dealer = Hand(dealer=True)
@@ -60,15 +61,15 @@ class Blackjack:
 
         for player in self.players:
             if self.game[player][1]['split']:
-                fields.append({'inline': True, 'name': f'{self.ctx.guild.get_member(int(player)).display_name} - 1',
+                fields.append({'inline': True, 'name': f'{self.inter.guild.get_member(int(player)).display_name} - 1',
                                'value': f'`{await self.game[player][0][0].getHandAndScore()}`'})
 
-                fields.append({'inline': True, 'name': f'{self.ctx.guild.get_member(int(player)).display_name} - 2',
+                fields.append({'inline': True, 'name': f'{self.inter.guild.get_member(int(player)).display_name} - 2',
                                'value': f'`{await self.game[player][0][1].getHandAndScore()}`'})
 
                 continue
 
-            fields.append({'inline': True, 'name': self.ctx.guild.get_member(int(player)).display_name,
+            fields.append({'inline': True, 'name': self.inter.guild.get_member(int(player)).display_name,
                            'value': f'`{await self.game[player][0].getHandAndScore()}`'})
 
         myDict = {'fields': fields, 'type': 'rich',
@@ -76,7 +77,7 @@ class Blackjack:
 
         embed = Embed.from_dict(myDict)
 
-        await self.ctx.send(embed=embed)
+        await self.inter.followup.send(embed=embed)
         await asyncio.sleep(0.25)
 
     async def getResult(self):
@@ -99,11 +100,11 @@ class Blackjack:
                     drawList.append(player)
         if len(winners) > 0:
             win = 'Победители: ' + \
-                ", ".join([self.ctx.guild.get_member(
+                ", ".join([self.inter.guild.get_member(
                     int(winner)).display_name for winner in winners])
         if len(drawList) > 0:
             draw = 'Ничья: ' + \
-                ", ".join([self.ctx.guild.get_member(
+                ", ".join([self.inter.guild.get_member(
                     int(drawP)).display_name for drawP in drawList])
 
         if winners or drawList:
@@ -158,7 +159,7 @@ class Blackjack:
                 buttons = []
 
                 await self.printGame()
-                playerProfile = self.ctx.guild.get_member(int(player))
+                playerProfile = self.inter.guild.get_member(int(player))
                 msg = f'Ход {playerProfile.mention} (15s)'
                 buttons.append(Button(
                         style=ButtonStyle.green,
@@ -195,12 +196,12 @@ class Blackjack:
                 for btn in  buttons:
                     view.add_item(btn)
 
-                msg = await self.ctx.send(msg, view=view)
+                msg = await self.inter.followup.send(msg, view=view)
 
                 await asyncio.sleep(0.25)
 
                 try:
-                    decicion: Interaction = await self.ctx.bot.wait_for('interaction', check=lambda interaction: interaction.user.id == int(player) and interaction.channel_id == self.ctx.channel.id, timeout=15)
+                    decicion: Interaction = await self.bot.wait_for('interaction', check=lambda interaction: interaction.user.id == int(player) and interaction.channel_id == self.inter.channel.id, timeout=15)
                     for item in view.children:
                         if item.custom_id == decicion.data['custom_id']:
                             await decicion.response.edit_message(content=f'{playerProfile.display_name} ВЫБРАЛ {item.label}', view=None)
@@ -208,7 +209,7 @@ class Blackjack:
 
                 except asyncio.TimeoutError:
                     self.game[player][1]['stop'] == True
-                    await self.ctx.send(f'{playerProfile.mention} ничего не выбрал')
+                    await self.inter.followup.send(f'{playerProfile.mention} ничего не выбрал')
                     await asyncio.sleep(0.25)
                     break
 
@@ -262,5 +263,5 @@ class Blackjack:
         await self.checkWithDealer()
         await self.printGame(forceShow=True)
         result = await self.getResult()
-        await self.ctx.send(result)
+        await self.inter.followup.send(result)
         await asyncio.sleep(0.25)
