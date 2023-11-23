@@ -1,6 +1,5 @@
 import pomice
-from discord import Message, HTTPException, Embed
-from discord.ext.commands import Context
+from discord import Message, HTTPException, Embed, Interaction
 from contextlib import suppress
 from datetime import timedelta
 
@@ -10,7 +9,7 @@ class BonzoPlayer(pomice.Player):
         
         self.queue = pomice.Queue()
         self.controller: Message = None
-        self.context: Context = None
+        self.context: Interaction = None
 
     async def do_next(self) -> None:
         if self.controller:
@@ -26,7 +25,7 @@ class BonzoPlayer(pomice.Player):
 
         embed = await self.get_controller(track)
 
-        self.controller = await self.context.send(embed=embed)
+        self.controller = await self.context.followup.send(embed=embed)
 
     async def shuffle(self):
         return self.queue.shuffle()
@@ -51,5 +50,5 @@ class BonzoPlayer(pomice.Player):
             if self.controller:
                 await self.controller.delete()
 
-    async def set_context(self, ctx: Context):
-        self.context = ctx
+    async def set_context(self, inter: Interaction):
+        self.context = inter

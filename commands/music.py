@@ -1,7 +1,7 @@
 import pomice
 
-from discord.ext.commands import hybrid_command, Context, Cog
-from discord import Member, VoiceState, Interaction
+from discord.ext.commands import Cog
+from discord import Member, VoiceState, app_commands, Interaction
 from discord.app_commands import Choice, autocomplete
 
 from .resources.music.bonzoPlayer import BonzoPlayer
@@ -65,81 +65,85 @@ class Music(Cog):
     async def on_pomice_track_stuck(self, player: BonzoPlayer, track: pomice.Track, error):
         logging.warning(f'on_pomice_track_stuck\n{error}')
 
-        await player.context.send(f"Возникла ошибка при проигрывании  {track.title}")
+        await player.context.followup.send(f"Возникла ошибка при проигрывании  {track.title}")
         await player.do_next()
+        
+        raise error
 
     @Cog.listener()
     async def on_pomice_track_exception(self, player: BonzoPlayer, track: pomice.Track, error):
         logging.warning(f'on_pomice_track_exception\n{error}')
 
-        await player.context.send(f"Возникла ошибка при проигрывании {track.title}")
+        await player.context.followup.send(f"Возникла ошибка при проигрывании {track.title}")
         await player.do_next()
 
-    @hybrid_command(name='play', description="Ищет и играет музыку по ссылке или запросу.")
+        raise error
+
+    @app_commands.command(name='play', description="Ищет и играет музыку по ссылке или запросу.")
     @same_voice()
     @author_in_voice()
-    async def play(self, ctx: Context, query: str):
-        player: BonzoPlayer = await get_player(ctx)
+    async def play(self, inter: Interaction, query: str):
+        player: BonzoPlayer  = inter.guild.voice_client
         self.check_status(player.node)
 
-        results = await player.get_tracks(query, ctx=ctx)
+        results = await player.get_tracks(query)
         if not results:
             raise CustomCheckError(message="Не найдено ни одного трека!")
 
         if isinstance(results, pomice.Playlist):
             for track in results.tracks:
                 player.queue.put(track)
-            await ctx.send(f"Плейлист с {results.track_count} треками добавлен в очередь")   
+            await inter.response.send_message(f"Плейлист с {results.track_count} треками добавлен в очередь")   
         else:
             track = results[0]
             player.queue.put(track)
-            await ctx.send(f"{track.title} добавлен в очередь")   
+            await inter.response.send_message(f"{track.title} добавлен в очередь")   
 
         if not player.is_playing:
             await player.do_next()
 
 
-    @hybrid_command(name='stop', description="Останавливает воспроизведение и отключается.")
+    @app_commands.command(name='stop', description="Останавливает воспроизведение и отключается.")
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def stop(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def stop(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         await player.teardown()
 
-        await ctx.send(f"Отключился из голосового канала.")
+        await inter.response.send_message(f"Отключился из голосового канала.")
 
-    @hybrid_command(name='skip', description="Пропускает текущую музыку.")
+    @app_commands.command(name='skip', description="Пропускает текущую музыку.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def skip(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def skip(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         track = player.current
-        await ctx.send(f"Пропустил {track.title}")
+        await inter.response.send_message(f"Пропустил {track.title}")
         try:
             await player.stop()
         except Exception as e:
             logging.warning(f"COULD NOT SKIP: {e}")
 
-    @hybrid_command(name='search', description="Осуществляет поиск музыки.")
+    @app_commands.command(name='search', description="Осуществляет поиск музыки.")
     @same_voice()
     @author_in_voice()
-    async def search(self, ctx: Context, query: str):
-        player: BonzoPlayer = await get_player(ctx)
+    async def search(self, inter: Interaction, query: str):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
-        results = await player.get_tracks(query, ctx=ctx)
+        results = await player.get_tracks(query)
         if not results:
             raise CustomCheckError(message="Не найдено ни одного трека!")
 
         dropdown = Dropdown(results)
-        view = DropdownView(ctx.author, dropdown, timeout=25)
+        view = DropdownView(inter.user, dropdown, timeout=25)
 
-        await ctx.send(f"Всего нашлось {len(results)} результатов", view=view)
+        await inter.response.send_message(f"Всего нашлось {len(results)} результатов", view=view)
         await view.wait()
 
         if view.dropdown.value != None:
@@ -148,48 +152,48 @@ class Music(Cog):
             if not player.is_playing:
                 await player.do_next()
 
-    @hybrid_command(name='pause', description="Останавливает/возобновляет воспроизведение.")
+    @app_commands.command(name='pause', description="Останавливает/возобновляет воспроизведение.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def pause(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def pause(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         if player.is_paused:
             await player.set_pause(False)
-            return await ctx.send("Пауза убрана")
+            return await inter.response.send_message("Пауза убрана")
         else:
             await player.set_pause(True)
-            return await ctx.send("Пауза поставлена")
+            return await inter.response.send_message("Пауза поставлена")
         
-    @hybrid_command(name='unpause', description="Возобновляет воспроизведение.")
+    @app_commands.command(name='unpause', description="Возобновляет воспроизведение.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def unpause(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def unpause(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
         
         if not player.is_paused:
             raise CustomCheckError(message="Музыка не на паузе!")
 
         await player.set_pause(False)
-        await ctx.send("Пауза убрана")
+        await inter.response.send_message("Пауза убрана")
     # -------------------
-    @hybrid_command(name='volume', description="Меняет громкость воспроизведение.")
+    @app_commands.command(name='volume', description="Меняет громкость воспроизведение.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def volume(self, ctx: Context, volume: int):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def volume(self, inter: Interaction, volume: int):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         await player.set_volume(volume)
-        await ctx.send(f"Установлена громкость: {volume}")
+        await inter.response.send_message(f"Установлена громкость: {volume}")
 
     async def equalizer_autocomplete(
             self,
@@ -201,14 +205,14 @@ class Music(Cog):
                 for filter in ['default', 'bass'] if current.lower() in filter.lower()
             ]
 
-    @hybrid_command(name='equalizer', description="Применяет пресет эквалайзера.")
+    @app_commands.command(name='equalizer', description="Применяет пресет эквалайзера.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
+    @author_in_voice()
     @autocomplete(preset=equalizer_autocomplete)
-    async def equalizer(self, ctx: Context, preset: str):
-        player: BonzoPlayer = await get_player(ctx)
+    async def equalizer(self, inter: Interaction, preset: str):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         eq = equalizers.get(preset)
@@ -218,15 +222,15 @@ class Music(Cog):
         await player.reset_filters()
         await player.add_filter(eq, fast_apply=True)
 
-        await ctx.send(f"Применил пресет {preset}")
+        await inter.response.send_message(f"Применил пресет {preset}")
 
-    @hybrid_command(name='reset_filters', description="Убирает фильтры.")
+    @app_commands.command(name='reset_filters', description="Убирает фильтры.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def reset_filters(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def reset_filters(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         try:
@@ -234,58 +238,58 @@ class Music(Cog):
         except pomice.exceptions.FilterInvalidArgument:
             pass
 
-        await ctx.send(f"Убрал все фильтры")
+        await inter.response.send_message(f"Убрал все фильтры")
 
     # -------------------
 
-    @hybrid_command(name='now_playing', description="Показывает текущую музыку.", aliases=['np'])
+    @app_commands.command(name='now_playing', description="Показывает текущую музыку.")
     @is_playing()
-    @author_in_voice()
     @bot_in_voice()
-    async def now_playing(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def now_playing(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
         
-        await ctx.send(embed=await player.get_controller(player.current))
+        await inter.response.send_message(embed=await player.get_controller(player.current))
 
-    @hybrid_command(name='loop', description="Ставит/убирает текущую музыку на повтор.")
+    @app_commands.command(name='loop', description="Ставит/убирает текущую музыку на повтор.")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def loop(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def loop(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         if player.queue.is_looping:
             player.queue.disable_loop()
-            return await ctx.send(f"{player.current.title} убран с повтора.")
+            return await inter.response.send_message(f"{player.current.title} убран с повтора.")
         else:
             player.queue.set_loop_mode(pomice.LoopMode.TRACK)
-            return await ctx.send(f"{player.current.title} поставлен на повтор.")
+            return await inter.response.send_message(f"{player.current.title} поставлен на повтор.")
 
-    @hybrid_command(name='shuffle', description="Перемешивает музыку в очереди.")
+    @app_commands.command(name='shuffle', description="Перемешивает музыку в очереди.")
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def shuffle(self, ctx: Context):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def shuffle(self, inter: Interaction):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
 
         if len(player.queue) < 1:
             raise CustomCheckError(message="Очередь пустая, перемешивать нечего!")
-        await ctx.send("Очередь перемешана")
+        await inter.response.send_message("Очередь перемешана")
 
         await player.shuffle()
 
 
-    @hybrid_command(name='seek', description="Пропускает до таймкода в музыке (формат 0m:00s).")
+    @app_commands.command(name='seek', description="Пропускает до таймкода в музыке (формат 0m:00s).")
     @is_playing()
     @same_voice()
-    @author_in_voice()
     @bot_in_voice()
-    async def seek(self, ctx: Context, time: str):
-        player: BonzoPlayer = await get_player(ctx)
+    @author_in_voice()
+    async def seek(self, inter: Interaction, time: str):
+        player: BonzoPlayer = await get_player(inter)
         self.check_status(player.node)
         
         match = TIME_REGEX.match(time)
