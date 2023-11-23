@@ -1,5 +1,5 @@
 from discord import Embed, app_commands, Spotify, CustomActivity, Member, Interaction
-from discord.ext.commands import Cog, hybrid_command
+from discord.ext.commands import Cog
 from discord.ext.commands.core import guild_only
 from bot import Bot
 import os

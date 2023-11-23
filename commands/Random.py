@@ -1,5 +1,5 @@
 from discord import app_commands, Interaction
-from discord.ext.commands import Cog, GroupCog
+from discord.ext.commands import Cog
 from bot import Bot
 import random
 from string import ascii_lowercase, digits

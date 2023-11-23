@@ -1,6 +1,6 @@
 from discord import app_commands, Interaction
 from discord.embeds import Embed
-from discord.ext.commands import Cog, Context
+from discord.ext.commands import Cog
 from bot import Bot
 
 from dependencies.api import coinmarketcap

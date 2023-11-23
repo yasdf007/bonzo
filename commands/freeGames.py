@@ -1,20 +1,14 @@
 from discord.ext.commands import (
     Cog,
-    GroupCog,
     guild_only,
-    has_permissions,
-    bot_has_permissions,
     BucketType,
-    cooldown,
 )
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
-from discord.ext.commands import  hybrid_command, Context
 from .resources import checks
 
 from discord.enums import ChannelType
 from discord import Embed, Colour, app_commands, Interaction
-from .resources.AutomatedMessages import automata
 
 from dependencies.repository.free_games.abc import FreeGamesRepository
 from dependencies.repository.free_games.memory import FreeGamesRepositoryMemory

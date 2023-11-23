@@ -2,7 +2,7 @@ from discord.ext.commands import Cog
 from discord import app_commands, Interaction
 import traceback
 from bot import Bot
-from config import MAIN_GUILD, DEBUG_GUILD
+from config import MAIN_GUILD
 from discord.app_commands import guilds
 from .resources.checks import check_is_owner
 import discord

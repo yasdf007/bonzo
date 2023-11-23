@@ -1,12 +1,4 @@
-from discord.ext.commands import (
-    Cog,
-    BucketType,
-    guild_only,
-    has_permissions,
-    cooldown,
-    hybrid_command,
-    Context
-)
+from discord.ext.commands import Cog
 from bot import Bot
 
 class Settings(Cog):

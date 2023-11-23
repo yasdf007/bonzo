@@ -1,7 +1,6 @@
 from discord import Embed, Interaction, app_commands
-from discord.ext.commands import Cog, hybrid_command, Context
+from discord.ext.commands import Cog
 from bot import Bot
-from .resources.exceptions import CustomCheckError
 from dependencies.api import nasa
 
 class Nasa(Cog):

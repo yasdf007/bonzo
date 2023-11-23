@@ -1,4 +1,4 @@
-from discord.ext.commands import Cog,  command, Context
+from discord.ext.commands import Cog
 from .resources import exceptions
 from discord import Interaction, app_commands
 

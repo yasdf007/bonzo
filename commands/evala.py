@@ -1,6 +1,5 @@
 from discord.ext.commands import Cog
 from discord.ext.commands.errors import CommandInvokeError
-from discord.app_commands import guilds
 from bot import Bot
 from config import MAIN_GUILD
 from discord import Interaction, app_commands
