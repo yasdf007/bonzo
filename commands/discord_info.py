@@ -1,4 +1,4 @@
-from discord import Embed, app_commands, Spotify, CustomActivity, Member, Interaction
+from discord import Embed, app_commands, Spotify, CustomActivity, Member, Interaction, File
 from discord.ext.commands import Cog
 from discord.ext.commands.core import guild_only
 from bot import Bot
@@ -159,8 +159,9 @@ class DiscordInfo(Cog):
     @app_commands.command(name='status', description='Статус бота на данный момент')
     async def status(self, inter: Interaction):
         embed = Embed(title="**Информация**", color=0x1fcf48)
-
-        embed.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
+        
+        file = File("./static/bonzo.png", filename="bonzo.png")
+        embed.set_thumbnail(url="attachment://bonzo.png")
 
         botLatency = round(self.bot.latency * 1000, 2)
         Voice = len(self.bot.voice_clients)
@@ -182,7 +183,7 @@ class DiscordInfo(Cog):
 
         embed.set_footer(text="/by bonzo/")
 
-        await inter.response.send_message(embed=embed)
+        await inter.response.send_message(file=file, embed=embed)
 
 async def setup(bot):
     await bot.add_cog(DiscordInfo(bot))

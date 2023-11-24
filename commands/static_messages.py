@@ -1,4 +1,4 @@
-from discord import app_commands, Interaction, Embed, Color
+from discord import app_commands, Interaction, Embed, Color, File
 from discord.ext.commands import Cog
 from bot import Bot
 
@@ -10,17 +10,20 @@ class StaticMessages(Cog):
     @app_commands.command(name='donate', description='Пожертвования разработчикам bonzo')
     async def donate(self, inter: Interaction):
         donate_embed = build_donate_embed()
-        await inter.response.send_message(embed=donate_embed)
+        file = File("./static/bonzo.png", filename="bonzo.png")
+        await inter.response.send_message(embed=donate_embed, file=file)
 
     @app_commands.command(name='init', description='Краткая информация об использовании бота / How to start?')
     async def inita(self, inter: Interaction):
         inita_embed = build_bot_init_message('b/')
-        await inter.response.send_message(embed=inita_embed)
+        file = File("./static/bonzo.png", filename="bonzo.png")
+        await inter.response.send_message(embed=inita_embed, file=file)
 
     @app_commands.command(name='invite', description='Ссылка на приглашение бота')
     async def invite_bot(self, inter: Interaction):
         invite_embed = build_invite_embed(inter.user.name)
-        await inter.response.send_message(embed=invite_embed)
+        file = File("./static/bonzo.png", filename="bonzo.png")
+        await inter.response.send_message(embed=invite_embed, file=file)
 
 async def setup(bot):
     await bot.add_cog(StaticMessages(bot))
@@ -34,7 +37,9 @@ def build_donate_embed():
         title="**Способы пожертвований средств разработчикам Bonzo**",
         color=Color.random(),
     )
-    embed.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
+
+    embed.set_thumbnail(url="attachment://bonzo.png")
+    
     embed.add_field(
         name="**Для пожертвования через QIWI (RUB):**",
         value=f"**-->** [QIWI/RUB]({qiwilink}) **<--**",
@@ -53,8 +58,7 @@ supportserver = "https://discord.gg/kjUdcUGw"
 def build_bot_init_message(prefix):
     embed = Embed(title="**Начало работы с bonzo**", color=Color.random())
 
-    embed.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
-
+    embed.set_thumbnail(url="attachment://bonzo.png")
     embed.add_field(
         name="**Для использования legacy-команд:**", value=f"{prefix}help"
     )
@@ -72,7 +76,9 @@ invlink = "https://discord.com/api/oauth2/authorize?client_id=680132907859443790
 
 def build_invite_embed(for_username):
     embedd = Embed(title="**Зовём /bonzo/ на Ваш сервер...**", colour=0xB84000)
-    embedd.set_thumbnail(url="https://i.ibb.co/Xk7qTy4/BOnzo-1.png")
+
+    embedd.set_thumbnail(url="attachment://bonzo.png")
+
     embedd.add_field(
         name="Спасибо за поддержку!",
         value=f"**-->** [Нажмите сюда!]({invlink}) **<--**",
