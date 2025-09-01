@@ -1,7 +1,6 @@
 <img align="right" src="static/bonzo.png" width="160" height="160">
 
-# OUTDATED | ON UPDATE
-# УСТАРЕВШИЙ КОД | БОТ НА ОБНОВЛЕНИИ
+# OUTDATED | ARCHIVED AS OF FALL 2025
 
 ## bonzo 1.13.2 stacknox2
 ## made by /bonzoTeam & others
@@ -41,15 +40,11 @@ III. RUNNING NODE \
 * TBA
 
 
-Запуск собственной инстанции крайне не рекомендуется. данный код не проверен на работоспособность в полностью модульном режиме.
+Запуск собственной инстанции крайне не рекомендуется.
 
 **Donations:**
 *Using TON (Prefferable):*
 > EQAcPIGWfiW-CFQFzQpjzYOicIu8zV2flffRmfAEq8BE_vSU
-
-*Using RUB:*
-[QIWI](https://qiwi.com/n/OTTIC882)
-
 
 powered by [discord.py](https://github.com/Rapptz/discord.py)
 остальные используемые библиотеки описаны в [requirements.txt](/requirements.txt)
